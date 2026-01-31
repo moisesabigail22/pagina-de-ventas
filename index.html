@@ -156,7 +156,8 @@
 
         /* Sections */
         .section {
-            margin-bottom: 60px;
+            margin-bottom: 80px;
+            scroll-margin-top: 100px;
         }
 
         .section-header {
@@ -280,11 +281,136 @@
             align-items: center;
             gap: 10px;
             font-size: 1rem;
+            text-decoration: none;
         }
 
         .btn-buy:hover {
             background: var(--gold-dark);
             transform: scale(1.05);
+        }
+
+        /* Gold Section */
+        .gold-packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .gold-card {
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s;
+        }
+
+        .gold-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .gold-icon {
+            font-size: 3rem;
+            color: var(--gold);
+            margin-bottom: 20px;
+        }
+
+        .gold-amount {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .gold-game {
+            color: var(--text);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .gold-server {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* Sell Section */
+        .sell-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .sell-info {
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+
+        .sell-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .sell-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 20px;
+            background: var(--panel-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--gold);
+        }
+
+        .step-number {
+            background: var(--gold);
+            color: var(--dark);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h4 {
+            color: var(--text);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .step-content p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .discord-join-container {
+            background: var(--panel);
+            border-radius: 12px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .discord-icon-large {
+            font-size: 5rem;
+            color: #5865F2;
+            margin-bottom: 25px;
         }
 
         /* References Section */
@@ -329,6 +455,7 @@
             justify-content: center;
             font-size: 3rem;
             color: var(--gold);
+            cursor: pointer;
         }
 
         .video-info {
@@ -472,42 +599,6 @@
         .contact-details p {
             color: var(--text-gray);
             font-size: 0.95rem;
-        }
-
-        .discord-widget {
-            background: var(--panel);
-            border-radius: 12px;
-            padding: 40px;
-            border: 1px solid var(--border);
-            text-align: center;
-        }
-
-        .discord-icon {
-            font-size: 5rem;
-            color: #5865F2;
-            margin-bottom: 20px;
-        }
-
-        .discord-join {
-            background: #5865F2;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 20px;
-            text-decoration: none;
-        }
-
-        .discord-join:hover {
-            background: #4752c4;
-            transform: scale(1.05);
         }
 
         /* Admin Section */
@@ -767,7 +858,8 @@
         /* Responsive */
         @media (max-width: 1024px) {
             .references-container,
-            .contact-container {
+            .contact-container,
+            .sell-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -783,7 +875,8 @@
                 font-size: 2.2rem;
             }
             
-            .products-grid {
+            .products-grid,
+            .gold-packages {
                 grid-template-columns: 1fr;
             }
             
@@ -843,7 +936,13 @@
     
     <div class="nav-container">
         <a href="#products" class="nav-btn active">
-            <i class="fas fa-store"></i> PRODUCTOS
+            <i class="fas fa-gamepad"></i> CUENTAS
+        </a>
+        <a href="#gold" class="nav-btn">
+            <i class="fas fa-coins"></i> ORO
+        </a>
+        <a href="#sell" class="nav-btn">
+            <i class="fas fa-dollar-sign"></i> VENDER
         </a>
         <a href="#references" class="nav-btn">
             <i class="fas fa-star"></i> REFERENCIAS
@@ -856,10 +955,10 @@
         </button>
         
         <div class="social-links">
-            <a href="https://discord.gg/tu-link" target="_blank" class="social-link">
+            <a href="https://discord.gg/AYJkmeZn" target="_blank" class="social-link">
                 <i class="fab fa-discord"></i>
             </a>
-            <a href="https://tiktok.com/@tu-usuario" target="_blank" class="social-link">
+            <a href="https://www.tiktok.com/@farmers.de.mmorpg?_r=1&_t=ZS-93X7c7XttZv" target="_blank" class="social-link">
                 <i class="fab fa-tiktok"></i>
             </a>
             <a href="https://wa.me/tunumero" target="_blank" class="social-link">
@@ -872,32 +971,136 @@
 <!-- Hero Section -->
 <div class="container">
     <div class="hero">
-        <h1 class="hero-title">EL MEJOR MARKETPLACE PARA GAMERS</h1>
+        <h1 class="hero-title">COMPRA Y VENDE ORO SEGURO</h1>
         <p class="hero-subtitle">
-            Compra oro, cuentas y servicios para tus juegos favoritos con total seguridad. 
-            Miles de clientes satisfechos nos respaldan. ¡Únete a la comunidad!
+            Marketplace #1 para gamers. Compra oro y cuentas premium con total seguridad, 
+            o vende tu excedente de oro directamente en nuestro Discord. Miles de transacciones exitosas.
         </p>
-        <a href="#products" class="btn-buy" style="font-size: 1.2rem; padding: 15px 40px;">
-            <i class="fas fa-shopping-cart"></i> VER PRODUCTOS
+        <a href="#gold" class="btn-buy" style="font-size: 1.2rem; padding: 15px 40px;">
+            <i class="fas fa-coins"></i> VER ORO DISPONIBLE
         </a>
     </div>
 </div>
 
-<!-- Products Section -->
+<!-- Accounts Section -->
 <div class="container" id="products">
     <div class="section">
         <div class="section-header">
-            <h2 class="section-title">Productos Disponibles</h2>
+            <h2 class="section-title">Cuentas Premium</h2>
             <div style="color: var(--text-gray);">
                 <i class="fas fa-filter"></i> Filtros: 
-                <button class="nav-btn" style="padding: 5px 15px; margin-left: 10px;" onclick="filterProducts('all')">Todos</button>
+                <button class="nav-btn" style="padding: 5px 15px; margin-left: 10px;" onclick="filterProducts('all')">Todas</button>
                 <button class="nav-btn" style="padding: 5px 15px;" onclick="filterProducts('Turtle WoW')">Turtle WoW</button>
                 <button class="nav-btn" style="padding: 5px 15px;" onclick="filterProducts('Albion')">Albion</button>
             </div>
         </div>
         
         <div class="products-grid" id="products-grid">
-            <!-- Los productos se cargan aquí -->
+            <!-- Las cuentas se cargan aquí -->
+        </div>
+    </div>
+</div>
+
+<!-- Gold Section -->
+<div class="container" id="gold">
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Oro Disponible</h2>
+            <div style="color: var(--gold); font-weight: 600;">
+                <i class="fas fa-bolt"></i> Entrega Inmediata
+            </div>
+        </div>
+        
+        <div class="gold-packages" id="gold-packages">
+            <!-- El oro se carga aquí -->
+        </div>
+        
+        <div style="margin-top: 40px; padding: 30px; background: var(--panel); border-radius: 12px; border: 1px solid var(--border);">
+            <h3 style="color: var(--gold); margin-bottom: 15px;">
+                <i class="fas fa-shield-alt"></i> Garantía de Seguridad
+            </h3>
+            <p style="color: var(--text); line-height: 1.6;">
+                Todas las transacciones están protegidas. Entrega inmediata una vez confirmado el pago. 
+                Soporte 24/7 disponible en nuestro Discord para cualquier consulta o problema.
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Sell Section -->
+<div class="container" id="sell">
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">¿Quieres Vender Oro?</h2>
+            <a href="https://discord.gg/AYJkmeZn" target="_blank" class="btn-primary">
+                <i class="fab fa-discord"></i> UNIRME AL DISCORD
+            </a>
+        </div>
+        
+        <div class="sell-container">
+            <div class="sell-info">
+                <h3 style="color: var(--gold); margin-bottom: 25px;">
+                    <i class="fas fa-handshake"></i> Vende Tu Oro Fácilmente
+                </h3>
+                <div class="sell-steps">
+                    <div class="sell-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Únete a Nuestro Discord</h4>
+                            <p>Accede a nuestro servidor Discord donde coordinamos todas las ventas y compras de oro.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="sell-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Publica Tu Oferta</h4>
+                            <p>En el canal designado, publica la cantidad de oro que tienes disponible y tu precio.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="sell-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Coordina la Transacción</h4>
+                            <p>Nuestros moderadores te ayudarán a coordinar la transacción con compradores verificados.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="sell-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Recibe Tu Pago</h4>
+                            <p>Una vez completada la transacción, recibe tu pago de forma inmediata y segura.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="discord-join-container">
+                <div class="discord-icon-large">
+                    <i class="fab fa-discord"></i>
+                </div>
+                <h3 style="color: var(--text); margin-bottom: 15px;">Vende Directamente en Discord</h3>
+                <p style="color: var(--text-gray); text-align: center; margin-bottom: 25px; line-height: 1.6;">
+                    Únete a nuestra comunidad de más de 1,000 gamers activos. 
+                    Canal dedicado para ventas, precios competitivos y transacciones seguras.
+                </p>
+                <a href="https://discord.gg/AYJkmeZn" target="_blank" class="btn-buy" style="font-size: 1.1rem; padding: 15px 40px;">
+                    <i class="fab fa-discord"></i> ENTRAR AL DISCORD PARA VENDER
+                </a>
+                <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px; width: 100%;">
+                    <h4 style="color: var(--gold); margin-bottom: 10px;">
+                        <i class="fas fa-chart-line"></i> Ventajas de Vender Con Nosotros
+                    </h4>
+                    <p style="color: var(--text-gray); font-size: 0.9rem; line-height: 1.5;">
+                        • Precios competitivos del mercado<br>
+                        • Compradores verificados<br>
+                        • Transacciones supervisadas<br>
+                        • Pago inmediato garantizado
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -950,15 +1153,15 @@
                     <i class="fas fa-envelope"></i> Métodos de Contacto
                 </h3>
                 <div class="contact-methods">
-                    <a href="https://discord.gg/tu-link" target="_blank" class="contact-method">
+                    <a href="https://discord.gg/AYJkmeZn" target="_blank" class="contact-method">
                         <div class="contact-icon">
                             <i class="fab fa-discord"></i>
                         </div>
                         <div class="contact-details">
-                            <h4>Discord</h4>
-                            <p>Únete a nuestro servidor para soporte inmediato</p>
+                            <h4>Discord Principal</h4>
+                            <p>Para compras, ventas y soporte inmediato</p>
                             <p style="color: var(--gold); font-size: 0.9rem; margin-top: 5px;">
-                                <i class="fas fa-external-link-alt"></i> discord.gg/epiclevelup
+                                <i class="fas fa-external-link-alt"></i> discord.gg/AYJkmeZn
                             </p>
                         </div>
                     </a>
@@ -969,46 +1172,46 @@
                         </div>
                         <div class="contact-details">
                             <h4>WhatsApp</h4>
-                            <p>Atención directa por WhatsApp</p>
+                            <p>Atención directa para consultas rápidas</p>
                             <p style="color: var(--gold); font-size: 0.9rem; margin-top: 5px;">
                                 <i class="fas fa-phone"></i> +1 (234) 567-8900
                             </p>
                         </div>
                     </a>
                     
-                    <a href="https://tiktok.com/@tu-usuario" target="_blank" class="contact-method">
+                    <a href="https://www.tiktok.com/@farmers.de.mmorpg?_r=1&_t=ZS-93X7c7XttZv" target="_blank" class="contact-method">
                         <div class="contact-icon">
                             <i class="fab fa-tiktok"></i>
                         </div>
                         <div class="contact-details">
                             <h4>TikTok</h4>
-                            <p>Síguenos para novedades y promociones</p>
+                            <p>Síguenos para novedades, promociones y contenido</p>
                             <p style="color: var(--gold); font-size: 0.9rem; margin-top: 5px;">
-                                <i class="fas fa-user"></i> @epiclevelup_shop
+                                <i class="fas fa-user"></i> @farmers.de.mmorpg
                             </p>
                         </div>
                     </a>
                 </div>
             </div>
             
-            <div class="discord-widget">
-                <div class="discord-icon">
+            <div class="discord-join-container">
+                <div class="discord-icon-large">
                     <i class="fab fa-discord"></i>
                 </div>
-                <h3 style="color: var(--text); margin-bottom: 15px;">Únete a Nuestra Comunidad</h3>
-                <p style="color: var(--text-gray); margin-bottom: 20px;">
+                <h3 style="color: var(--text); margin-bottom: 15px;">Comunidad Activa en Discord</h3>
+                <p style="color: var(--text-gray); margin-bottom: 25px; line-height: 1.6;">
                     Más de 1,000 gamers activos en nuestro Discord. 
-                    Soporte directo, anuncios exclusivos y comunidad amigable.
+                    Soporte directo, anuncios exclusivos, canal de ventas y comunidad amigable.
                 </p>
-                <a href="https://discord.gg/tu-link" target="_blank" class="discord-join">
-                    <i class="fab fa-discord"></i> UNIRME AL DISCORD
+                <a href="https://discord.gg/AYJkmeZn" target="_blank" class="btn-buy" style="font-size: 1.1rem; padding: 15px 40px;">
+                    <i class="fab fa-discord"></i> UNIRME A LA COMUNIDAD
                 </a>
-                <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 8px; width: 100%;">
                     <h4 style="color: var(--gold); margin-bottom: 10px;">
                         <i class="fas fa-shield-alt"></i> 100% Seguro
                     </h4>
                     <p style="color: var(--text-gray); font-size: 0.9rem;">
-                        Todas las transacciones protegidas. Garantía de entrega o reembolso.
+                        Todas las transacciones protegidas. Garantía de entrega o reembolso completo.
                     </p>
                 </div>
             </div>
@@ -1028,8 +1231,11 @@
         
         <div class="admin-container">
             <div class="admin-tabs">
-                <button class="admin-tab active" onclick="switchAdminTab('products')">
-                    <i class="fas fa-box"></i> Productos
+                <button class="admin-tab active" onclick="switchAdminTab('accounts')">
+                    <i class="fas fa-gamepad"></i> Cuentas
+                </button>
+                <button class="admin-tab" onclick="switchAdminTab('gold')">
+                    <i class="fas fa-coins"></i> Oro
                 </button>
                 <button class="admin-tab" onclick="switchAdminTab('references')">
                     <i class="fas fa-star"></i> Referencias
@@ -1055,21 +1261,18 @@
         <div class="footer-section">
             <h3>EPIC LEVEL UP</h3>
             <p>
-                Tu tienda confiable para la compra de oro, cuentas y servicios de gaming. 
+                Tu tienda confiable para la compra y venta de oro y cuentas de gaming. 
                 Garantizamos transacciones seguras y entrega rápida.
             </p>
             <div class="footer-social">
-                <a href="https://discord.gg/tu-link" target="_blank">
+                <a href="https://discord.gg/AYJkmeZn" target="_blank">
                     <i class="fab fa-discord"></i>
                 </a>
-                <a href="https://tiktok.com/@tu-usuario" target="_blank">
+                <a href="https://www.tiktok.com/@farmers.de.mmorpg?_r=1&_t=ZS-93X7c7XttZv" target="_blank">
                     <i class="fab fa-tiktok"></i>
                 </a>
                 <a href="https://wa.me/tunumero" target="_blank">
                     <i class="fab fa-whatsapp"></i>
-                </a>
-                <a href="https://instagram.com/tu-usuario" target="_blank">
-                    <i class="fab fa-instagram"></i>
                 </a>
             </div>
         </div>
@@ -1077,11 +1280,11 @@
         <div class="footer-section">
             <h3>Enlaces Rápidos</h3>
             <ul class="footer-links">
-                <li><a href="#products"><i class="fas fa-chevron-right"></i> Productos</a></li>
+                <li><a href="#products"><i class="fas fa-chevron-right"></i> Cuentas</a></li>
+                <li><a href="#gold"><i class="fas fa-chevron-right"></i> Oro</a></li>
+                <li><a href="#sell"><i class="fas fa-chevron-right"></i> Vender Oro</a></li>
                 <li><a href="#references"><i class="fas fa-chevron-right"></i> Referencias</a></li>
                 <li><a href="#contact"><i class="fas fa-chevron-right"></i> Contacto</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Términos de Servicio</a></li>
-                <li><a href="#"><i class="fas fa-chevron-right"></i> Política de Privacidad</a></li>
             </ul>
         </div>
         
@@ -1092,7 +1295,7 @@
                 <li><a href="#"><i class="fas fa-gamepad"></i> Albion Online</a></li>
                 <li><a href="#"><i class="fas fa-gamepad"></i> World of Warcraft</a></li>
                 <li><a href="#"><i class="fas fa-gamepad"></i> Runescape</a></li>
-                <li><a href="#"><i class="fas fa-gamepad"></i> Más juegos pronto</a></li>
+                <li><a href="#"><i class="fas fa-gamepad"></i> Más juegos</a></li>
             </ul>
         </div>
         
@@ -1109,6 +1312,7 @@
         <p>&copy; 2023 EPIC LEVEL UP. Todos los derechos reservados.</p>
         <p style="margin-top: 10px; font-size: 0.8rem; color: var(--text-gray);">
             Este sitio no está afiliado con Blizzard Entertainment, Turtle WoW, Albion Online ni ninguna otra compañía de videojuegos.
+            Todos los productos son vendidos por usuarios independientes.
         </p>
     </div>
 </footer>
@@ -1194,101 +1398,157 @@
     let isAdmin = false;
     let currentRating = 0;
     
-    // Datos de ejemplo
-    const sampleProducts = [
+    // URLs actualizadas
+    const DISCORD_LINK = "https://discord.gg/AYJkmeZn";
+    const TIKTOK_LINK = "https://www.tiktok.com/@farmers.de.mmorpg?_r=1&_t=ZS-93X7c7XttZv";
+    
+    // Datos de ejemplo - Cuentas
+    const sampleAccounts = [
         {
             id: 1,
-            type: 'gold',
-            category: 'Turtle WoW',
-            server: 'Nordanaar',
-            name: '1000 Gold Turtle WoW',
-            description: 'Oro seguro y rápido para Turtle WoW servidor Nordanaar. Entrega en menos de 30 minutos.',
-            price: '$22.00',
-            stock: 50,
-            image: 'https://i.imgur.com/uCclv8s.png',
-            featured: true
-        },
-        {
-            id: 2,
-            type: 'gold',
-            category: 'Albion Online',
-            server: 'Americas',
-            name: '20M Silver Albion',
-            description: 'Silver para Albion Online servidor Americas. Método seguro y entrega inmediata.',
-            price: '$15.50',
-            stock: 30,
-            image: 'https://i.imgur.com/vHqB3qX.png',
-            featured: true
-        },
-        {
-            id: 3,
             type: 'account',
             category: 'Turtle WoW',
             server: 'Nordanaar',
             name: 'Cuenta Nivel 60 Guerrero',
-            description: 'Cuenta con guerrero nivel 60, equipo épico, 300 en profesiones y monturas raras.',
+            description: 'Guerrero nivel 60 con equipo épico completo, monturas raras y 300 en todas las profesiones principales.',
             price: '$89.99',
-            stock: 5,
+            stock: 3,
             image: 'https://i.imgur.com/T3qQk9J.jpeg',
             featured: true
         },
         {
+            id: 2,
+            type: 'account',
+            category: 'Turtle WoW',
+            server: 'Tel\'Abim',
+            name: 'Cuenta Nivel 40 Mago',
+            description: 'Mago nivel 40 con hechizos avanzados, buena cantidad de oro y equipo azul para continuar leveling.',
+            price: '$45.00',
+            stock: 5,
+            image: 'https://i.imgur.com/uCclv8s.png',
+            featured: false
+        },
+        {
+            id: 3,
+            type: 'account',
+            category: 'Albion Online',
+            server: 'Americas',
+            name: 'Cuenta T8 Albion',
+            description: 'Cuenta con personaje Tier 8, millones de silver, isla personalizada y especializaciones avanzadas.',
+            price: '$120.00',
+            stock: 2,
+            image: 'https://i.imgur.com/vHqB3qX.png',
+            featured: true
+        },
+        {
             id: 4,
-            type: 'gold',
+            type: 'account',
             category: 'World of Warcraft',
             server: 'Retail',
-            name: '5000 Gold WoW Retail',
-            description: 'Oro para World of Warcraft Retail. Entrega segura y soporte 24/7.',
-            price: '$45.00',
-            stock: 25,
+            name: 'Cuenta Nivel 70 Dragonflight',
+            description: 'Cuenta con nivel máximo en Dragonflight, equipo mítico+ y múltiples personajes de nivel alto.',
+            price: '$150.00',
+            stock: 1,
             image: 'https://i.imgur.com/9p6WxcP.png',
-            featured: false
+            featured: true
+        }
+    ];
+    
+    // Datos de ejemplo - Oro
+    const sampleGold = [
+        {
+            id: 1,
+            game: 'Turtle WoW',
+            server: 'Nordanaar',
+            amount: '1000',
+            price: '$22.00',
+            delivery: '5-15 minutos',
+            stock: 50
+        },
+        {
+            id: 2,
+            game: 'Turtle WoW',
+            server: 'Nordanaar',
+            amount: '5000',
+            price: '$100.00',
+            delivery: '10-30 minutos',
+            stock: 25
+        },
+        {
+            id: 3,
+            game: 'Turtle WoW',
+            server: 'Tel\'Abim',
+            amount: '1000',
+            price: '$25.00',
+            delivery: '5-15 minutos',
+            stock: 40
+        },
+        {
+            id: 4,
+            game: 'Albion Online',
+            server: 'Americas',
+            amount: '10M',
+            price: '$7.50',
+            delivery: 'Inmediato',
+            stock: 100
         },
         {
             id: 5,
-            type: 'account',
-            category: 'Albion Online',
-            server: 'Europe',
-            name: 'Cuenta Premium Albion',
-            description: 'Cuenta con personaje T8, millones de silver y especializaciones avanzadas.',
-            price: '$75.00',
-            stock: 3,
-            image: 'https://i.imgur.com/vHqB3qX.png',
-            featured: false
+            game: 'Albion Online',
+            server: 'Americas',
+            amount: '50M',
+            price: '$35.00',
+            delivery: 'Inmediato',
+            stock: 50
         },
         {
             id: 6,
-            type: 'gold',
-            category: 'Turtle WoW',
-            server: 'Tel\'Abim',
-            name: '2000 Gold Tel\'Abim',
-            description: 'Oro para el nuevo servidor Tel\'Abim de Turtle WoW. Stock disponible.',
-            price: '$38.00',
-            stock: 40,
-            image: 'https://i.imgur.com/uCclv8s.png',
-            featured: false
+            game: 'World of Warcraft',
+            server: 'Retail',
+            amount: '100K',
+            price: '$25.00',
+            delivery: '15-30 minutos',
+            stock: 30
+        },
+        {
+            id: 7,
+            game: 'World of Warcraft',
+            server: 'Retail',
+            amount: '500K',
+            price: '$110.00',
+            delivery: '30-60 minutos',
+            stock: 15
+        },
+        {
+            id: 8,
+            game: 'Runescape',
+            server: 'OSRS',
+            amount: '10M',
+            price: '$12.00',
+            delivery: '5-10 minutos',
+            stock: 80
         }
     ];
     
     const sampleVideos = [
         {
             id: 1,
-            title: 'Cómo comprar oro de forma segura',
-            description: 'Tutorial completo paso a paso para realizar tu primera compra con total seguridad.',
+            title: 'Cómo comprar oro seguro en nuestro Discord',
+            description: 'Tutorial completo paso a paso para realizar compras seguras en nuestra comunidad.',
             url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
             thumbnail: 'https://i.imgur.com/uCclv8s.png'
         },
         {
             id: 2,
-            title: 'Reseñas de clientes satisfechos',
-            description: 'Lo que dicen nuestros usuarios sobre la calidad de nuestro servicio.',
+            title: 'Testimonios de vendedores exitosos',
+            description: 'Historias de usuarios que han vendido grandes cantidades de oro con nosotros.',
             url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
             thumbnail: 'https://i.imgur.com/vHqB3qX.png'
         },
         {
             id: 3,
-            title: 'Guía de entrega rápida',
-            description: 'Explicación de nuestro proceso de entrega y tiempos de espera.',
+            title: 'Proceso de venta de oro paso a paso',
+            description: 'Guía completa para vender tu oro de forma segura y obtener el mejor precio.',
             url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
             thumbnail: 'https://i.imgur.com/T3qQk9J.jpeg'
         }
@@ -1300,23 +1560,23 @@
             userName: 'GamerPro',
             userInitial: 'G',
             rating: 5,
-            text: 'Excelente servicio! El oro llegó en menos de 10 minutos. Totalmente recomendado para la comunidad de Turtle WoW.',
+            text: 'Excelente servicio! Compré 5000 gold para Turtle WoW y llegó en 10 minutos. Totalmente recomendado.',
             date: '2023-10-15'
         },
         {
             id: 2,
             userName: 'WoWPlayer',
             userInitial: 'W',
-            rating: 4,
-            text: 'Buena atención al cliente, me ayudaron con todas mis dudas antes de comprar. El proceso fue sencillo y seguro.',
+            rating: 5,
+            text: 'Vendí 20M de silver en Albion y recibí mi pago al instante. La mejor plataforma para vender oro.',
             date: '2023-10-10'
         },
         {
             id: 3,
-            userName: 'AlbionFan',
+            userName: 'AlbionTrader',
             userInitial: 'A',
-            rating: 5,
-            text: 'La mejor tienda para comprar silver en Albion Online. Precios competitivos y entrega inmediata. ¡Volveré a comprar!',
+            rating: 4,
+            text: 'Buenos precios y transacciones seguras. El Discord está muy bien organizado para comprar/vender.',
             date: '2023-10-05'
         },
         {
@@ -1331,15 +1591,15 @@
     
     // Configuración de contactos
     const contactInfo = {
-        discord: 'https://discord.gg/tu-link-aqui',
+        discord: DISCORD_LINK,
         whatsapp: 'https://wa.me/1234567890',
-        tiktok: 'https://tiktok.com/@epiclevelup_shop',
-        instagram: 'https://instagram.com/epiclevelup',
+        tiktok: TIKTOK_LINK,
         email: 'soporte@epiclevelup.com'
     };
     
     // Cargar datos del localStorage
-    let products = JSON.parse(localStorage.getItem('epic_products')) || sampleProducts;
+    let accounts = JSON.parse(localStorage.getItem('epic_accounts')) || sampleAccounts;
+    let gold = JSON.parse(localStorage.getItem('epic_gold')) || sampleGold;
     let videos = JSON.parse(localStorage.getItem('epic_videos')) || sampleVideos;
     let references = JSON.parse(localStorage.getItem('epic_references')) || sampleReferences;
     let settings = JSON.parse(localStorage.getItem('epic_settings')) || contactInfo;
@@ -1353,7 +1613,8 @@
         loadData();
         
         // Renderizar contenido inicial
-        renderProducts();
+        renderAccounts();
+        renderGold();
         renderVideos();
         renderReferences();
         
@@ -1362,40 +1623,82 @@
         
         // Verificar si admin está logueado
         checkAdminSession();
+        
+        // Actualizar todos los enlaces de Discord y TikTok
+        updateSocialLinks();
     }
     
     function loadData() {
         // Cargar datos del localStorage
-        const savedProducts = localStorage.getItem('epic_products');
+        const savedAccounts = localStorage.getItem('epic_accounts');
+        const savedGold = localStorage.getItem('epic_gold');
         const savedVideos = localStorage.getItem('epic_videos');
         const savedReferences = localStorage.getItem('epic_references');
         const savedSettings = localStorage.getItem('epic_settings');
         
-        if (savedProducts) products = JSON.parse(savedProducts);
+        if (savedAccounts) accounts = JSON.parse(savedAccounts);
+        if (savedGold) gold = JSON.parse(savedGold);
         if (savedVideos) videos = JSON.parse(savedVideos);
         if (savedReferences) references = JSON.parse(savedReferences);
         if (savedSettings) settings = JSON.parse(savedSettings);
+        
+        // Asegurar que los enlaces estén actualizados
+        if (!settings.discord || settings.discord !== DISCORD_LINK) {
+            settings.discord = DISCORD_LINK;
+        }
+        if (!settings.tiktok || settings.tiktok !== TIKTOK_LINK) {
+            settings.tiktok = TIKTOK_LINK;
+        }
+        
+        // Guardar configuración actualizada
+        localStorage.setItem('epic_settings', JSON.stringify(settings));
         
         // Actualizar enlaces de contacto
         updateContactLinks();
     }
     
+    function updateSocialLinks() {
+        // Actualizar TODOS los enlaces de Discord en la página
+        document.querySelectorAll('a[href*="discord"]').forEach(link => {
+            if (link.href.includes('discord.gg')) {
+                link.href = DISCORD_LINK;
+            }
+        });
+        
+        // Actualizar TODOS los enlaces de TikTok
+        document.querySelectorAll('a[href*="tiktok"]').forEach(link => {
+            if (link.href.includes('tiktok.com')) {
+                link.href = TIKTOK_LINK;
+            }
+        });
+        
+        // Actualizar textos que muestran el enlace de Discord
+        document.querySelectorAll('.contact-details p:last-child').forEach(el => {
+            if (el.textContent.includes('discord.gg')) {
+                el.innerHTML = `<i class="fas fa-external-link-alt"></i> discord.gg/AYJkmeZn`;
+            }
+        });
+        
+        // Actualizar textos que muestran el TikTok
+        document.querySelectorAll('.contact-details p:last-child').forEach(el => {
+            if (el.textContent.includes('@farmers.de.mmorpg')) {
+                el.innerHTML = `<i class="fas fa-user"></i> @farmers.de.mmorpg`;
+            }
+        });
+    }
+    
     function updateContactLinks() {
         // Actualizar enlaces en el HTML con la configuración
-        document.querySelectorAll('a[href*="discord.gg/tu-link"]').forEach(link => {
+        document.querySelectorAll('a[href*="discord.gg"]').forEach(link => {
             link.href = settings.discord;
         });
         
-        document.querySelectorAll('a[href*="wa.me/tunumero"]').forEach(link => {
+        document.querySelectorAll('a[href*="wa.me"]').forEach(link => {
             link.href = settings.whatsapp;
         });
         
-        document.querySelectorAll('a[href*="tiktok.com/@tu-usuario"]').forEach(link => {
+        document.querySelectorAll('a[href*="tiktok.com"]').forEach(link => {
             link.href = settings.tiktok;
-        });
-        
-        document.querySelectorAll('a[href*="instagram.com/tu-usuario"]').forEach(link => {
-            link.href = settings.instagram;
         });
         
         // Actualizar texto del WhatsApp
@@ -1436,50 +1739,50 @@
     // FUNCIONES DE RENDERIZADO
     // ============================================
     
-    function renderProducts(filter = 'all') {
+    function renderAccounts(filter = 'all') {
         const container = document.getElementById('products-grid');
-        let filteredProducts = products;
+        let filteredAccounts = accounts;
         
         if (filter !== 'all') {
-            filteredProducts = products.filter(p => p.category.includes(filter));
+            filteredAccounts = accounts.filter(p => p.category.includes(filter));
         }
         
-        if (filteredProducts.length === 0) {
+        if (filteredAccounts.length === 0) {
             container.innerHTML = `
                 <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-gray);">
-                    <i class="fas fa-box-open" style="font-size: 4rem; margin-bottom: 20px;"></i>
-                    <h3>No hay productos disponibles en esta categoría</h3>
-                    <p>Pronto agregaremos más productos</p>
+                    <i class="fas fa-user-slash" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                    <h3>No hay cuentas disponibles en esta categoría</h3>
+                    <p>Pronto agregaremos más cuentas premium</p>
                 </div>
             `;
             return;
         }
         
-        container.innerHTML = filteredProducts.map(product => `
+        container.innerHTML = filteredAccounts.map(account => `
             <div class="product-card">
-                <img src="${product.image}" alt="${product.name}" class="product-image" 
-                     onerror="this.src='https://via.placeholder.com/320x220/333/fff?text=${encodeURIComponent(product.name)}'">
+                <img src="${account.image}" alt="${account.name}" class="product-image" 
+                     onerror="this.src='https://via.placeholder.com/320x220/333/fff?text=${encodeURIComponent(account.name)}'">
                 <div class="product-content">
-                    <div class="product-badge">${product.type === 'gold' ? 'ORO' : 'CUENTA'}</div>
+                    <div class="product-badge">CUENTA PREMIUM</div>
                     <div class="product-category">
-                        <i class="fas fa-gamepad"></i> ${product.category} ${product.server ? '• ' + product.server : ''}
+                        <i class="fas fa-gamepad"></i> ${account.category} ${account.server ? '• ' + account.server : ''}
                     </div>
-                    <h3 class="product-name">${product.name}</h3>
-                    <p class="product-description">${product.description}</p>
+                    <h3 class="product-name">${account.name}</h3>
+                    <p class="product-description">${account.description}</p>
                     <div class="product-details">
-                        <div class="product-price">${product.price}</div>
-                        <button class="btn-buy" onclick="buyProduct(${product.id})">
-                            <i class="fas fa-shopping-cart"></i> COMPRAR
-                        </button>
+                        <div class="product-price">${account.price}</div>
+                        <a href="${DISCORD_LINK}" target="_blank" class="btn-buy">
+                            <i class="fas fa-shopping-cart"></i> COMPRAR EN DISCORD
+                        </a>
                     </div>
-                    ${product.stock ? `
-                    <div style="margin-top: 15px; font-size: 0.85rem; color: var(${product.stock > 10 ? '--success' : product.stock > 0 ? 'var(--gold)' : '--danger'});">
-                        <i class="fas fa-cube"></i> ${product.stock} disponibles
+                    ${account.stock ? `
+                    <div style="margin-top: 15px; font-size: 0.85rem; color: var(${account.stock > 2 ? '--success' : account.stock > 0 ? 'var(--gold)' : '--danger'});">
+                        <i class="fas fa-cube"></i> ${account.stock} disponibles
                     </div>
                     ` : ''}
-                    ${product.featured ? `
+                    ${account.featured ? `
                     <div style="margin-top: 10px; font-size: 0.85rem; color: var(--gold);">
-                        <i class="fas fa-star"></i> Producto destacado
+                        <i class="fas fa-star"></i> Cuenta destacada
                     </div>
                     ` : ''}
                 </div>
@@ -1488,16 +1791,70 @@
     }
     
     function filterProducts(category) {
-        renderProducts(category);
+        renderAccounts(category);
         
         // Actualizar botones activos
         document.querySelectorAll('.nav-btn').forEach(btn => {
-            if (btn.textContent.includes('Todos') || btn.textContent.includes(category)) {
+            if (btn.textContent.includes('Todas') || btn.textContent.includes(category)) {
                 btn.classList.add('active');
             } else {
                 btn.classList.remove('active');
             }
         });
+    }
+    
+    function renderGold() {
+        const container = document.getElementById('gold-packages');
+        
+        // Agrupar por juego
+        const games = [...new Set(gold.map(item => item.game))];
+        
+        let html = '';
+        
+        games.forEach(game => {
+            const gameGold = gold.filter(item => item.game === game);
+            const servers = [...new Set(gameGold.map(item => item.server))];
+            
+            servers.forEach(server => {
+                const serverGold = gameGold.filter(item => item.server === server);
+                
+                html += `
+                    <div style="grid-column: 1/-1; margin-bottom: 40px;">
+                        <h3 style="color: var(--gold); margin-bottom: 20px; padding-left: 10px; border-left: 4px solid var(--gold);">
+                            ${game} - ${server}
+                        </h3>
+                        <div class="gold-packages">
+                            ${serverGold.map(item => `
+                                <div class="gold-card">
+                                    <div class="gold-icon">
+                                        <i class="fas fa-coins"></i>
+                                    </div>
+                                    <div class="gold-amount">${item.amount}</div>
+                                    <div class="gold-game">${item.game}</div>
+                                    <div class="gold-server">Servidor: ${item.server}</div>
+                                    <div style="font-size: 2rem; font-weight: 900; color: var(--text); margin: 20px 0;">
+                                        ${item.price}
+                                    </div>
+                                    <div style="color: var(--text-gray); font-size: 0.9rem; margin-bottom: 20px;">
+                                        <i class="fas fa-clock"></i> Entrega: ${item.delivery}
+                                    </div>
+                                    <a href="${DISCORD_LINK}" target="_blank" class="btn-buy">
+                                        <i class="fas fa-shopping-cart"></i> COMPRAR
+                                    </a>
+                                    ${item.stock ? `
+                                    <div style="margin-top: 15px; font-size: 0.85rem; color: var(${item.stock > 20 ? '--success' : item.stock > 0 ? 'var(--gold)' : '--danger'});">
+                                        <i class="fas fa-cube"></i> ${item.stock} disponibles
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+        });
+        
+        container.innerHTML = html;
     }
     
     function renderVideos() {
@@ -1667,7 +2024,7 @@
                 top: document.getElementById('admin-section').offsetTop - 100,
                 behavior: 'smooth'
             });
-            switchAdminTab('products');
+            switchAdminTab('accounts');
         } else {
             // Si no es admin, mostrar login
             showLoginModal();
@@ -1731,8 +2088,11 @@
         const content = document.getElementById('admin-content');
         
         switch(tab) {
-            case 'products':
-                content.innerHTML = renderAdminProducts();
+            case 'accounts':
+                content.innerHTML = renderAdminAccounts();
+                break;
+            case 'gold':
+                content.innerHTML = renderAdminGold();
                 break;
             case 'references':
                 content.innerHTML = renderAdminReferences();
@@ -1746,45 +2106,45 @@
         }
     }
     
-    function renderAdminProducts() {
+    function renderAdminAccounts() {
         return `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="color: var(--gold);">Gestión de Productos</h3>
-                <button class="btn-primary" onclick="showAddProductModal()">
-                    <i class="fas fa-plus"></i> NUEVO PRODUCTO
+                <h3 style="color: var(--gold);">Gestión de Cuentas</h3>
+                <button class="btn-primary" onclick="showAddAccountModal()">
+                    <i class="fas fa-plus"></i> NUEVA CUENTA
                 </button>
             </div>
             
             <div style="max-height: 600px; overflow-y: auto;">
-                ${products.map(product => `
-                    <div style="background: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid ${product.type === 'gold' ? 'var(--gold)' : 'var(--primary)'};">
+                ${accounts.map(account => `
+                    <div style="background: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid var(--primary);">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div style="flex: 1;">
                                 <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
-                                    <img src="${product.image}" 
+                                    <img src="${account.image}" 
                                          style="width: 80px; height: 80px; border-radius: 5px; object-fit: cover;"
                                          onerror="this.src='https://via.placeholder.com/80x80/333/fff'">
                                     <div>
-                                        <h4 style="color: var(--text); margin-bottom: 5px;">${product.name}</h4>
+                                        <h4 style="color: var(--text); margin-bottom: 5px;">${account.name}</h4>
                                         <div style="color: var(--text-gray); font-size: 0.9rem;">
-                                            ${product.category} ${product.server ? '• ' + product.server : ''}
+                                            ${account.category} ${account.server ? '• ' + account.server : ''}
                                         </div>
                                     </div>
                                 </div>
-                                <p style="color: var(--text-gray); font-size: 0.95rem; margin-bottom: 10px;">${product.description}</p>
+                                <p style="color: var(--text-gray); font-size: 0.95rem; margin-bottom: 10px;">${account.description}</p>
                                 <div style="display: flex; gap: 20px; font-size: 0.9rem;">
-                                    <span style="color: var(--gold); font-weight: 700;">${product.price}</span>
-                                    <span style="color: var(--text-gray);">Stock: ${product.stock}</span>
-                                    <span style="color: ${product.featured ? 'var(--gold)' : 'var(--text-gray)'};">
-                                        ${product.featured ? '★ Destacado' : 'Normal'}
+                                    <span style="color: var(--gold); font-weight: 700;">${account.price}</span>
+                                    <span style="color: var(--text-gray);">Stock: ${account.stock}</span>
+                                    <span style="color: ${account.featured ? 'var(--gold)' : 'var(--text-gray)'};">
+                                        ${account.featured ? '★ Destacada' : 'Normal'}
                                     </span>
                                 </div>
                             </div>
                             <div style="display: flex; gap: 10px; margin-left: 20px;">
-                                <button class="btn-primary" onclick="editProduct(${product.id})">
+                                <button class="btn-primary" onclick="editAccount(${account.id})">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-                                <button class="btn-danger" onclick="deleteProduct(${product.id})">
+                                <button class="btn-danger" onclick="deleteAccount(${account.id})">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -1792,12 +2152,51 @@
                     </div>
                 `).join('')}
                 
-                ${products.length === 0 ? `
+                ${accounts.length === 0 ? `
                 <div style="text-align: center; padding: 40px; color: var(--text-gray);">
-                    <i class="fas fa-box-open" style="font-size: 3rem; margin-bottom: 15px;"></i>
-                    <p>No hay productos registrados</p>
+                    <i class="fas fa-user-slash" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <p>No hay cuentas registradas</p>
                 </div>
                 ` : ''}
+            </div>
+        `;
+    }
+    
+    function renderAdminGold() {
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: var(--gold);">Gestión de Oro</h3>
+                <button class="btn-primary" onclick="showAddGoldModal()">
+                    <i class="fas fa-plus"></i> NUEVO ORO
+                </button>
+            </div>
+            
+            <div class="form-grid">
+                ${gold.map(item => `
+                    <div style="background: var(--panel); padding: 20px; border-radius: 8px; border: 1px solid var(--border);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                            <div>
+                                <h4 style="color: var(--text); margin-bottom: 5px;">${item.amount} - ${item.game}</h4>
+                                <div style="color: var(--text-gray); font-size: 0.9rem;">
+                                    Servidor: ${item.server} • Entrega: ${item.delivery}
+                                </div>
+                            </div>
+                            <div style="font-size: 1.5rem; font-weight: 900; color: var(--gold);">
+                                ${item.price}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" value="${item.price}" style="flex: 1; font-size: 0.9rem;" id="price-${item.id}">
+                            <input type="number" value="${item.stock}" style="width: 80px; font-size: 0.9rem;" id="stock-${item.id}" min="0">
+                            <button class="btn-primary" onclick="updateGold(${item.id})">
+                                <i class="fas fa-save"></i>
+                            </button>
+                            <button class="btn-danger" onclick="deleteGold(${item.id})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
             </div>
         `;
     }
@@ -1915,11 +2314,6 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Enlace de Instagram</label>
-                    <input type="text" id="setting-instagram" value="${settings.instagram}" placeholder="https://instagram.com/...">
-                </div>
-                
-                <div class="form-group">
                     <label class="form-label">Email de Contacto</label>
                     <input type="email" id="setting-email" value="${settings.email}" placeholder="soporte@ejemplo.com">
                 </div>
@@ -1935,6 +2329,7 @@
                 </h4>
                 <p style="color: var(--text-gray); font-size: 0.95rem;">
                     Los cambios en la configuración se aplicarán inmediatamente a todos los enlaces de contacto del sitio.
+                    El enlace de Discord es especialmente importante para las funciones de compra/venta.
                 </p>
             </div>
         `;
@@ -1945,7 +2340,6 @@
         settings.discord = document.getElementById('setting-discord').value.trim();
         settings.whatsapp = document.getElementById('setting-whatsapp').value.trim();
         settings.tiktok = document.getElementById('setting-tiktok').value.trim();
-        settings.instagram = document.getElementById('setting-instagram').value.trim();
         settings.email = document.getElementById('setting-email').value.trim();
         
         // Validar URLs
@@ -1958,40 +2352,82 @@
         
         // Actualizar enlaces
         updateContactLinks();
+        updateSocialLinks();
         
         // Mostrar mensaje de éxito
         showMessage('Configuración guardada exitosamente', 'success');
     }
     
-    function showAddProductModal() {
-        // En una implementación completa, aquí mostrarías un modal para añadir productos
-        showMessage('Función de añadir producto en desarrollo', 'info');
+    // Funciones CRUD para administración
+    function showAddAccountModal() {
+        showMessage('Función de añadir cuenta en desarrollo', 'info');
     }
     
-    function editProduct(id) {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
+    function editAccount(id) {
+        const account = accounts.find(a => a.id === id);
+        if (!account) return;
         
-        // En una implementación completa, aquí mostrarías un modal para editar
-        const newPrice = prompt(`Editar precio para "${product.name}":`, product.price);
-        if (newPrice && newPrice !== product.price) {
-            product.price = newPrice;
-            localStorage.setItem('epic_products', JSON.stringify(products));
-            renderProducts();
-            switchAdminTab('products');
-            showMessage('Precio actualizado exitosamente', 'success');
+        const newPrice = prompt(`Editar precio para "${account.name}":`, account.price);
+        const newStock = prompt(`Editar stock para "${account.name}":`, account.stock);
+        
+        if (newPrice && newPrice !== account.price) {
+            account.price = newPrice;
         }
+        
+        if (newStock !== null && parseInt(newStock) !== account.stock) {
+            account.stock = parseInt(newStock);
+        }
+        
+        localStorage.setItem('epic_accounts', JSON.stringify(accounts));
+        renderAccounts();
+        switchAdminTab('accounts');
+        showMessage('Cuenta actualizada exitosamente', 'success');
     }
     
-    function deleteProduct(id) {
-        if (!confirm('¿Estás seguro de eliminar este producto?')) return;
+    function deleteAccount(id) {
+        if (!confirm('¿Estás seguro de eliminar esta cuenta?')) return;
         
-        products = products.filter(p => p.id !== id);
-        localStorage.setItem('epic_products', JSON.stringify(products));
+        accounts = accounts.filter(a => a.id !== id);
+        localStorage.setItem('epic_accounts', JSON.stringify(accounts));
         
-        renderProducts();
-        switchAdminTab('products');
-        showMessage('Producto eliminado exitosamente', 'success');
+        renderAccounts();
+        switchAdminTab('accounts');
+        showMessage('Cuenta eliminada exitosamente', 'success');
+    }
+    
+    function showAddGoldModal() {
+        showMessage('Función de añadir oro en desarrollo', 'info');
+    }
+    
+    function updateGold(id) {
+        const item = gold.find(g => g.id === id);
+        if (!item) return;
+        
+        const newPrice = document.getElementById(`price-${id}`).value.trim();
+        const newStock = parseInt(document.getElementById(`stock-${id}`).value);
+        
+        if (newPrice && newPrice !== item.price) {
+            item.price = newPrice;
+        }
+        
+        if (!isNaN(newStock) && newStock !== item.stock) {
+            item.stock = newStock;
+        }
+        
+        localStorage.setItem('epic_gold', JSON.stringify(gold));
+        renderGold();
+        showMessage('Oro actualizado exitosamente', 'success');
+    }
+    
+    function deleteGold(id) {
+        if (!confirm('¿Estás seguro de eliminar este paquete de oro?')) return;
+        
+        gold = gold.filter(g => g.id !== id);
+        localStorage.setItem('epic_gold', JSON.stringify(gold));
+        
+        renderGold();
+        switchAdminTab('gold');
+        showMessage('Oro eliminado exitosamente', 'success');
     }
     
     function showAddVideoModal() {
@@ -2074,22 +2510,7 @@
         }, 3000);
     }
     
-    function buyProduct(id) {
-        const product = products.find(p => p.id === id);
-        if (!product) return;
-        
-        // Simular compra (en realidad redirigiría a WhatsApp/Discord)
-        const message = `Hola! Estoy interesado en comprar: ${product.name} por ${product.price}.`;
-        
-        // Abrir WhatsApp con el mensaje
-        const whatsappUrl = `https://wa.me/${settings.whatsapp.replace('https://wa.me/', '')}?text=${encodeURIComponent(message)}`;
-        window.open(whatsappUrl, '_blank');
-        
-        showMessage('Redirigiendo a WhatsApp para completar la compra...', 'success');
-    }
-    
     function playVideo(url) {
-        // En una implementación completa, mostrarías el video en un modal
         window.open(url, '_blank');
     }
     
