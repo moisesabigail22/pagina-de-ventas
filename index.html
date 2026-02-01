@@ -95,35 +95,219 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-        }
-
-        .logo i {
-            background: linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold), var(--wow-gold-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 2.2rem;
-            text-shadow: 0 0 15px rgba(200, 170, 109, 0.5);
-            filter: drop-shadow(0 0 5px rgba(200, 170, 109, 0.3));
-        }
-
-        .logo-text {
-            background: linear-gradient(to bottom, var(--wow-gold-dark) 0%, var(--wow-gold) 30%, var(--wow-gold-light) 50%, var(--wow-gold) 70%, var(--wow-gold-dark) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            font-size: 1.8rem;
-            letter-spacing: 2px;
-            text-shadow: 0 0 15px rgba(139, 107, 41, 0.5);
-            font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            gap: 15px;
             position: relative;
         }
 
+        .logo-image-container {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .logo-image {
+            height: 70px;
+            width: auto;
+            filter: 
+                drop-shadow(0 5px 10px rgba(0, 0, 0, 0.7))
+                drop-shadow(0 15px 25px rgba(200, 170, 109, 0.3))
+                drop-shadow(0 0 20px rgba(200, 170, 109, 0.4));
+            transform-style: preserve-3d;
+            animation: logoFloat 6s ease-in-out infinite;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { 
+                transform: 
+                    translateZ(0px)
+                    rotateX(0deg)
+                    rotateY(0deg); 
+            }
+            25% { 
+                transform: 
+                    translateZ(15px)
+                    rotateX(2deg)
+                    rotateY(3deg); 
+            }
+            50% { 
+                transform: 
+                    translateZ(20px)
+                    rotateX(-1deg)
+                    rotateY(-2deg); 
+            }
+            75% { 
+                transform: 
+                    translateZ(10px)
+                    rotateX(1deg)
+                    rotateY(4deg); 
+            }
+        }
+
+        .logo-image-container:before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, 
+                transparent 20%, 
+                rgba(200, 170, 109, 0.15) 50%, 
+                transparent 80%);
+            border-radius: 15px;
+            z-index: 1;
+            animation: logoShine 8s infinite linear;
+            filter: blur(8px);
+            opacity: 0.7;
+        }
+
+        @keyframes logoShine {
+            0% { 
+                transform: 
+                    translateX(-120%) 
+                    translateY(-120%) 
+                    rotate(45deg)
+                    translateZ(-10px); 
+            }
+            100% { 
+                transform: 
+                    translateX(120%) 
+                    translateY(120%) 
+                    rotate(45deg)
+                    translateZ(-10px); 
+            }
+        }
+
+        .logo-image-container:after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 120%;
+            height: 120%;
+            background: radial-gradient(
+                circle at center,
+                rgba(200, 170, 109, 0.1) 0%,
+                rgba(200, 170, 109, 0.05) 30%,
+                transparent 70%
+            );
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            animation: logoGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            0% { 
+                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(0.95);
+            }
+            100% { 
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.05);
+            }
+        }
+
+        .logo:hover .logo-image {
+            transform: 
+                translateZ(30px)
+                scale(1.05)
+                rotateX(5deg)
+                rotateY(5deg);
+            filter: 
+                drop-shadow(0 10px 20px rgba(0, 0, 0, 0.8))
+                drop-shadow(0 25px 40px rgba(200, 170, 109, 0.5))
+                drop-shadow(0 0 30px rgba(200, 170, 109, 0.6))
+                brightness(1.1);
+        }
+
+        .logo-text-container {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, 
+                var(--wow-gold-light) 0%, 
+                var(--wow-gold) 25%, 
+                var(--wow-gold-light) 50%, 
+                var(--wow-gold) 75%, 
+                var(--wow-gold-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            font-size: 2.2rem;
+            letter-spacing: 3px;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                0 0 25px rgba(139, 107, 41, 0.6),
+                0 0 40px rgba(200, 170, 109, 0.3);
+            font-family: 'Cinzel', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            text-transform: uppercase;
+            position: relative;
+            padding-bottom: 8px;
+            transform: translateZ(10px);
+            animation: textGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes textGlow {
+            0% { 
+                text-shadow: 
+                    2px 2px 4px rgba(0, 0, 0, 0.8),
+                    0 0 20px rgba(139, 107, 41, 0.5),
+                    0 0 35px rgba(200, 170, 109, 0.2);
+            }
+            100% { 
+                text-shadow: 
+                    2px 2px 4px rgba(0, 0, 0, 0.8),
+                    0 0 30px rgba(139, 107, 41, 0.8),
+                    0 0 50px rgba(200, 170, 109, 0.4);
+            }
+        }
+
+        .logo-text:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--wow-gold), 
+                var(--wow-gold-light), 
+                var(--wow-gold), 
+                transparent);
+            border-radius: 2px;
+            box-shadow: 0 0 15px rgba(200, 170, 109, 0.5);
+            transform: translateZ(5px);
+        }
+
         .logo-subtitle {
-            font-size: 0.8rem;
-            color: var(--text-gray);
-            margin-left: 5px;
+            font-size: 0.9rem;
+            color: var(--wow-beige);
+            margin-top: 8px;
             font-style: italic;
+            letter-spacing: 1px;
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.5),
+                0 0 10px rgba(200, 170, 109, 0.2);
+            transform: translateZ(5px);
+            position: relative;
+            padding-left: 5px;
+        }
+
+        .logo-subtitle:before {
+            content: '»';
+            position: absolute;
+            left: -10px;
+            color: var(--wow-gold);
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(200, 170, 109, 0.5);
         }
 
         /* Navigation */
@@ -150,13 +334,17 @@
             position: relative;
             overflow: hidden;
             font-size: 0.9rem;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .nav-btn:hover, .nav-btn.active {
             background: linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold));
             color: var(--wow-blue-dark);
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 25px rgba(200, 170, 109, 0.4);
+            transform: translateY(-3px) scale(1.05) translateZ(10px);
+            box-shadow: 
+                0 8px 25px rgba(200, 170, 109, 0.4),
+                0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .nav-btn:before {
@@ -195,13 +383,15 @@
             font-size: 1.05rem;
             min-width: 200px;
             justify-content: space-between;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .filter-dropdown-btn:hover, .filter-dropdown-btn.active {
             background: linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold));
             color: var(--wow-blue-dark);
             border-color: var(--wow-gold);
-            transform: translateY(-3px);
+            transform: translateY(-3px) translateZ(10px);
             box-shadow: 0 8px 20px rgba(200, 170, 109, 0.4);
         }
 
@@ -217,6 +407,8 @@
             margin-top: 10px;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(20px);
         }
 
         .filter-dropdown-content.show {
@@ -227,11 +419,11 @@
         @keyframes dropdownAppear {
             from {
                 opacity: 0;
-                transform: translateY(-10px);
+                transform: translateY(-10px) translateZ(0);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) translateZ(20px);
             }
         }
 
@@ -245,6 +437,7 @@
             transition: all 0.3s;
             border-bottom: 1px solid rgba(139, 107, 41, 0.2);
             cursor: pointer;
+            transform: translateZ(0);
         }
 
         .filter-dropdown-item:last-child {
@@ -255,6 +448,7 @@
             background: linear-gradient(90deg, rgba(139, 107, 41, 0.2), transparent);
             color: var(--wow-gold);
             padding-left: 30px;
+            transform: translateX(5px) translateZ(5px);
         }
 
         .filter-dropdown-item.active {
@@ -288,11 +482,13 @@
             border-radius: 50%;
             background: rgba(10, 25, 41, 0.8);
             border: 1px solid var(--wow-gold-dark);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .social-link:hover {
             color: var(--wow-gold);
-            transform: scale(1.1) rotate(5deg);
+            transform: scale(1.1) rotate(5deg) translateZ(10px);
             background: rgba(139, 107, 41, 0.2);
             box-shadow: 0 0 15px rgba(200, 170, 109, 0.3);
         }
@@ -320,6 +516,8 @@
             position: relative;
             overflow: hidden;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
         .hero:before {
@@ -350,6 +548,7 @@
             position: relative;
             z-index: 1;
             letter-spacing: 1px;
+            transform: translateZ(20px);
         }
 
         .hero-subtitle {
@@ -361,6 +560,7 @@
             position: relative;
             z-index: 1;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            transform: translateZ(15px);
         }
 
         /* Quick Actions */
@@ -388,12 +588,14 @@
             gap: 8px;
             min-width: 150px;
             text-decoration: none;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .quick-action-btn:hover {
             border-color: var(--wow-gold);
             background: rgba(139, 107, 41, 0.1);
-            transform: translateY(-3px);
+            transform: translateY(-3px) translateZ(10px);
         }
 
         /* Sections */
@@ -458,10 +660,12 @@
             box-shadow: var(--shadow);
             position: relative;
             backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .product-card:hover {
-            transform: translateY(-15px) scale(1.02);
+            transform: translateY(-15px) scale(1.02) translateZ(20px);
             border-color: var(--wow-gold);
             box-shadow: 
                 0 25px 50px rgba(0, 0, 0, 0.8),
@@ -510,6 +714,7 @@
             top: 20px;
             right: 20px;
             z-index: 3;
+            transform: translateZ(30px);
         }
 
         .product-content {
@@ -558,6 +763,7 @@
             color: var(--wow-gold);
             text-shadow: 0 0 15px rgba(200, 170, 109, 0.4);
             position: relative;
+            transform: translateZ(10px);
         }
 
         .product-price:before {
@@ -586,11 +792,13 @@
             position: relative;
             overflow: hidden;
             letter-spacing: 0.5px;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .btn-buy:hover {
             background: linear-gradient(135deg, var(--wow-gold), var(--wow-gold-light));
-            transform: translateY(-3px) scale(1.05);
+            transform: translateY(-3px) scale(1.05) translateZ(20px);
             box-shadow: 
                 0 10px 25px rgba(200, 170, 109, 0.5),
                 0 0 20px rgba(200, 170, 109, 0.3);
@@ -629,11 +837,13 @@
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .gold-card:hover {
             border-color: var(--wow-gold);
-            transform: translateY(-10px) scale(1.03);
+            transform: translateY(-10px) scale(1.03) translateZ(20px);
             box-shadow: 
                 0 20px 40px rgba(0, 0, 0, 0.7),
                 0 0 25px rgba(200, 170, 109, 0.3);
@@ -669,6 +879,7 @@
                 0 0 20px rgba(200, 170, 109, 0.5),
                 0 0 30px rgba(200, 170, 109, 0.3);
             position: relative;
+            transform: translateZ(15px);
         }
 
         .gold-game {
@@ -733,6 +944,8 @@
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .sell-info:before, .discord-join-container:before {
@@ -766,10 +979,12 @@
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .sell-step:hover {
-            transform: translateX(15px);
+            transform: translateX(15px) translateZ(10px);
             background: linear-gradient(90deg, rgba(139, 107, 41, 0.15), transparent);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
@@ -800,6 +1015,7 @@
             box-shadow: 
                 0 5px 15px rgba(139, 107, 41, 0.5),
                 inset 0 2px 0 rgba(255,255,255,0.3);
+            transform: translateZ(15px);
         }
 
         .step-content h4 {
@@ -832,14 +1048,15 @@
                 0 0 50px rgba(200, 170, 109, 0.3);
             filter: drop-shadow(0 0 10px rgba(200, 170, 109, 0.3));
             animation: discordFloat 3s ease-in-out infinite;
+            transform-style: preserve-3d;
         }
 
         @keyframes discordFloat {
-            0%, 100% { transform: translateY(0) rotate(0); }
-            50% { transform: translateY(-10px) rotate(5deg); }
+            0%, 100% { transform: translateY(0) rotate(0) translateZ(0); }
+            50% { transform: translateY(-10px) rotate(5deg) translateZ(15px); }
         }
 
-        /* References Section */
+        /* References Section - ACTUALIZADO */
         .references-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -854,6 +1071,8 @@
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .video-references:before, .user-references:before {
@@ -876,6 +1095,102 @@
             margin-top: 25px;
         }
 
+        /* NUEVO: Estilos para videos */
+        .video-player-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(12, 28, 44, 0.98);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            animation: videoFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes videoFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .video-player {
+            width: 90%;
+            max-width: 1000px;
+            background: var(--panel);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 4px solid var(--wow-gold);
+            box-shadow: 
+                0 30px 70px rgba(0, 0, 0, 0.9),
+                0 0 50px rgba(200, 170, 109, 0.3);
+            position: relative;
+            transform-style: preserve-3d;
+            transform: translateZ(50px);
+        }
+
+        .video-player-header {
+            background: var(--panel-light);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--wow-gold-dark);
+        }
+
+        .video-player-title {
+            color: var(--wow-gold);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .close-video-btn {
+            background: rgba(200, 170, 109, 0.1);
+            border: 2px solid var(--wow-gold-dark);
+            color: var(--text-gray);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+        }
+
+        .close-video-btn:hover {
+            color: var(--wow-gold);
+            background: rgba(200, 170, 109, 0.2);
+            transform: rotate(90deg) scale(1.1) translateZ(20px);
+            box-shadow: 0 0 20px rgba(200, 170, 109, 0.3);
+        }
+
+        .video-embed-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
         .video-card {
             background: var(--panel-light);
             border-radius: 10px;
@@ -883,10 +1198,13 @@
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             border: 2px solid transparent;
             position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .video-card:hover {
-            transform: translateY(-10px) scale(1.03);
+            transform: translateY(-10px) scale(1.03) translateZ(20px);
             box-shadow: 
                 0 15px 35px rgba(0, 0, 0, 0.5),
                 0 0 20px rgba(200, 170, 109, 0.2);
@@ -896,19 +1214,19 @@
         .video-thumbnail {
             width: 100%;
             height: 180px;
-            background: linear-gradient(135deg, var(--wow-blue-dark), var(--wow-blue-medium));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            color: var(--wow-gold);
-            cursor: pointer;
             position: relative;
             overflow: hidden;
             transition: transform 0.5s;
         }
 
-        .video-card:hover .video-thumbnail {
+        .video-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .video-card:hover .video-thumbnail img {
             transform: scale(1.05);
         }
 
@@ -927,6 +1245,34 @@
         @keyframes thumbnailShine {
             0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
             100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .video-thumbnail-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .video-card:hover .video-thumbnail-overlay {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .video-play-icon {
+            font-size: 3.5rem;
+            color: var(--wow-gold);
+            text-shadow: 0 0 20px rgba(200, 170, 109, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .video-card:hover .video-play-icon {
+            transform: scale(1.2);
         }
 
         .video-info {
@@ -979,10 +1325,12 @@
             transition: all 0.3s;
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .reference-item:hover {
-            transform: translateX(10px);
+            transform: translateX(10px) translateZ(10px);
             background: linear-gradient(90deg, rgba(139, 107, 41, 0.15), transparent);
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
@@ -1014,6 +1362,7 @@
             box-shadow: 
                 0 5px 15px rgba(139, 107, 41, 0.5),
                 inset 0 2px 0 rgba(255,255,255,0.3);
+            transform: translateZ(15px);
         }
 
         .reference-rating {
@@ -1051,6 +1400,8 @@
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(10px);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .contact-info:before, .contact-discord:before {
@@ -1086,11 +1437,13 @@
             color: var(--text);
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .contact-method:hover {
             border-color: var(--wow-gold);
-            transform: translateX(15px);
+            transform: translateX(15px) translateZ(15px);
             background: linear-gradient(90deg, rgba(139, 107, 41, 0.15), transparent);
             box-shadow: 
                 0 15px 30px rgba(0, 0, 0, 0.4),
@@ -1125,10 +1478,12 @@
             border: 2px solid var(--wow-gold-dark);
             flex-shrink: 0;
             transition: all 0.3s;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .contact-method:hover .contact-icon {
-            transform: scale(1.1) rotate(10deg);
+            transform: scale(1.1) rotate(10deg) translateZ(15px);
             background: rgba(200, 170, 109, 0.2);
             box-shadow: 0 0 20px rgba(200, 170, 109, 0.3);
         }
@@ -1170,6 +1525,8 @@
             box-shadow: 
                 0 20px 50px rgba(0, 0, 0, 0.8),
                 0 0 30px rgba(200, 170, 109, 0.2);
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .admin-container:before {
@@ -1207,13 +1564,15 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .admin-tab:hover, .admin-tab.active {
             background: linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold));
             color: var(--wow-blue-dark);
             border-color: var(--wow-gold);
-            transform: translateY(-3px);
+            transform: translateY(-3px) translateZ(10px);
             box-shadow: 0 8px 20px rgba(200, 170, 109, 0.4);
         }
 
@@ -1270,6 +1629,8 @@
             font-size: 1.05rem;
             transition: all 0.3s;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         input:focus, select:focus, textarea:focus {
@@ -1279,6 +1640,7 @@
                 0 0 0 4px rgba(200, 170, 109, 0.2),
                 0 0 20px rgba(200, 170, 109, 0.2);
             background: rgba(10, 25, 41, 0.8);
+            transform: translateZ(10px);
         }
 
         textarea {
@@ -1302,11 +1664,13 @@
             position: relative;
             overflow: hidden;
             letter-spacing: 0.5px;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .btn-primary:hover {
             background: linear-gradient(135deg, var(--wow-gold), var(--wow-gold-light));
-            transform: translateY(-3px) scale(1.05);
+            transform: translateY(-3px) scale(1.05) translateZ(20px);
             box-shadow: 
                 0 12px 30px rgba(200, 170, 109, 0.6),
                 0 0 25px rgba(200, 170, 109, 0.3);
@@ -1340,13 +1704,15 @@
             align-items: center;
             gap: 12px;
             font-size: 1.1rem;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .btn-secondary:hover {
             background: var(--panel-light);
             border-color: var(--wow-gold);
             color: var(--wow-gold);
-            transform: translateY(-3px);
+            transform: translateY(-3px) translateZ(10px);
             box-shadow: 0 8px 20px rgba(200, 170, 109, 0.3);
         }
 
@@ -1359,61 +1725,14 @@
             cursor: pointer;
             transition: all 0.3s;
             font-weight: 700;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .btn-danger:hover {
             background: linear-gradient(135deg, #c82333, #e33445);
-            transform: scale(1.05);
+            transform: scale(1.05) translateZ(15px);
             box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
-        }
-
-        /* Stats badges */
-        .stats-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(135deg, rgba(139, 107, 41, 0.3), rgba(200, 170, 109, 0.1));
-            border: 2px solid var(--wow-gold-dark);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            color: var(--wow-gold);
-            font-weight: 600;
-        }
-
-        /* Tag system */
-        .tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
-        }
-
-        .tag {
-            background: rgba(200, 170, 109, 0.1);
-            color: var(--wow-gold);
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(200, 170, 109, 0.3);
-        }
-
-        /* Feature highlight */
-        .feature-highlight {
-            position: relative;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(139, 107, 41, 0.1), transparent);
-            border-radius: 10px;
-            border-left: 5px solid var(--wow-gold);
-            margin: 20px 0;
-        }
-
-        .feature-highlight:before {
-            content: '✨';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            font-size: 1.5rem;
         }
 
         /* Footer */
@@ -1581,16 +1900,18 @@
                 0 30px 70px rgba(0, 0, 0, 0.9),
                 0 0 40px rgba(200, 170, 109, 0.2);
             animation: modalAppear 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            transform: translateZ(50px);
         }
 
         @keyframes modalAppear {
             from {
                 opacity: 0;
-                transform: translateY(30px) scale(0.95);
+                transform: translateY(30px) scale(0.95) translateZ(0);
             }
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
+                transform: translateY(0) scale(1) translateZ(50px);
             }
         }
 
@@ -1611,12 +1932,14 @@
             align-items: center;
             justify-content: center;
             z-index: 10;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .close-modal:hover {
             color: var(--wow-gold);
             background: rgba(200, 170, 109, 0.2);
-            transform: rotate(90deg) scale(1.1);
+            transform: rotate(90deg) scale(1.1) translateZ(20px);
             box-shadow: 0 0 20px rgba(200, 170, 109, 0.3);
         }
 
@@ -1655,12 +1978,14 @@
             background: var(--panel-light);
             position: relative;
             overflow: hidden;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
         }
 
         .image-upload-container:hover {
             border-color: var(--wow-gold);
             background: rgba(200, 170, 109, 0.05);
-            transform: translateY(-5px);
+            transform: translateY(-5px) translateZ(10px);
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
         }
 
@@ -1756,6 +2081,38 @@
             margin: 0 auto;
         }
 
+        /* Filter Buttons */
+        .filter-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--panel-light);
+            border: 2px solid var(--wow-gold-dark);
+            color: var(--text);
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold));
+            color: var(--wow-blue-dark);
+            border-color: var(--wow-gold);
+            transform: translateY(-3px) translateZ(10px);
+            box-shadow: 0 8px 20px rgba(200, 170, 109, 0.4);
+        }
+
         /* Animated elements */
         @keyframes glow {
             0% { 
@@ -1804,6 +2161,8 @@
             z-index: 1000;
             pointer-events: none;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform-style: preserve-3d;
+            transform: translateZ(50px);
         }
 
         [data-tooltip]:after {
@@ -1843,20 +2202,141 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Progress bars */
-        .progress-bar {
-            height: 10px;
-            background: rgba(10, 25, 41, 0.8);
-            border-radius: 5px;
-            overflow: hidden;
+        /* Stats badges */
+        .stats-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(139, 107, 41, 0.3), rgba(200, 170, 109, 0.1));
+            border: 2px solid var(--wow-gold-dark);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--wow-gold);
+            font-weight: 600;
+            transform-style: preserve-3d;
+            transform: translateZ(0);
+        }
+
+        /* Price highlight */
+        .price-highlight {
+            background: linear-gradient(135deg, rgba(139, 107, 41, 0.2), transparent);
+            padding: 5px 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--wow-gold);
+        }
+
+        /* Tag system */
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
             margin: 15px 0;
         }
 
-        .progress-fill {
+        .tag {
+            background: rgba(200, 170, 109, 0.1);
+            color: var(--wow-gold);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(200, 170, 109, 0.3);
+        }
+
+        /* Rating stars */
+        .rating-stars {
+            color: var(--wow-gold);
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        /* Notification dot */
+        .notification-dot {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 12px;
+            height: 12px;
+            background: linear-gradient(135deg, #ff0000, #ff6b6b);
+            border-radius: 50%;
+            border: 2px solid var(--panel);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+        }
+
+        /* Avatar with status */
+        .avatar {
+            position: relative;
+            width: 50px;
+            height: 50px;
+        }
+
+        .avatar img {
+            width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, var(--wow-gold-dark), var(--wow-gold));
-            border-radius: 5px;
-            transition: width 0.5s ease;
+            border-radius: 50%;
+            border: 2px solid var(--wow-gold-dark);
+        }
+
+        .avatar-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--panel);
+        }
+
+        .status-online {
+            background: #28a745;
+        }
+
+        .status-offline {
+            background: #6c757d;
+        }
+
+        .status-busy {
+            background: #dc3545;
+        }
+
+        /* Card flip effect */
+        .card-flip {
+            perspective: 1000px;
+        }
+
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .card-flip:hover .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-flip-front, .card-flip-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+        }
+
+        .card-flip-back {
+            transform: rotateY(180deg);
+            background: var(--panel);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px solid var(--wow-gold);
         }
 
         /* Responsive */
@@ -1893,6 +2373,11 @@
                 align-items: flex-start;
                 gap: 20px;
             }
+            
+            .filter-buttons {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1905,11 +2390,15 @@
             .logo {
                 flex-direction: column;
                 text-align: center;
-                gap: 5px;
+                gap: 15px;
+            }
+            
+            .logo-image {
+                height: 60px;
             }
             
             .logo-text {
-                font-size: 1.6rem;
+                font-size: 1.8rem;
             }
             
             .nav-container {
@@ -1967,29 +2456,6 @@
             .form-grid {
                 grid-template-columns: 1fr;
             }
-            
-            /* Ajustes para dropdown en móvil */
-            .filter-dropdown {
-                width: 100%;
-            }
-            
-            .filter-dropdown-btn {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .filter-dropdown-content {
-                width: 100%;
-                min-width: auto;
-            }
-            
-            .quick-actions {
-                flex-direction: column;
-            }
-            
-            .quick-action-btn {
-                width: 100%;
-            }
         }
 
         @media (max-width: 480px) {
@@ -2045,6 +2511,28 @@
             .modal-title {
                 font-size: 1.8rem;
             }
+            
+            .filter-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .filter-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .quick-actions {
+                flex-direction: column;
+            }
+            
+            .logo-image {
+                height: 50px;
+            }
+            
+            .logo-text {
+                font-size: 1.6rem;
+            }
         }
 
         /* Print styles */
@@ -2078,63 +2566,21 @@
             }
         }
 
-        /* Forzar tema oscuro independientemente de las preferencias del sistema */
-        @media (prefers-color-scheme: light) {
-            /* Ignorar preferencias de modo claro */
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
             :root {
-                /* Mantener colores WoW oscuros */
-                --wow-blue-dark: #0c1c2c;
-                --wow-blue-medium: #1a365d;
-                --wow-blue-light: #2a5a9f;
-                --wow-gold: #c8aa6d;
-                --wow-gold-dark: #8b6b29;
-                --wow-gold-light: #f7e7a0;
-                --wow-brown: #a89c7d;
-                --wow-beige: #e8d8a6;
-                
-                --dark: var(--wow-blue-dark);
-                --darker: #050505;
-                --panel: rgba(10, 25, 41, 0.95);
-                --panel-light: rgba(26, 58, 95, 0.85);
-                --text: var(--wow-beige);
-                --text-gray: var(--wow-brown);
+                --wow-gold: #ffcc00;
+                --wow-gold-dark: #cc9900;
+                --wow-beige: #ffffff;
+                --text-gray: #cccccc;
             }
             
-            body {
-                background: linear-gradient(135deg, var(--wow-blue-dark) 0%, var(--wow-blue-medium) 50%, var(--wow-blue-dark) 100%);
-                color: var(--text);
+            .product-card,
+            .gold-card,
+            .sell-info,
+            .discord-join-container {
+                border-width: 3px;
             }
-            
-            /* Forzar scrollbar oscura */
-            ::-webkit-scrollbar-track {
-                background: var(--wow-blue-dark);
-            }
-            
-            ::-webkit-scrollbar-thumb {
-                background: linear-gradient(var(--wow-gold-dark), var(--wow-gold));
-            }
-            
-            /* Forzar inputs oscuros */
-            input, select, textarea {
-                background: var(--panel);
-                color: var(--text);
-                border-color: var(--wow-gold-dark);
-            }
-            
-            /* Forzar modales oscuros */
-            .modal {
-                background: rgba(12, 28, 44, 0.97);
-            }
-            
-            /* Forzar footer oscuro */
-            footer {
-                background: linear-gradient(to bottom, var(--wow-blue-dark) 0%, #050505 100%);
-            }
-        }
-
-        /* Dark mode (nuestro tema ya es oscuro) */
-        @media (prefers-color-scheme: dark) {
-            /* No hacer cambios, nuestro tema ya es oscuro */
         }
 
         /* Reduced motion */
@@ -2154,6 +2600,57 @@
             .gold-card:hover {
                 transform: none !important;
             }
+            
+            .logo-image {
+                animation: none !important;
+            }
+            
+            .logo-image-container:before,
+            .logo-image-container:after {
+                animation: none !important;
+                display: none;
+            }
+        }
+
+        /* Dark mode (already dark, but for consistency) */
+        @media (prefers-color-scheme: dark) {
+            /* Our theme is already dark, so no changes needed */
+        }
+
+        /* Light mode support - DESHABILITADO */
+        @media (prefers-color-scheme: light) {
+            /* Forzar siempre oscuro */
+            :root {
+                --dark: #0c1c2c;
+                --panel: rgba(10, 25, 41, 0.95);
+                --panel-light: rgba(26, 58, 95, 0.85);
+                --text: #e8d8a6;
+                --text-gray: #a89c7d;
+            }
+            
+            body {
+                background: linear-gradient(135deg, #0c1c2c 0%, #1a365d 50%, #0c1c2c 100%) !important;
+            }
+            
+            .wow-bg {
+                background-image: 
+                    radial-gradient(circle at 20% 80%, rgba(200, 170, 109, 0.03) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(200, 170, 109, 0.03) 0%, transparent 50%),
+                    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,50 L100,50 M50,0 L50,100" stroke="%238b6b29" stroke-width="0.5" opacity="0.1"/><circle cx="50" cy="50" r="40" stroke="%23c8aa6d" stroke-width="0.5" fill="none" opacity="0.05"/></svg>') !important;
+            }
+            
+            header {
+                background: linear-gradient(to right, #0c1c2c 0%, #1a365d 50%, #0c1c2c 100%) !important;
+                border-bottom: 3px solid var(--wow-gold) !important;
+            }
+            
+            .modal {
+                background: rgba(12, 28, 44, 0.97) !important;
+            }
+            
+            footer {
+                background: linear-gradient(to bottom, #0c1c2c 0%, #050505 100%) !important;
+            }
         }
     </style>
 </head>
@@ -2165,8 +2662,10 @@
 <!-- Header -->
 <header>
     <div class="logo">
-        <i class="fas fa-crown"></i>
-        <div>
+        <div class="logo-image-container">
+            <img src="https://i.imgur.com/ynvAS9B.png" alt="EPIC LEVEL UP" class="logo-image">
+        </div>
+        <div class="logo-text-container">
             <div class="logo-text">EPIC LEVEL UP</div>
             <div class="logo-subtitle">Tienda Premium de Oro y Cuentas World of Warcraft</div>
         </div>
@@ -2239,34 +2738,33 @@
             <h2 class="section-title">Cuentas World of Warcraft</h2>
             <div style="color: var(--text-gray); display: flex; align-items: center; gap: 15px;">
                 <i class="fas fa-filter"></i> 
-                <!-- Dropdown de Filtros -->
                 <div class="filter-dropdown">
-                    <button class="filter-dropdown-btn" onclick="toggleFilterDropdown()">
-                        <span id="current-filter">Todas las Categorías</span>
+                    <button class="filter-dropdown-btn" id="filter-dropdown-btn">
+                        <span>Todas las Categorías</span>
                         <i class="fas fa-chevron-down"></i>
                     </button>
-                    <div class="filter-dropdown-content" id="filter-dropdown">
-                        <div class="filter-dropdown-item active" onclick="filterProducts('all')">
+                    <div class="filter-dropdown-content" id="filter-dropdown-content">
+                        <div class="filter-dropdown-item active" onclick="selectFilter('all')">
                             <i class="fas fa-layer-group"></i>
                             <span>Todas las Categorías</span>
                         </div>
-                        <div class="filter-dropdown-item" onclick="filterProducts('Turtle WoW')">
+                        <div class="filter-dropdown-item" onclick="selectFilter('Turtle WoW')">
                             <i class="fas fa-dragon"></i>
                             <span>Turtle WoW</span>
                         </div>
-                        <div class="filter-dropdown-item" onclick="filterProducts('World of Warcraft')">
+                        <div class="filter-dropdown-item" onclick="selectFilter('World of Warcraft')">
                             <i class="fab fa-wow"></i>
                             <span>WoW Retail</span>
                         </div>
-                        <div class="filter-dropdown-item" onclick="filterProducts('Albion')">
+                        <div class="filter-dropdown-item" onclick="selectFilter('Albion')">
                             <i class="fas fa-shield-alt"></i>
                             <span>Albion Online</span>
                         </div>
-                        <div class="filter-dropdown-item" onclick="filterProducts('Runescape')">
+                        <div class="filter-dropdown-item" onclick="selectFilter('Runescape')">
                             <i class="fas fa-gamepad"></i>
                             <span>Runescape</span>
                         </div>
-                        <div class="filter-dropdown-item" onclick="filterProducts('Otro')">
+                        <div class="filter-dropdown-item" onclick="selectFilter('Otro')">
                             <i class="fas fa-plus"></i>
                             <span>Otros Juegos</span>
                         </div>
@@ -2436,6 +2934,19 @@
                     <!-- Las referencias se cargan aquí dinámicamente -->
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- NUEVO: Video Player Overlay -->
+<div class="video-player-container" id="video-player-container">
+    <div class="video-player">
+        <div class="video-player-header">
+            <h3 class="video-player-title" id="video-player-title">Video Tutorial</h3>
+            <button class="close-video-btn" onclick="closeVideoPlayer()">&times;</button>
+        </div>
+        <div class="video-embed-container">
+            <iframe class="video-embed" id="video-embed" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 </div>
@@ -3081,9 +3592,6 @@
     // ============================================
     
     function init() {
-        // Forzar tema oscuro
-        forceDarkTheme();
-        
         // Cargar datos
         loadData();
         
@@ -3111,10 +3619,96 @@
         // Configurar eventos
         setupEventListeners();
         
+        // Configurar dropdown de filtros
+        setupFilterDropdown();
+        
         // Mostrar mensaje de bienvenida
         setTimeout(() => {
             showMessage('¡Bienvenido a EPIC LEVEL UP! 🎮✨', 'info');
         }, 1000);
+    }
+    
+    function setupFilterDropdown() {
+        const filterBtn = document.getElementById('filter-dropdown-btn');
+        const filterContent = document.getElementById('filter-dropdown-content');
+        
+        // Toggle dropdown
+        filterBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            filterContent.classList.toggle('show');
+            this.classList.toggle('active');
+        });
+        
+        // Cerrar dropdown al hacer click fuera
+        document.addEventListener('click', function() {
+            filterContent.classList.remove('show');
+            filterBtn.classList.remove('active');
+        });
+        
+        // Prevenir que el dropdown se cierre al hacer click dentro
+        filterContent.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    }
+    
+    function selectFilter(category) {
+        currentFilter = category;
+        renderAccounts(category);
+        
+        // Actualizar texto del botón
+        const filterBtn = document.getElementById('filter-dropdown-btn');
+        const filterItems = document.querySelectorAll('.filter-dropdown-item');
+        
+        filterItems.forEach(item => {
+            item.classList.remove('active');
+        });
+        
+        let filterText = 'Todas las Categorías';
+        let filterIcon = 'fas fa-layer-group';
+        
+        switch(category) {
+            case 'Turtle WoW':
+                filterText = 'Turtle WoW';
+                filterIcon = 'fas fa-dragon';
+                document.querySelector('.filter-dropdown-item:nth-child(2)').classList.add('active');
+                break;
+            case 'World of Warcraft':
+                filterText = 'WoW Retail';
+                filterIcon = 'fab fa-wow';
+                document.querySelector('.filter-dropdown-item:nth-child(3)').classList.add('active');
+                break;
+            case 'Albion':
+                filterText = 'Albion Online';
+                filterIcon = 'fas fa-shield-alt';
+                document.querySelector('.filter-dropdown-item:nth-child(4)').classList.add('active');
+                break;
+            case 'Runescape':
+                filterText = 'Runescape';
+                filterIcon = 'fas fa-gamepad';
+                document.querySelector('.filter-dropdown-item:nth-child(5)').classList.add('active');
+                break;
+            case 'Otro':
+                filterText = 'Otros Juegos';
+                filterIcon = 'fas fa-plus';
+                document.querySelector('.filter-dropdown-item:nth-child(6)').classList.add('active');
+                break;
+            default:
+                filterText = 'Todas las Categorías';
+                filterIcon = 'fas fa-layer-group';
+                document.querySelector('.filter-dropdown-item:nth-child(1)').classList.add('active');
+        }
+        
+        filterBtn.innerHTML = `
+            <span>${filterText}</span>
+            <i class="fas fa-chevron-down"></i>
+        `;
+        
+        // Cerrar dropdown
+        document.getElementById('filter-dropdown-content').classList.remove('show');
+        filterBtn.classList.remove('active');
+        
+        // Scroll suave a la sección
+        document.getElementById('products').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     
     function loadData() {
@@ -3212,76 +3806,78 @@
         });
     }
     
-    // ============================================
-    // FUNCIONES DEL DROPDOWN DE FILTROS
-    // ============================================
-    
-    function toggleFilterDropdown() {
-        const dropdown = document.getElementById('filter-dropdown');
-        dropdown.classList.toggle('show');
-        
-        // Cambiar ícono
-        const icon = document.querySelector('.filter-dropdown-btn i');
-        if (dropdown.classList.contains('show')) {
-            icon.className = 'fas fa-chevron-up';
-        } else {
-            icon.className = 'fas fa-chevron-down';
-        }
+    function setupSmoothNavigation() {
+        // Navegación suave para enlaces internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 120,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Actualizar botón activo
+                    document.querySelectorAll('.nav-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Cerrar admin section si está abierta
+                    if (targetId !== '#admin-section') {
+                        document.getElementById('admin-section').style.display = 'none';
+                    }
+                }
+            });
+        });
     }
     
-    function filterProducts(category) {
-        currentFilter = category;
-        renderAccounts(category);
-        
-        // Actualizar texto del botón dropdown
-        let filterText = 'Todas las Categorías';
-        switch(category) {
-            case 'all':
-                filterText = 'Todas las Categorías';
-                break;
-            case 'Turtle WoW':
-                filterText = 'Turtle WoW';
-                break;
-            case 'World of Warcraft':
-                filterText = 'WoW Retail';
-                break;
-            case 'Albion':
-                filterText = 'Albion Online';
-                break;
-            case 'Runescape':
-                filterText = 'Runescape';
-                break;
-            case 'Otro':
-                filterText = 'Otros Juegos';
-                break;
-        }
-        
-        document.getElementById('current-filter').textContent = filterText;
-        
-        // Actualizar items activos en el dropdown
-        document.querySelectorAll('.filter-dropdown-item').forEach(item => {
-            item.classList.remove('active');
+    function setupTooltips() {
+        // Tooltips se activan automáticamente con el atributo data-tooltip
+        document.querySelectorAll('[data-tooltip]').forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                // Tooltip ya está configurado por CSS
+            });
+        });
+    }
+    
+    function setupEventListeners() {
+        // Enter key en formularios
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                // Login modal
+                if (document.getElementById('login-modal').style.display === 'flex') {
+                    loginAdmin();
+                }
+                // Account modal
+                if (document.getElementById('account-modal').style.display === 'flex') {
+                    saveAccount();
+                }
+                // Reference modal
+                if (document.getElementById('reference-modal').style.display === 'flex') {
+                    submitReference();
+                }
+            }
         });
         
-        // Activar el item correspondiente
-        const activeItem = Array.from(document.querySelectorAll('.filter-dropdown-item')).find(item => {
-            return item.textContent.includes(filterText);
+        // Escape key para cerrar modales
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+                closeVideoPlayer();
+            }
         });
         
-        if (activeItem) {
-            activeItem.classList.add('active');
-        }
-        
-        // Cerrar el dropdown
-        const dropdown = document.getElementById('filter-dropdown');
-        dropdown.classList.remove('show');
-        
-        // Restaurar ícono
-        const icon = document.querySelector('.filter-dropdown-btn i');
-        icon.className = 'fas fa-chevron-down';
-        
-        // Scroll suave a la sección
-        document.getElementById('products').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Click fuera del modal para cerrar
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
     }
     
     // ============================================
@@ -3293,7 +3889,7 @@
         let filteredAccounts = accounts;
         
         if (filter !== 'all') {
-            filteredAccounts = accounts.filter(p => p.category === filter);
+            filteredAccounts = accounts.filter(p => p.category.includes(filter));
         }
         
         if (filteredAccounts.length === 0) {
@@ -3302,7 +3898,7 @@
                     <i class="fas fa-user-slash" style="font-size: 5rem; margin-bottom: 25px; color: var(--wow-gold); opacity: 0.5;"></i>
                     <h3 style="color: var(--wow-gold); margin-bottom: 15px; font-size: 1.8rem;">No hay cuentas disponibles en esta categoría</h3>
                     <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.7;">Pronto agregaremos más cuentas premium. Mientras tanto, puedes revisar otras categorías o contactarnos para solicitudes especiales.</p>
-                    <button class="btn-primary" onclick="filterProducts('all')" style="margin-top: 30px;">
+                    <button class="btn-primary" onclick="selectFilter('all')" style="margin-top: 30px;">
                         <i class="fas fa-layer-group"></i> VER TODAS LAS CUENTAS
                     </button>
                 </div>
@@ -3432,9 +4028,14 @@
         }
         
         container.innerHTML = videos.map(video => `
-            <div class="video-card">
-                <div class="video-thumbnail" onclick="playVideo('${video.url}')" data-tooltip="Ver video">
-                    <i class="fas fa-play-circle"></i>
+            <div class="video-card" onclick="playVideo('${video.url}', '${video.title}')">
+                <div class="video-thumbnail">
+                    <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/320x180/1a365d/c8aa6d?text=Video+Tutorial'">
+                    <div class="video-thumbnail-overlay">
+                        <div class="video-play-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                    </div>
                     <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">
                         ${video.duration}
                     </div>
@@ -3442,7 +4043,7 @@
                 <div class="video-info">
                     <h4 class="video-title">${video.title}</h4>
                     <p class="video-description">${video.description}</p>
-                    <button class="btn-primary" onclick="playVideo('${video.url}')" style="margin-top: 20px; width: 100%;" data-tooltip="Abrir en YouTube">
+                    <button class="btn-primary" onclick="event.stopPropagation(); playVideo('${video.url}', '${video.title}')" style="margin-top: 20px; width: 100%;" data-tooltip="Ver video completo">
                         <i class="fas fa-play"></i> VER VIDEO COMPLETO
                     </button>
                 </div>
@@ -3499,119 +4100,31 @@
     }
     
     // ============================================
-    // FUNCIONES DE UTILIDAD
+    // FUNCIONES DE VIDEOS (NUEVAS)
     // ============================================
     
-    function forceDarkTheme() {
-        // Agregar metatag para forzar tema oscuro
-        const metaTheme = document.createElement('meta');
-        metaTheme.name = 'color-scheme';
-        metaTheme.content = 'dark';
-        document.head.appendChild(metaTheme);
+    function playVideo(url, title) {
+        const videoContainer = document.getElementById('video-player-container');
+        const videoEmbed = document.getElementById('video-embed');
+        const videoTitle = document.getElementById('video-player-title');
         
-        // Forzar atributo en HTML
-        document.documentElement.setAttribute('data-theme', 'dark');
-        document.documentElement.style.colorScheme = 'dark';
+        videoTitle.textContent = title || 'Video Tutorial';
+        videoEmbed.src = url;
+        videoContainer.style.display = 'flex';
+        
+        // Bloquear scroll del body
+        document.body.style.overflow = 'hidden';
     }
     
-    function setupSmoothNavigation() {
-        // Navegación suave para enlaces internos
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 120,
-                        behavior: 'smooth'
-                    });
-                    
-                    // Actualizar botón activo
-                    document.querySelectorAll('.nav-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                    });
-                    this.classList.add('active');
-                    
-                    // Cerrar admin section si está abierta
-                    if (targetId !== '#admin-section') {
-                        document.getElementById('admin-section').style.display = 'none';
-                    }
-                    
-                    // Cerrar dropdown de filtros si está abierto
-                    const dropdown = document.getElementById('filter-dropdown');
-                    if (dropdown && dropdown.classList.contains('show')) {
-                        dropdown.classList.remove('show');
-                        const icon = document.querySelector('.filter-dropdown-btn i');
-                        if (icon) icon.className = 'fas fa-chevron-down';
-                    }
-                }
-            });
-        });
-    }
-    
-    function setupTooltips() {
-        // Tooltips se activan automáticamente con el atributo data-tooltip
-        document.querySelectorAll('[data-tooltip]').forEach(element => {
-            element.addEventListener('mouseenter', function() {
-                // Tooltip ya está configurado por CSS
-            });
-        });
-    }
-    
-    function setupEventListeners() {
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('filter-dropdown');
-            const dropdownBtn = document.querySelector('.filter-dropdown-btn');
-            
-            if (dropdown && dropdownBtn && !dropdown.contains(event.target) && !dropdownBtn.contains(event.target)) {
-                dropdown.classList.remove('show');
-                const icon = document.querySelector('.filter-dropdown-btn i');
-                if (icon) icon.className = 'fas fa-chevron-down';
-            }
-        });
+    function closeVideoPlayer() {
+        const videoContainer = document.getElementById('video-player-container');
+        const videoEmbed = document.getElementById('video-embed');
         
-        // Enter key en formularios
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                // Login modal
-                if (document.getElementById('login-modal').style.display === 'flex') {
-                    loginAdmin();
-                }
-                // Account modal
-                if (document.getElementById('account-modal').style.display === 'flex') {
-                    saveAccount();
-                }
-                // Reference modal
-                if (document.getElementById('reference-modal').style.display === 'flex') {
-                    submitReference();
-                }
-            }
-        });
+        videoEmbed.src = '';
+        videoContainer.style.display = 'none';
         
-        // Escape key para cerrar modales
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeModal();
-                // También cerrar dropdown de filtros
-                const dropdown = document.getElementById('filter-dropdown');
-                if (dropdown && dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                    const icon = document.querySelector('.filter-dropdown-btn i');
-                    if (icon) icon.className = 'fas fa-chevron-down';
-                }
-            }
-        });
-        
-        // Click fuera del modal para cerrar
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('modal')) {
-                closeModal();
-            }
-        });
+        // Restaurar scroll del body
+        document.body.style.overflow = 'auto';
     }
     
     // ============================================
@@ -3704,6 +4217,28 @@
             text: text,
             date: formattedDate
         };
+        
+        // Agregar con animación visual
+        const tempRef = document.createElement('div');
+        tempRef.innerHTML = `
+            <div class="reference-item" style="opacity: 0; transform: translateY(20px);">
+                <div class="reference-header">
+                    <div class="reference-user">
+                        <div class="user-avatar">${newReference.userInitial}</div>
+                        <div>
+                            <strong style="color: var(--text); font-size: 1.1rem;">${newReference.userName}</strong>
+                            <div class="reference-rating">
+                                ${'★'.repeat(newReference.rating)}${'☆'.repeat(5 - newReference.rating)}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reference-content">"${newReference.text}"</div>
+                <div class="reference-date">
+                    <i class="far fa-calendar"></i> ${newReference.date}
+                </div>
+            </div>
+        `;
         
         references.unshift(newReference);
         localStorage.setItem('epic_references', JSON.stringify(references));
@@ -4567,10 +5102,52 @@
         }
     }
     
-    // ============================================
-    // FUNCIONES AUXILIARES DE ADMIN
-    // ============================================
+    function saveSettings() {
+        // Obtener valores
+        const discord = document.getElementById('setting-discord').value.trim();
+        const whatsapp = document.getElementById('setting-whatsapp').value.trim();
+        const tiktok = document.getElementById('setting-tiktok').value.trim();
+        const email = document.getElementById('setting-email').value.trim();
+        
+        // Validaciones básicas
+        if (!discord) {
+            showMessage('El enlace de Discord es obligatorio', 'error');
+            document.getElementById('setting-discord').focus();
+            return;
+        }
+        
+        if (!discord.startsWith('https://')) {
+            settings.discord = 'https://' + discord;
+        } else {
+            settings.discord = discord;
+        }
+        
+        settings.whatsapp = whatsapp || 'https://wa.me/1234567890';
+        settings.tiktok = tiktok || TIKTOK_LINK;
+        settings.email = email || 'soporte@epiclevelup.com';
+        
+        // Guardar en localStorage
+        localStorage.setItem('epic_settings', JSON.stringify(settings));
+        
+        // Actualizar enlaces
+        updateContactLinks();
+        updateSocialLinks();
+        
+        // Mostrar mensaje de éxito
+        showMessage('✅ Configuración guardada exitosamente', 'success');
+        
+        // Pequeña animación
+        const saveBtn = document.querySelector('[onclick="saveSettings()"]');
+        saveBtn.innerHTML = '<i class="fas fa-check"></i> GUARDADO';
+        saveBtn.style.background = 'linear-gradient(135deg, var(--success), #20c997)';
+        
+        setTimeout(() => {
+            saveBtn.innerHTML = '<i class="fas fa-save"></i> GUARDAR CONFIGURACIÓN';
+            saveBtn.style.background = 'linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold))';
+        }, 2000);
+    }
     
+    // Funciones CRUD para oro
     function showAddGoldModal() {
         // Crear un modal simple para añadir oro
         const newGold = {
@@ -4676,51 +5253,6 @@
         }
     }
     
-    function saveSettings() {
-        // Obtener valores
-        const discord = document.getElementById('setting-discord').value.trim();
-        const whatsapp = document.getElementById('setting-whatsapp').value.trim();
-        const tiktok = document.getElementById('setting-tiktok').value.trim();
-        const email = document.getElementById('setting-email').value.trim();
-        
-        // Validaciones básicas
-        if (!discord) {
-            showMessage('El enlace de Discord es obligatorio', 'error');
-            document.getElementById('setting-discord').focus();
-            return;
-        }
-        
-        if (!discord.startsWith('https://')) {
-            settings.discord = 'https://' + discord;
-        } else {
-            settings.discord = discord;
-        }
-        
-        settings.whatsapp = whatsapp || 'https://wa.me/1234567890';
-        settings.tiktok = tiktok || TIKTOK_LINK;
-        settings.email = email || 'soporte@epiclevelup.com';
-        
-        // Guardar en localStorage
-        localStorage.setItem('epic_settings', JSON.stringify(settings));
-        
-        // Actualizar enlaces
-        updateContactLinks();
-        updateSocialLinks();
-        
-        // Mostrar mensaje de éxito
-        showMessage('✅ Configuración guardada exitosamente', 'success');
-        
-        // Pequeña animación
-        const saveBtn = document.querySelector('[onclick="saveSettings()"]');
-        saveBtn.innerHTML = '<i class="fas fa-check"></i> GUARDADO';
-        saveBtn.style.background = 'linear-gradient(135deg, var(--success), #20c997)';
-        
-        setTimeout(() => {
-            saveBtn.innerHTML = '<i class="fas fa-save"></i> GUARDAR CONFIGURACIÓN';
-            saveBtn.style.background = 'linear-gradient(135deg, var(--wow-gold-dark), var(--wow-gold))';
-        }, 2000);
-    }
-    
     // ============================================
     // FUNCIONES UTILITARIAS
     // ============================================
@@ -4801,10 +5333,6 @@
                 }
             }, 300);
         });
-    }
-    
-    function playVideo(url) {
-        window.open(url, '_blank', 'noopener,noreferrer');
     }
     
     // ============================================
@@ -4914,7 +5442,7 @@
         localStorage.setItem('epic_settings', JSON.stringify(settings));
         
         // Recargar la interfaz
-        renderAccounts();
+        renderAccounts(currentFilter);
         renderGold();
         renderVideos();
         renderReferences();
