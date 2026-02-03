@@ -2403,7 +2403,7 @@
             .btn-buy,
             .btn-primary,
             .btn-secondary,
-            #admin-btn,
+            #acceso-btn,
             footer .footer-social,
             .modal,
             .close-modal {
@@ -2553,8 +2553,8 @@
         <a href="#contact" class="nav-btn">
             <i class="fas fa-headset"></i> CONTACTO
         </a>
-        <button class="nav-btn" id="admin-btn" onclick="showAdmin()">
-            <i class="fas fa-user-shield"></i> ADMIN
+        <button class="nav-btn" id="acceso-btn" onclick="showAdmin()">
+            <i class="fas fa-key"></i> ACCESO
         </button>
         
         <div class="social-links">
@@ -3144,6 +3144,7 @@
     let currentRating = 0;
     let editingAccountId = null;
     let currentImageData = null;
+    let currentFilter = 'all';
     
     // URLs actualizadas
     const DISCORD_LINK = "https://discord.gg/AYJkmeZn";
@@ -3647,6 +3648,27 @@
     // FUNCIONES DE RENDERIZADO
     // ============================================
     
+    function filterProducts(filter) {
+        currentFilter = filter;
+        
+        // Actualizar botones de filtro
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Encontrar el botón activo
+        const activeBtn = Array.from(document.querySelectorAll('.filter-btn')).find(btn => 
+            btn.textContent.includes(filter) || 
+            (filter === 'all' && btn.textContent.includes('Todas'))
+        );
+        
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+        
+        renderAccounts(filter);
+    }
+    
     function renderAccounts(filter = 'all') {
         const container = document.getElementById('products-grid');
         let filteredAccounts = accounts;
@@ -3661,7 +3683,7 @@
                     <i class="fas fa-user-slash" style="font-size: 5rem; margin-bottom: 25px; color: var(--wow-gold); opacity: 0.5;"></i>
                     <h3 style="color: var(--wow-gold); margin-bottom: 15px; font-size: 1.8rem;">No hay cuentas disponibles en esta categoría</h3>
                     <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.7;">Pronto agregaremos más cuentas premium. Mientras tanto, puedes revisar otras categorías o contactarnos para solicitudes especiales.</p>
-                    <button class="btn-primary" onclick="selectFilter('all')" style="margin-top: 30px;">
+                    <button class="btn-primary" onclick="filterProducts('all')" style="margin-top: 30px;">
                         <i class="fas fa-layer-group"></i> VER TODAS LAS CUENTAS
                     </button>
                 </div>
@@ -3750,7 +3772,7 @@
                                     </div>
                                     
                                     <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 20px;">
-                                        <span class="status-badge status-${item.status}">
+                                        <span class="status-badge" style="background: ${item.status === 'available' ? 'var(--success)' : item.status === 'limited' ? 'var(--wow-gold)' : 'var(--danger)'}; color: ${item.status === 'available' || item.status === 'limited' ? 'var(--wow-blue-dark)' : 'white'}; padding: 5px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">
                                             ${item.status === 'available' ? 'Disponible' : item.status === 'limited' ? 'Stock Limitado' : 'Agotado'}
                                         </span>
                                         ${item.stock ? `
@@ -3791,11 +3813,9 @@
         container.innerHTML = videos.map(video => `
             <div class="video-card" onclick="playVideo('${video.url}', '${video.title}')">
                 <div class="video-thumbnail">
-                    <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/320x180/1a365d/c8aa6d?text=Video+Tutorial'">
-                    <div class="video-thumbnail-overlay">
-                        <div class="video-play-icon">
-                            <i class="fas fa-play-circle"></i>
-                        </div>
+                    <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/320x180/1a365d/c8aa6d?text=Video+Tutorial'" style="width: 100%; height: 100%; object-fit: cover;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--wow-gold); font-size: 3rem;">
+                        <i class="fas fa-play-circle"></i>
                     </div>
                     <div style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem;">
                         ${video.duration}
@@ -3864,22 +3884,35 @@
     // ============================================
     
     function playVideo(url, title) {
-        const videoContainer = document.getElementById('video-player-container');
-        const videoEmbed = document.getElementById('video-embed');
-        const videoTitle = document.getElementById('video-player-title');
+        // Crear modal de video dinámicamente
+        const videoModal = document.createElement('div');
+        videoModal.className = 'modal';
+        videoModal.style.display = 'flex';
+        videoModal.innerHTML = `
+            <div class="modal-content">
+                <button class="close-modal" onclick="closeVideoModal()">&times;</button>
+                <h2 class="modal-title">${title}</h2>
+                <div style="position: relative; padding-bottom: 56.25%; height: 0; margin: 30px 0;">
+                    <iframe 
+                        src="${url}" 
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 10px; border: 2px solid var(--wow-gold);"
+                        frameborder="0" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                        allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+        `;
         
-        videoTitle.textContent = title || 'Video Tutorial';
-        videoEmbed.src = url;
-        videoContainer.style.display = 'flex';
+        document.body.appendChild(videoModal);
         document.body.style.overflow = 'hidden';
     }
     
-    function closeVideoPlayer() {
-        const videoContainer = document.getElementById('video-player-container');
-        const videoEmbed = document.getElementById('video-embed');
-        
-        videoEmbed.src = '';
-        videoContainer.style.display = 'none';
+    function closeVideoModal() {
+        const videoModal = document.querySelector('.modal:last-child');
+        if (videoModal) {
+            document.body.removeChild(videoModal);
+        }
         document.body.style.overflow = 'auto';
     }
     
@@ -3895,7 +3928,7 @@
         document.getElementById('reference-text').value = '';
         
         showModal('reference-modal');
-        focusFirstField('reference-modal');
+        document.getElementById('reference-name').focus();
     }
     
     function setRating(rating) {
@@ -4030,7 +4063,7 @@
         document.getElementById('login-message').style.display = 'none';
         
         showModal('login-modal');
-        focusFirstField('login-modal');
+        document.getElementById('admin-username').focus();
     }
     
     function loginAdmin() {
@@ -4146,30 +4179,6 @@
         }
         
         content.scrollTop = 0;
-        
-        setTimeout(() => {
-            reapplyEventListenersToAdminFields();
-        }, 100);
-    }
-    
-    function reapplyEventListenersToAdminFields() {
-        document.querySelectorAll('#admin-content input, #admin-content textarea, #admin-content select').forEach(input => {
-            input.setAttribute('autocomplete', 'off');
-            
-            input.addEventListener('click', function(e) {
-                e.stopPropagation();
-            });
-            
-            input.addEventListener('mousedown', function(e) {
-                e.stopPropagation();
-            });
-        });
-        
-        document.querySelectorAll('#admin-content button').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                // Permitir clic normal
-            });
-        });
     }
     
     function renderAdminAccounts() {
@@ -4217,7 +4226,7 @@
                                             <i class="fas fa-tag"></i> ${account.category} ${account.server ? '• ' + account.server : ''}
                                         </div>
                                         ${account.featured ? `
-                                        <span class="status-badge status-available" style="margin-top: 8px; display: inline-block;">
+                                        <span style="background: var(--wow-gold); color: var(--wow-blue-dark); padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 600; margin-top: 8px; display: inline-block;">
                                             <i class="fas fa-star"></i> Destacada
                                         </span>
                                         ` : ''}
@@ -4567,7 +4576,7 @@
         document.getElementById('account-message').style.display = 'none';
         
         showModal('account-modal');
-        focusFirstField('account-modal');
+        document.getElementById('account-name').focus();
     }
     
     function editAccount(id) {
@@ -4596,7 +4605,7 @@
         document.getElementById('account-message').style.display = 'none';
         
         showModal('account-modal');
-        focusFirstField('account-modal');
+        document.getElementById('account-name').focus();
     }
     
     function previewAccountImage(event) {
@@ -4959,6 +4968,11 @@
     // FUNCIONES UTILITARIAS
     // ============================================
     
+    function showModal(modalId) {
+        document.getElementById(modalId).style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
     function closeModal() {
         document.getElementById('login-modal').style.display = 'none';
         document.getElementById('account-modal').style.display = 'none';
@@ -5160,18 +5174,6 @@
     
     document.addEventListener('DOMContentLoaded', function() {
         init();
-        
-        setTimeout(() => {
-            document.querySelectorAll('input, textarea, select').forEach(input => {
-                input.addEventListener('focus', function(e) {
-                    this.style.zIndex = '1000';
-                });
-                
-                input.addEventListener('blur', function(e) {
-                    this.style.zIndex = '';
-                });
-            });
-        }, 500);
     });
     
     window.addEventListener('beforeunload', function() {
