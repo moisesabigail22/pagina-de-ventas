@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin
-Sitemap: https://epicgoldshop.com//sitemap.xml
+Disallow: /private
+Crawl-delay: 2
+
+Sitemap: https://epicgoldshop.com/sitemap.xml
+Host: https://epicgoldshop.com
