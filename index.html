@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -3476,7 +3477,7 @@
                     <i class="fas fa-coins"></i> Oro
                 </button>
                 <button class="admin-tab" onclick="switchAdminTab('gold-categories')">
-                    <i class="fas fa-tags"></i> Categorías Oro
+                    <i class="fas fa-tags"></i> Categorías de Juegos (Oro)
                 </button>
                 <button class="admin-tab" onclick="switchAdminTab('references')">
                     <i class="fas fa-star"></i> Referencias
@@ -3823,32 +3824,25 @@
     </div>
 </div>
 
-<!-- Modal para crear/editar categorías de oro -->
+<!-- Modal para agregar/editar juegos -->
 <div id="gold-category-modal" class="modal">
     <div class="modal-content">
         <button class="close-modal" onclick="closeModal()">&times;</button>
-        <h2 class="modal-title" id="gold-category-modal-title">NUEVA CATEGORÍA DE ORO</h2>
+        <h2 class="modal-title" id="gold-category-modal-title">AGREGAR JUEGO</h2>
         
-        <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Nombre de la Categoría</label>
-                <input type="text" id="gold-category-name" placeholder="Ej: Turtle WoW Gold" maxlength="100">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Juego</label>
-                <input type="text" id="gold-category-game" placeholder="Ej: Turtle WoW" maxlength="50">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Servidor</label>
-                <input type="text" id="gold-category-server" placeholder="Ej: Nordanaar, Americas, etc." maxlength="50">
-            </div>
+        <div class="form-group">
+            <label class="form-label">Nombre del Juego*</label>
+            <input type="text" id="gold-category-name" placeholder="Ej: Turtle WoW, World of Warcraft" maxlength="100">
         </div>
         
         <div class="form-group">
-            <label class="form-label">Descripción</label>
-            <textarea id="gold-category-description" placeholder="Describe esta categoría de oro, incluye información relevante para los compradores..." maxlength="300"></textarea>
+            <label class="form-label">Descripción*</label>
+            <textarea id="gold-category-description" placeholder="Describe este juego, características principales..." maxlength="300"></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Imagen del Juego (URL de Imgur)</label>
+            <input type="text" id="gold-category-image" placeholder="https://i.imgur.com/CODIGO.jpg" style="width: 100%;">
         </div>
         
         <div style="display: flex; gap: 20px; margin-top: 40px;">
@@ -3856,7 +3850,7 @@
                 <i class="fas fa-times"></i> CANCELAR
             </button>
             <button class="btn-primary" style="flex: 1; padding: 20px;" onclick="saveGoldCategory()" id="save-gold-category-btn">
-                <i class="fas fa-save"></i> GUARDAR CATEGORÍA
+                <i class="fas fa-save"></i> AGREGAR JUEGO
             </button>
         </div>
         
@@ -5717,7 +5711,8 @@
         
         return `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
-                <h3 style="color: var(--wow-gold); font-size: 1.8rem;">Gestión de Categorías de Oro</h3>
+                <h3 style="color: var(--wow-gold); margin-bottom: 25px; font-size: 1.8rem;">
+                    Gestión de Categorías de Juegos (Oro) 
                 <div style="display: flex; gap: 20px;">
                     <div style="text-align: center;">
                         <div style="font-size: 2.2rem; font-weight: 900; color: var(--wow-gold);">${totalCategories}</div>
@@ -5736,7 +5731,7 @@
             
             <div style="display: flex; justify-content: flex-end; margin-bottom: 25px;">
                 <button class="btn-primary" onclick="showAddGoldCategoryModal()">
-                    <i class="fas fa-plus"></i> NUEVA CATEGORÍA ORO
+                    <i class="fas fa-plus"></i> AGREGAR JUEGO
                 </button>
             </div>
             
@@ -5778,10 +5773,10 @@
                                 </div>
                             </div>
                             <div style="display: flex; gap: 12px; margin-left: 20px; flex-shrink: 0;">
-                                <button class="btn-primary" onclick="editGoldCategory(${category.id})" data-tooltip="Editar categoría">
+                                <button class="btn-primary" onclick="editGoldCategory(${category.id})" data-tooltip="Editar juego">
                                     <i class="fas fa-edit"></i> Editar
                                 </button>
-                                <button class="btn-danger" onclick="deleteGoldCategory(${category.id})" data-tooltip="Eliminar categoría">
+                                <button class="btn-danger" onclick="deleteGoldCategory(${category.id})" data-tooltip="Eliminar juego">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -6140,41 +6135,43 @@
     // ============================================
     
     function showAddGoldCategoryModal() {
-        editingGoldCategoryId = null;
-        
-        document.getElementById('gold-category-modal-title').textContent = 'NUEVA CATEGORÍA DE ORO';
-        document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> GUARDAR CATEGORÍA';
-        
-        document.getElementById('gold-category-name').value = '';
-        document.getElementById('gold-category-game').value = '';
-        document.getElementById('gold-category-server').value = '';
-        document.getElementById('gold-category-description').value = '';
-        
-        document.getElementById('gold-category-message').style.display = 'none';
-        
-        showModal('gold-category-modal');
-        document.getElementById('gold-category-name').focus();
-    }
+    editingGoldCategoryId = null;
+    
+    // CAMBIA ESTAS 2 LÍNEAS:
+    document.getElementById('gold-category-modal-title').textContent = 'AGREGAR JUEGO';
+    document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> AGREGAR JUEGO';
+    
+    // SOLO 3 CAMPOS AHORA:
+    document.getElementById('gold-category-name').value = '';
+    document.getElementById('gold-category-description').value = '';
+    document.getElementById('gold-category-image').value = '';
+    
+    document.getElementById('gold-category-message').style.display = 'none';
+    
+    showModal('gold-category-modal');
+    document.getElementById('gold-category-name').focus();
+}
     
     function editGoldCategory(id) {
-        const category = goldCategories.find(c => c.id === id);
-        if (!category) return;
-        
-        editingGoldCategoryId = id;
-        
-        document.getElementById('gold-category-modal-title').textContent = 'EDITAR CATEGORÍA DE ORO';
-        document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> ACTUALIZAR CATEGORÍA';
-        
-        document.getElementById('gold-category-name').value = category.name;
-        document.getElementById('gold-category-game').value = category.game;
-        document.getElementById('gold-category-server').value = category.server;
-        document.getElementById('gold-category-description').value = category.description;
-        
-        document.getElementById('gold-category-message').style.display = 'none';
-        
-        showModal('gold-category-modal');
-        document.getElementById('gold-category-name').focus();
-    }
+    const category = goldCategories.find(c => c.id === id);
+    if (!category) return;
+    
+    editingGoldCategoryId = id;
+    
+    // CAMBIA ESTAS 2 LÍNEAS:
+    document.getElementById('gold-category-modal-title').textContent = 'EDITAR JUEGO';
+    document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> ACTUALIZAR JUEGO';
+    
+    // SOLO 3 CAMPOS AHORA:
+    document.getElementById('gold-category-name').value = category.name;
+    document.getElementById('gold-category-description').value = category.description;
+    document.getElementById('gold-category-image').value = category.image || '';
+    
+    document.getElementById('gold-category-message').style.display = 'none';
+    
+    showModal('gold-category-modal');
+    document.getElementById('gold-category-name').focus();
+}
     
     function saveGoldCategory() {
         const name = document.getElementById('gold-category-name').value.trim();
