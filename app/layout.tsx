@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Epic Gold Shop | Comprar Oro WoW - Vender Oro WoW - Cuentas Premium",
