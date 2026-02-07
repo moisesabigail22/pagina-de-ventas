@@ -3840,6 +3840,23 @@
             <label class="form-label">Nombre del Juego*</label>
             <input type="text" id="gold-category-name" placeholder="Ej: Turtle WoW, World of Warcraft" maxlength="100">
         </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Juego</label>
+                <select id="gold-category-game">
+                    <!-- Los juegos se cargan dinámicamente -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Servidor</label>
+                <select id="gold-category-server-select">
+                    <option value="">Selecciona un servidor</option>
+                </select>
+                <input type="text" id="gold-category-server-custom" placeholder="Otro servidor..." maxlength="50" style="display: none; margin-top: 10px;">
+            </div>
+        </div>
         
         <div class="form-group">
             <label class="form-label">Descripción*</label>
@@ -4666,6 +4683,12 @@
         } else if (!gameServers || gameServers.length === 0) {
             gameServers = buildDefaultGameServers();
         }
+
+        const goldCategoryGames = goldCategories.map(category => category.game);
+        const combinedGames = Array.from(new Set([...categories, ...goldCategoryGames]));
+        if (combinedGames.length !== categories.length) {
+            categories = combinedGames.sort();
+        }
         
         // Asegurar que los enlaces estén actualizados
         if (!settings.discord || settings.discord !== DISCORD_LINK) {
@@ -4761,6 +4784,10 @@
         if (document.getElementById('gold-modal')?.style.display === 'flex') {
             updateGoldServerOptions();
         }
+
+        if (document.getElementById('gold-category-modal')?.style.display === 'flex') {
+            updateGoldCategoryServerOptions();
+        }
     }
 
     function updateGoldServerOptions() {
@@ -4771,6 +4798,37 @@
         if (!categorySelect || !serverSelect) return;
 
         const selectedGame = categorySelect.value;
+        const serversForGame = gameServers
+            .filter(server => server.game === selectedGame)
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        serverSelect.innerHTML = `
+            <option value="">Selecciona un servidor</option>
+            ${serversForGame.map(server => `
+                <option value="${server.name}">${server.name} (${server.type})</option>
+            `).join('')}
+            <option value="custom">Otro...</option>
+        `;
+
+        if (customInput) {
+            customInput.value = '';
+            customInput.style.display = serversForGame.length === 0 ? 'block' : 'none';
+        }
+
+        if (serversForGame.length === 0) {
+            serverSelect.value = 'custom';
+            if (customInput) customInput.focus();
+        }
+    }
+
+    function updateGoldCategoryServerOptions() {
+        const gameSelect = document.getElementById('gold-category-game');
+        const serverSelect = document.getElementById('gold-category-server-select');
+        const customInput = document.getElementById('gold-category-server-custom');
+
+        if (!gameSelect || !serverSelect) return;
+
+        const selectedGame = gameSelect.value;
         const serversForGame = gameServers
             .filter(server => server.game === selectedGame)
             .sort((a, b) => a.name.localeCompare(b.name));
@@ -4808,9 +4866,34 @@
         }
     }
 
+    function toggleGoldCategoryServerCustom() {
+        const serverSelect = document.getElementById('gold-category-server-select');
+        const customInput = document.getElementById('gold-category-server-custom');
+        if (!serverSelect || !customInput) return;
+
+        if (serverSelect.value === 'custom') {
+            customInput.style.display = 'block';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.value = '';
+        }
+    }
+
     function getSelectedGoldServer() {
         const serverSelect = document.getElementById('gold-server-select');
         const customInput = document.getElementById('gold-server-custom');
+
+        if (!serverSelect) return '';
+        if (serverSelect.value === 'custom') {
+            return customInput ? customInput.value.trim() : '';
+        }
+        return serverSelect.value.trim();
+    }
+
+    function getSelectedGoldCategoryServer() {
+        const serverSelect = document.getElementById('gold-category-server-select');
+        const customInput = document.getElementById('gold-category-server-custom');
 
         if (!serverSelect) return '';
         if (serverSelect.value === 'custom') {
@@ -4910,6 +4993,20 @@
         if (goldServerSelect) {
             goldServerSelect.addEventListener('change', function() {
                 toggleGoldServerCustom();
+            });
+        }
+
+        const goldCategoryGameSelect = document.getElementById('gold-category-game');
+        if (goldCategoryGameSelect) {
+            goldCategoryGameSelect.addEventListener('change', function() {
+                updateGoldCategoryServerOptions();
+            });
+        }
+
+        const goldCategoryServerSelect = document.getElementById('gold-category-server-select');
+        if (goldCategoryServerSelect) {
+            goldCategoryServerSelect.addEventListener('change', function() {
+                toggleGoldCategoryServerCustom();
             });
         }
     }
@@ -5939,6 +6036,7 @@
     function renderAdminServers() {
         const games = Array.from(new Set([
             ...categories,
+            ...goldCategories.map(category => category.game),
             ...gameServers.map(server => server.game)
         ])).sort();
         const totalServers = gameServers.length;
@@ -6079,6 +6177,7 @@
         if (message) message.style.display = 'none';
 
         updateGoldServerOptions();
+        updateGoldCategoryServerOptions();
         switchAdminTab('servers');
         showMessage('✅ Servidor agregado correctamente', 'success');
     }
@@ -6092,6 +6191,7 @@
         gameServers.splice(serverIndex, 1);
         localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
         updateGoldServerOptions();
+        updateGoldCategoryServerOptions();
         switchAdminTab('servers');
         showMessage('✅ Servidor eliminado', 'success');
     }
@@ -6438,8 +6538,13 @@
     document.getElementById('gold-category-modal-title').textContent = 'AGREGAR JUEGO';
     document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> AGREGAR JUEGO';
     
-    // SOLO 3 CAMPOS AHORA:
     document.getElementById('gold-category-name').value = '';
+    updateCategorySelects();
+    document.getElementById('gold-category-game').value = categories[0] || '';
+    updateGoldCategoryServerOptions();
+    document.getElementById('gold-category-server-select').value = '';
+    document.getElementById('gold-category-server-custom').value = '';
+    document.getElementById('gold-category-server-custom').style.display = 'none';
     document.getElementById('gold-category-description').value = '';
     document.getElementById('gold-category-image').value = '';
     
@@ -6459,10 +6564,31 @@
     document.getElementById('gold-category-modal-title').textContent = 'EDITAR JUEGO';
     document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> ACTUALIZAR JUEGO';
     
-    // SOLO 3 CAMPOS AHORA:
     document.getElementById('gold-category-name').value = category.name;
     document.getElementById('gold-category-description').value = category.description;
     document.getElementById('gold-category-image').value = category.image || '';
+
+    updateCategorySelects();
+    document.getElementById('gold-category-game').value = category.game || '';
+    updateGoldCategoryServerOptions();
+    const serverSelect = document.getElementById('gold-category-server-select');
+    const serverCustom = document.getElementById('gold-category-server-custom');
+    const hasServerOption = Array.from(serverSelect.options).some(
+        option => option.value === category.server
+    );
+    if (hasServerOption) {
+        serverSelect.value = category.server;
+        if (serverCustom) {
+            serverCustom.style.display = 'none';
+            serverCustom.value = '';
+        }
+    } else {
+        serverSelect.value = 'custom';
+        if (serverCustom) {
+            serverCustom.style.display = 'block';
+            serverCustom.value = category.server || '';
+        }
+    }
     
     document.getElementById('gold-category-message').style.display = 'none';
     
@@ -6473,8 +6599,9 @@
     function saveGoldCategory() {
         const name = document.getElementById('gold-category-name').value.trim();
         const game = document.getElementById('gold-category-game').value.trim();
-        const server = document.getElementById('gold-category-server').value.trim();
+        const server = getSelectedGoldCategoryServer();
         const description = document.getElementById('gold-category-description').value.trim();
+        const imageUrl = document.getElementById('gold-category-image').value.trim();
         const message = document.getElementById('gold-category-message');
         
         if (!name) {
@@ -6497,7 +6624,13 @@
             message.textContent = 'El servidor es obligatorio';
             message.className = 'message error';
             message.style.display = 'block';
-            document.getElementById('gold-category-server').focus();
+            const serverSelect = document.getElementById('gold-category-server-select');
+            const serverCustom = document.getElementById('gold-category-server-custom');
+            if (serverSelect && serverSelect.value === 'custom' && serverCustom) {
+                serverCustom.focus();
+            } else if (serverSelect) {
+                serverSelect.focus();
+            }
             return;
         }
         
@@ -6509,6 +6642,8 @@
             return;
         }
         
+        const categoryImage = imageUrl || GAME_IMAGES[game] || GAME_IMAGES.default;
+
         if (editingGoldCategoryId) {
             const index = goldCategories.findIndex(c => c.id === editingGoldCategoryId);
             if (index !== -1) {
@@ -6518,7 +6653,7 @@
                     game,
                     server,
                     description,
-                    image: GAME_IMAGES[game] || GAME_IMAGES.default
+                    image: categoryImage
                 };
                 
                 showMessage('✅ Categoría de oro actualizada exitosamente', 'success');
@@ -6530,11 +6665,17 @@
                 game,
                 server,
                 description,
-                image: GAME_IMAGES[game] || GAME_IMAGES.default
+                image: categoryImage
             };
             goldCategories.push(newCategory);
             
             showMessage('✅ Categoría de oro agregada exitosamente', 'success');
+        }
+
+        if (!categories.includes(game)) {
+            categories.push(game);
+            categories.sort();
+            localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
         }
         
         localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
