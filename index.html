@@ -3479,6 +3479,9 @@
                 <button class="admin-tab" onclick="switchAdminTab('gold-categories')">
                     <i class="fas fa-tags"></i> Categorías de Juegos (Oro)
                 </button>
+                <button class="admin-tab" onclick="switchAdminTab('servers')">
+                    <i class="fas fa-server"></i> Servidores (Juegos)
+                </button>
                 <button class="admin-tab" onclick="switchAdminTab('references')">
                     <i class="fas fa-star"></i> Referencias
                 </button>
@@ -5517,6 +5520,9 @@
             case 'gold-categories':
                 content.innerHTML = renderAdminGoldCategories();
                 break;
+            case 'servers':
+                content.innerHTML = renderAdminServers();
+                break;
             case 'references':
                 content.innerHTML = renderAdminReferences();
                 break;
@@ -5793,6 +5799,83 @@
                     <button class="btn-primary" onclick="showAddGoldCategoryModal()">
                         <i class="fas fa-plus"></i> AGREGAR PRIMERA CATEGORÍA
                     </button>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    function renderAdminServers() {
+        const combinedServers = {};
+        const addServer = (game, server, source) => {
+            const gameName = game || 'Sin juego';
+            const serverName = server || 'Sin servidor';
+            if (!combinedServers[gameName]) {
+                combinedServers[gameName] = {};
+            }
+            if (!combinedServers[gameName][serverName]) {
+                combinedServers[gameName][serverName] = new Set();
+            }
+            combinedServers[gameName][serverName].add(source);
+        };
+
+        gold.forEach(item => addServer(item.game, item.server, 'Oro'));
+        accounts.forEach(account => addServer(account.category, account.server, 'Cuentas'));
+
+        const games = Object.keys(combinedServers);
+        const totalServers = games.reduce((total, game) => total + Object.keys(combinedServers[game]).length, 0);
+
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+                <h3 style="color: var(--wow-gold); margin-bottom: 25px; font-size: 1.8rem;">
+                    Servidores por Juego
+                </h3>
+                <div style="display: flex; gap: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 2.2rem; font-weight: 900; color: var(--wow-gold);">${games.length}</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">Juegos</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 2.2rem; font-weight: 900; color: var(--wow-gold);">${totalServers}</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">Servidores</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="max-height: 600px; overflow-y: auto; padding-right: 10px;">
+                ${games.map(game => {
+                    const servers = Object.keys(combinedServers[game]);
+                    return `
+                    <div style="background: var(--panel); padding: 25px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid var(--wow-gold);">
+                        <div style="display: flex; justify-content: space-between; align-items: start; gap: 20px;">
+                            <div style="flex: 1; min-width: 0;">
+                                <h4 style="color: var(--text); margin-bottom: 8px; font-size: 1.3rem; word-break: break-word;">
+                                    <i class="fas fa-gamepad"></i> ${game}
+                                </h4>
+                                <div style="color: var(--text-gray); font-size: 0.95rem; margin-bottom: 15px;">
+                                    <i class="fas fa-server"></i> ${servers.length} ${servers.length === 1 ? 'servidor' : 'servidores'}
+                                </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                    ${servers.map(server => `
+                                        <span style="background: rgba(200, 170, 109, 0.12); color: var(--wow-gold-light); padding: 6px 12px; border-radius: 20px; font-size: 0.9rem;">
+                                            ${server}
+                                            <small style="color: var(--text-gray); margin-left: 6px;">
+                                                (${Array.from(combinedServers[game][server]).join(' / ')})
+                                            </small>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                }).join('')}
+
+                ${games.length === 0 ? `
+                <div style="text-align: center; padding: 60px 40px; color: var(--text-gray); background: var(--panel); border-radius: 10px; border: 2px dashed var(--wow-gold-dark);">
+                    <i class="fas fa-server" style="font-size: 4rem; margin-bottom: 20px; color: var(--wow-gold); opacity: 0.5;"></i>
+                    <h4 style="color: var(--wow-gold); margin-bottom: 15px;">No hay servidores registrados</h4>
+                    <p style="font-size: 1.05rem; margin-bottom: 0;">Agrega cuentas u oro para ver servidores asociados a juegos.</p>
                 </div>
                 ` : ''}
             </div>
