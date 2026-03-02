@@ -4527,9 +4527,34 @@
         return response.json();
     }
 
-    async function loadData() {
+    function validateSupabaseFrontendConfig() {
         if (!EFFECTIVE_SUPABASE_URL || !EFFECTIVE_SUPABASE_ANON_KEY) {
-            showMessage('Configura supabase-config.js con URL y ANON KEY de Supabase', 'error');
+            return 'Configura supabase-config.js con URL y ANON KEY de Supabase';
+        }
+
+        if (!EFFECTIVE_SUPABASE_URL.startsWith('https://')) {
+            return 'SUPABASE URL inválida: debe empezar con https://';
+        }
+
+        if (EFFECTIVE_SUPABASE_ANON_KEY.startsWith('sb_secret_')) {
+            return 'Estás usando SECRET KEY en frontend. Usa solo PUBLISHABLE/ANON KEY.';
+        }
+
+        if (!EFFECTIVE_SUPABASE_ANON_KEY.startsWith('sb_publishable_') && !EFFECTIVE_SUPABASE_ANON_KEY.startsWith('eyJ')) {
+            return 'La key no parece ANON/PUBLISHABLE. Revisa Supabase > Settings > API.';
+        }
+
+        return '';
+    }
+
+    async function loadData() {
+        const configError = validateSupabaseFrontendConfig();
+        if (configError) {
+            showMessage(configError, 'error');
+            console.error('[SUPABASE CONFIG]', configError, {
+                url: EFFECTIVE_SUPABASE_URL,
+                keyPrefix: EFFECTIVE_SUPABASE_ANON_KEY ? EFFECTIVE_SUPABASE_ANON_KEY.slice(0, 20) : ''
+            });
             return;
         }
 
@@ -4560,7 +4585,7 @@
             categories = Array.from(new Set(accounts.map(account => account.category).filter(Boolean))).sort();
         } catch (error) {
             console.error('Error cargando datos desde Supabase:', error);
-            showMessage('Error conectando con Supabase. Revisa RLS y tu anon key.', 'error');
+            showMessage('Error Supabase: revisa RLS (policies SELECT) y que la key sea publishable.', 'error');
             return;
         }
 
