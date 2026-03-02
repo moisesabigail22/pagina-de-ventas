@@ -4404,9 +4404,9 @@
     // FUNCIONES DE INICIALIZACIÓN
     // ============================================
 
-    function init() {
+    async function init() {
         // Cargar datos
-        loadData();
+        await loadData();
 
         // Renderizar contenido inicial
         renderAccounts();
@@ -4500,8 +4500,7 @@
         return Array.from(serverMap.values());
     }
 
-    function loadData() {
-        // Cargar datos del localStorage
+    function loadFromLocalStorage() {
         const savedAccounts = localStorage.getItem('epicgoldshop_accounts');
         const savedGold = localStorage.getItem('epicgoldshop_gold');
         const savedGoldCategories = localStorage.getItem('epicgoldshop_gold_categories');
@@ -4513,13 +4512,46 @@
         if (savedAccounts) accounts = JSON.parse(savedAccounts);
         if (savedGold) gold = JSON.parse(savedGold);
         if (savedGoldCategories) goldCategories = JSON.parse(savedGoldCategories);
-        sanitizeGoldCategoryImages();
         if (savedReferences) references = JSON.parse(savedReferences);
         if (savedSettings) settings = JSON.parse(savedSettings);
         if (savedCategories) categories = JSON.parse(savedCategories);
-        if (savedGameServers) {
-            gameServers = normalizeGameServers(JSON.parse(savedGameServers));
+        if (savedGameServers) gameServers = normalizeGameServers(JSON.parse(savedGameServers));
+    }
+
+    async function loadData() {
+        let loadedFromApi = false;
+
+        try {
+            const response = await fetch('/api/catalog', {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error(`No se pudo cargar catálogo desde API: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            accounts = Array.isArray(data.accounts) ? data.accounts : accounts;
+            gold = Array.isArray(data.gold) ? data.gold : gold;
+            goldCategories = Array.isArray(data.gold_categories) ? data.gold_categories : goldCategories;
+            references = Array.isArray(data.references) ? data.references : references;
+            categories = Array.isArray(data.categories) ? data.categories : categories;
+            gameServers = normalizeGameServers(Array.isArray(data.game_servers) ? data.game_servers : gameServers);
+
+            if (data.settings && typeof data.settings === 'object' && !Array.isArray(data.settings)) {
+                settings = { ...settings, ...data.settings };
+            }
+
+            loadedFromApi = true;
+        } catch (error) {
+            console.warn('Error cargando catálogo desde /api/catalog. Se usa fallback localStorage.', error);
+            loadFromLocalStorage();
         }
+
+        sanitizeGoldCategoryImages();
 
         if (!Array.isArray(gameServers) || gameServers.length === 0) {
             gameServers = buildGameServersFromData();
@@ -4545,7 +4577,10 @@
             settings.site = SITE_URL;
         }
 
-        // Guardar configuración actualizada
+        // Guardar datos para fallback local
+        localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        localStorage.setItem('epicgoldshop_references', JSON.stringify(references));
         localStorage.setItem('epicgoldshop_settings', JSON.stringify(settings));
         localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
         localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
@@ -4553,6 +4588,10 @@
 
         // Actualizar enlaces de contacto
         updateContactLinks();
+
+        if (loadedFromApi) {
+            showMessage('Catálogo sincronizado desde base de datos ✅', 'success');
+        }
     }
 
     function updateAverageRating() {
