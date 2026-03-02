@@ -49,8 +49,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const supabaseUrl = getEnv('SUPABASE_URL');
-  const apiKey = getEnv('SUPABASE_ANON_KEY') || getEnv('SUPABASE_SERVICE_ROLE_KEY');
+  const supabaseUrl = getEnv(sb_publishable_d8czXDE3zG8BiVgah6NilA_MuHAyp25);
+  const apiKey = getEnv(sb_secret__nzzXtrNNV2HwzUo4HB8cA_7H3vYboS) || getEnv('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!supabaseUrl || !apiKey) {
     return res.status(500).json({
