@@ -22,6 +22,7 @@ Ejecuta esto en SQL Editor (ajusta tablas si cambian):
 
 ```sql
 alter table public.accounts enable row level security;
+alter table public.categories enable row level security;
 alter table public.gold enable row level security;
 alter table public.gold_categories enable row level security;
 alter table public.game_servers enable row level security;
@@ -29,6 +30,9 @@ alter table public.references enable row level security;
 alter table public.settings enable row level security;
 
 create policy "accounts_select_anon" on public.accounts
+for select to anon using (true);
+
+create policy "categories_select_anon" on public.categories
 for select to anon using (true);
 
 create policy "gold_select_anon" on public.gold

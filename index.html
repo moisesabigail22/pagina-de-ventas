@@ -4558,36 +4558,60 @@
             return;
         }
 
-        try {
-            const [accountsData, goldData, goldCategoriesData, referencesData, gameServersData, settingsRows] = await Promise.all([
-                fetchSupabaseTable('accounts', 'select=*&order=id.asc'),
-                fetchSupabaseTable('gold', 'select=*&order=id.asc'),
-                fetchSupabaseTable('gold_categories', 'select=*&order=id.asc'),
-                fetchSupabaseTable('references', 'select=*&order=id.asc'),
-                fetchSupabaseTable('game_servers', 'select=*&order=id.asc'),
-                fetchSupabaseTable('settings', 'select=key,value')
-            ]);
+        const catalogQueries = [
+            { key: 'accounts', query: 'select=*&order=id.asc' },
+            { key: 'gold', query: 'select=*&order=id.asc' },
+            { key: 'gold_categories', query: 'select=*&order=id.asc' },
+            { key: 'references', query: 'select=*&order=id.asc' },
+            { key: 'game_servers', query: 'select=*&order=id.asc' },
+            { key: 'settings', query: 'select=key,value' },
+            { key: 'categories', query: 'select=*&order=id.asc' }
+        ];
 
-            accounts = Array.isArray(accountsData) ? accountsData : [];
-            gold = Array.isArray(goldData) ? goldData : [];
-            goldCategories = Array.isArray(goldCategoriesData) ? goldCategoriesData : [];
-            references = Array.isArray(referencesData) ? referencesData : [];
-            gameServers = normalizeGameServers(Array.isArray(gameServersData) ? gameServersData : []);
+        const settled = await Promise.allSettled(
+            catalogQueries.map(item => fetchSupabaseTable(item.key, item.query))
+        );
 
-            const settingsFromDb = Array.isArray(settingsRows)
-                ? settingsRows.reduce((acc, row) => {
-                    if (row?.key) acc[row.key] = row.value;
-                    return acc;
-                }, {})
-                : {};
+        const loaded = {};
+        const failedTables = [];
 
-            settings = { ...settings, ...settingsFromDb };
-            categories = Array.from(new Set(accounts.map(account => account.category).filter(Boolean))).sort();
-        } catch (error) {
-            console.error('Error cargando datos desde Supabase:', error);
-            showMessage('Error Supabase: revisa RLS (policies SELECT) y que la key sea publishable.', 'error');
-            return;
+        settled.forEach((result, index) => {
+            const table = catalogQueries[index].key;
+            if (result.status === 'fulfilled') {
+                loaded[table] = result.value;
+            } else {
+                failedTables.push(table);
+                console.error(`[SUPABASE][${table}]`, result.reason);
+            }
+        });
+
+        if (failedTables.length > 0) {
+            const failedLabel = failedTables.join(', ');
+            showMessage(`Error RLS/permiso en: ${failedLabel}`, 'error');
         }
+
+        accounts = Array.isArray(loaded.accounts) ? loaded.accounts : [];
+        gold = Array.isArray(loaded.gold) ? loaded.gold : [];
+        goldCategories = Array.isArray(loaded.gold_categories) ? loaded.gold_categories : [];
+        references = Array.isArray(loaded.references) ? loaded.references : [];
+        gameServers = normalizeGameServers(Array.isArray(loaded.game_servers) ? loaded.game_servers : []);
+
+        const settingsRows = loaded.settings;
+        const settingsFromDb = Array.isArray(settingsRows)
+            ? settingsRows.reduce((acc, row) => {
+                if (row?.key) acc[row.key] = row.value;
+                return acc;
+            }, {})
+            : {};
+
+        settings = { ...settings, ...settingsFromDb };
+
+        const categoriesFromAccounts = Array.from(new Set(accounts.map(account => account.category).filter(Boolean))).sort();
+        const categoriesFromTable = Array.isArray(loaded.categories)
+            ? loaded.categories.map(item => item?.name || item?.category || '').filter(Boolean)
+            : [];
+
+        categories = Array.from(new Set([...categoriesFromAccounts, ...categoriesFromTable])).sort();
 
         sanitizeGoldCategoryImages();
 
@@ -4617,7 +4641,7 @@
 
         // Actualizar enlaces de contacto
         updateContactLinks();
-        showMessage('Catálogo cargado desde Supabase ✅', 'success');
+        showMessage('Catálogo cargado desde Supabase ✅ (si una tabla falla verás su nombre)', 'success');
     }
 
     function updateAverageRating() {
