@@ -3772,6 +3772,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     // ============================================
     // DATOS Y CONFIGURACIÓN
@@ -4110,6 +4111,106 @@
         site: SITE_URL
     };
 
+    // Supabase (modo sin backend)
+    const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('SUPABASE_URL') || '';
+    const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('SUPABASE_ANON_KEY') || '';
+    const SUPABASE_ENABLED = Boolean(window.supabase && SUPABASE_URL && SUPABASE_ANON_KEY);
+    const supabaseClient = SUPABASE_ENABLED ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+    let isSyncingSupabase = false;
+    let syncTimer = null;
+    let skipSupabaseSync = false;
+
+    async function supabaseSelect(table) {
+        if (!SUPABASE_ENABLED) return null;
+        const { data, error } = await supabaseClient.from(table).select('*');
+        if (error) throw error;
+        return data || [];
+    }
+
+    async function loadDataFromSupabase() {
+        if (!SUPABASE_ENABLED) return false;
+        try {
+            const [
+                dbAccounts,
+                dbGold,
+                dbGoldCategories,
+                dbReferences,
+                dbSettings,
+                dbAccountCategories,
+                dbGameServers
+            ] = await Promise.all([
+                supabaseSelect('accounts'),
+                supabaseSelect('gold'),
+                supabaseSelect('gold_categories'),
+                supabaseSelect('references'),
+                supabaseSelect('settings'),
+                supabaseSelect('account_categories'),
+                supabaseSelect('game_servers')
+            ]);
+
+            accounts = Array.isArray(dbAccounts) ? dbAccounts : [];
+            gold = Array.isArray(dbGold) ? dbGold : [];
+            goldCategories = Array.isArray(dbGoldCategories) ? dbGoldCategories : [];
+            references = Array.isArray(dbReferences) ? dbReferences : [];
+            settings = dbSettings && dbSettings[0] ? dbSettings[0] : { ...contactInfo };
+            categories = Array.isArray(dbAccountCategories) ? dbAccountCategories.map(c => c.name).filter(Boolean) : [...defaultCategories];
+            gameServers = normalizeGameServers(Array.isArray(dbGameServers) ? dbGameServers : []);
+
+            return true;
+        } catch (error) {
+            console.warn('Supabase load failed, using localStorage fallback:', error.message || error);
+            return false;
+        }
+    }
+
+    async function replaceTableData(table, rows) {
+        if (!SUPABASE_ENABLED) return;
+        const { error: deleteError } = await supabaseClient.from(table).delete().not('id', 'is', null);
+        if (deleteError && !String(deleteError.message || '').includes('0 rows')) throw deleteError;
+        if (rows.length > 0) {
+            const { error: insertError } = await supabaseClient.from(table).insert(rows);
+            if (insertError) throw insertError;
+        }
+    }
+
+    function queueSupabaseSync() {
+        if (!SUPABASE_ENABLED || skipSupabaseSync) return;
+        clearTimeout(syncTimer);
+        syncTimer = setTimeout(syncDataToSupabase, 700);
+    }
+
+    async function syncDataToSupabase() {
+        if (!SUPABASE_ENABLED || isSyncingSupabase || skipSupabaseSync) return;
+        isSyncingSupabase = true;
+        try {
+            await Promise.all([
+                replaceTableData('accounts', (accounts || []).map(item => ({ ...item, id: String(item.id) }))),
+                replaceTableData('gold', (gold || []).map(item => ({ ...item, id: String(item.id) }))),
+                replaceTableData('gold_categories', (goldCategories || []).map(item => ({ ...item, id: String(item.id) }))),
+                replaceTableData('references', (references || []).map(item => ({ ...item, id: String(item.id) }))),
+                replaceTableData('game_servers', (gameServers || []).map(item => ({ ...item, id: String(item.id) }))),
+                replaceTableData('account_categories', (categories || []).filter(Boolean).map((name, i) => ({ id: `${Date.now()}-${i}-${name}`, name }))),
+                replaceTableData('settings', [{ ...settings, id: String(settings?.id || Date.now()) }])
+            ]);
+        } catch (error) {
+            console.error('Supabase sync error:', error.message || error);
+        } finally {
+            isSyncingSupabase = false;
+        }
+    }
+
+    function installSupabaseSyncHook() {
+        if (!SUPABASE_ENABLED || localStorage.__supabaseSyncHookInstalled) return;
+        const rawSetItem = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = function(key, value) {
+            rawSetItem(key, value);
+            if (String(key).startsWith('epicgoldshop_')) {
+                queueSupabaseSync();
+            }
+        };
+        localStorage.__supabaseSyncHookInstalled = '1';
+    }
+
     // Cargar datos del localStorage
     function normalizeGameServers(servers) {
         if (!Array.isArray(servers)) return [];
@@ -4404,9 +4505,9 @@
     // FUNCIONES DE INICIALIZACIÓN
     // ============================================
 
-    function init() {
+    async function init() {
         // Cargar datos
-        loadData();
+        await loadData();
 
         // Renderizar contenido inicial
         renderAccounts();
@@ -4500,58 +4601,53 @@
         return Array.from(serverMap.values());
     }
 
-    function loadData() {
-        // Cargar datos del localStorage
-        const savedAccounts = localStorage.getItem('epicgoldshop_accounts');
-        const savedGold = localStorage.getItem('epicgoldshop_gold');
-        const savedGoldCategories = localStorage.getItem('epicgoldshop_gold_categories');
-        const savedReferences = localStorage.getItem('epicgoldshop_references');
-        const savedSettings = localStorage.getItem('epicgoldshop_settings');
-        const savedCategories = localStorage.getItem('epicgoldshop_categories');
-        const savedGameServers = localStorage.getItem('epicgoldshop_game_servers');
+    async function loadData() {
+        installSupabaseSyncHook();
 
-        if (savedAccounts) accounts = JSON.parse(savedAccounts);
-        if (savedGold) gold = JSON.parse(savedGold);
-        if (savedGoldCategories) goldCategories = JSON.parse(savedGoldCategories);
-        sanitizeGoldCategoryImages();
-        if (savedReferences) references = JSON.parse(savedReferences);
-        if (savedSettings) settings = JSON.parse(savedSettings);
-        if (savedCategories) categories = JSON.parse(savedCategories);
-        if (savedGameServers) {
-            gameServers = normalizeGameServers(JSON.parse(savedGameServers));
+        const loadedFromSupabase = await loadDataFromSupabase();
+
+        if (!loadedFromSupabase) {
+            const savedAccounts = localStorage.getItem('epicgoldshop_accounts');
+            const savedGold = localStorage.getItem('epicgoldshop_gold');
+            const savedGoldCategories = localStorage.getItem('epicgoldshop_gold_categories');
+            const savedReferences = localStorage.getItem('epicgoldshop_references');
+            const savedSettings = localStorage.getItem('epicgoldshop_settings');
+            const savedCategories = localStorage.getItem('epicgoldshop_categories');
+            const savedGameServers = localStorage.getItem('epicgoldshop_game_servers');
+
+            if (savedAccounts) accounts = JSON.parse(savedAccounts);
+            if (savedGold) gold = JSON.parse(savedGold);
+            if (savedGoldCategories) goldCategories = JSON.parse(savedGoldCategories);
+            if (savedReferences) references = JSON.parse(savedReferences);
+            if (savedSettings) settings = JSON.parse(savedSettings);
+            if (savedCategories) categories = JSON.parse(savedCategories);
+            if (savedGameServers) gameServers = normalizeGameServers(JSON.parse(savedGameServers));
         }
+
+        sanitizeGoldCategoryImages();
 
         if (!Array.isArray(gameServers) || gameServers.length === 0) {
             gameServers = buildGameServersFromData();
         }
 
-        // Mantener las categorías generales separadas de juegos de Oro
-        // (si una categoría coincide con un juego de oro y no la usa ninguna cuenta, se limpia)
         const accountCategoriesInUse = new Set(accounts.map(account => account.category).filter(Boolean));
         const goldCategoryGames = new Set(getGoldCategoryGames());
-        categories = Array.from(new Set(categories.filter(Boolean))).filter(category => {
+        categories = Array.from(new Set((categories || []).filter(Boolean))).filter(category => {
             if (accountCategoriesInUse.has(category)) return true;
             return !goldCategoryGames.has(category);
         }).sort();
 
-        // Asegurar que los enlaces estén actualizados
-        if (!settings.discord || settings.discord !== DISCORD_LINK) {
-            settings.discord = DISCORD_LINK;
-        }
-        if (!settings.tiktok || settings.tiktok !== TIKTOK_LINK) {
-            settings.tiktok = TIKTOK_LINK;
-        }
-        if (!settings.site || settings.site !== SITE_URL) {
-            settings.site = SITE_URL;
-        }
+        if (!settings.discord || settings.discord !== DISCORD_LINK) settings.discord = DISCORD_LINK;
+        if (!settings.tiktok || settings.tiktok !== TIKTOK_LINK) settings.tiktok = TIKTOK_LINK;
+        if (!settings.site || settings.site !== SITE_URL) settings.site = SITE_URL;
 
-        // Guardar configuración actualizada
+        skipSupabaseSync = true;
         localStorage.setItem('epicgoldshop_settings', JSON.stringify(settings));
         localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
         localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
         localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+        skipSupabaseSync = false;
 
-        // Actualizar enlaces de contacto
         updateContactLinks();
     }
 
@@ -7273,9 +7369,9 @@
         history.scrollRestoration = 'manual';
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         window.scrollTo(0, 0);
-        init();
+        await init();
     });
 
     window.addEventListener('beforeunload', function() {

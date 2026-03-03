@@ -1,23 +1,37 @@
-# Supabase SIN backend (solo tu página)
+# Supabase SIN backend (guardado real desde tu página)
 
-Perfecto: lo dejamos **sin backend**.
+Perfecto: sin backend, pero **sí guardando en Supabase** desde el admin de la web.
 
-## Qué significa “sin backend”
-- Tu web se conecta directo a Supabase con:
-  - `SUPABASE_URL`
-  - `SUPABASE_ANON_KEY`
-- **No necesitas** API propia ni servidor adicional.
+## 1) Ejecuta el SQL una vez
+En Supabase > SQL Editor:
+- pega y ejecuta `supabase/setup.sql`
 
-## Lo que ya te deja `supabase/setup.sql`
-1. Base creada (accounts, gold, settings, references, etc.).
-2. Lectura pública para que cualquier visitante vea paquetes y datos.
-3. `admin_users` protegida (no visible para público).
+## 2) Configura tu frontend (importante)
+En `index.html`, antes del script principal, define:
 
-## Paso 1: ejecutar SQL
-En Supabase > SQL Editor ejecuta completo:
-- `supabase/setup.sql`
+```html
+<script>
+  window.SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+  window.SUPABASE_ANON_KEY = 'TU_ANON_KEY';
+</script>
+```
 
-## Paso 2: validar que quedó bien
+> Con eso la página se conecta directo a Supabase (sin backend).
+
+## 3) Qué ya hace esta versión
+- Lee datos desde Supabase al cargar la web.
+- Si editas desde admin, se sincroniza a Supabase.
+- Si Supabase falla, usa fallback local para no romper la página.
+
+## 4) Prueba rápida (la que te interesa)
+1. Abre admin y agrega/edita 1 paquete de oro o cuenta.
+2. Espera 1-2 segundos.
+3. Abre la web en incógnito/u otro dispositivo.
+4. Si ves el cambio, quedó guardando global para todos.
+
+## 5) Verificación directa en Supabase
+Ejecuta:
+
 ```sql
 select count(*) as cuentas from public.accounts;
 select count(*) as paquetes_oro from public.gold;
@@ -25,19 +39,8 @@ select count(*) as referencias from public.references;
 select * from public.settings limit 1;
 ```
 
-## Paso 3: variables en Vercel (solo frontend)
-Si no vas a usar backend, solo necesitas en frontend:
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
+Si suben/actualizan después de editar en admin, ya está funcionando bien.
 
-> `SUPABASE_SERVICE_ROLE_KEY` NO se usa en frontend.
-
-## Importante para que no quede “pelada”
-Ahora mismo tu `index.html` usa `localStorage` como fuente principal.
-Para que se vea global para todos, hay que cambiar la carga de datos a Supabase.
-
-## Modo sin backend recomendado
-- Lectura global: desde Supabase (público).
-- Cambios de datos: por Table Editor de Supabase o luego con login real (Supabase Auth) para admin.
-
-Así evitas montar backend y sigues teniendo datos globales para toda la web.
+## Nota de seguridad
+Esta configuración permite escritura con `anon` para usar admin sin backend.
+Más adelante, cuando quieras endurecer seguridad, migramos a auth real (sin perder datos).
