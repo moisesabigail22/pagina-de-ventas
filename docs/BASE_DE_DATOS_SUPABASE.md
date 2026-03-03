@@ -1,16 +1,23 @@
-# Instrucciones Supabase (desde cero, simple)
+# Supabase SIN backend (solo tu página)
 
-Esto te deja una base central para tu página de venta de oro, para que cualquier persona que entre vea los mismos datos.
+Perfecto: lo dejamos **sin backend**.
 
-## 1) Crear y ejecutar la base
-1. Crea proyecto en Supabase.
-2. Ve a **SQL Editor**.
-3. Copia y ejecuta completo:
-   - `supabase/setup.sql`
+## Qué significa “sin backend”
+- Tu web se conecta directo a Supabase con:
+  - `SUPABASE_URL`
+  - `SUPABASE_ANON_KEY`
+- **No necesitas** API propia ni servidor adicional.
 
-## 2) Verificar que quedó bien
-Ejecuta estas queries en SQL Editor:
+## Lo que ya te deja `supabase/setup.sql`
+1. Base creada (accounts, gold, settings, references, etc.).
+2. Lectura pública para que cualquier visitante vea paquetes y datos.
+3. `admin_users` protegida (no visible para público).
 
+## Paso 1: ejecutar SQL
+En Supabase > SQL Editor ejecuta completo:
+- `supabase/setup.sql`
+
+## Paso 2: validar que quedó bien
 ```sql
 select count(*) as cuentas from public.accounts;
 select count(*) as paquetes_oro from public.gold;
@@ -18,23 +25,19 @@ select count(*) as referencias from public.references;
 select * from public.settings limit 1;
 ```
 
-Si todo responde, la base está lista.
-
-## 3) Variables en Vercel
-En tu proyecto agrega:
+## Paso 3: variables en Vercel (solo frontend)
+Si no vas a usar backend, solo necesitas en frontend:
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (solo backend)
-- `ADMIN_JWT_SECRET`
 
-> Nunca expongas `SUPABASE_SERVICE_ROLE_KEY` en frontend.
+> `SUPABASE_SERVICE_ROLE_KEY` NO se usa en frontend.
 
-## 4) Prueba global (lo importante)
-1. Agrega o edita un paquete de oro/cuenta desde tu admin.
-2. Abre tu web en otro navegador/dispositivo en modo incógnito.
-3. Todos deben ver el mismo dato actualizado.
+## Importante para que no quede “pelada”
+Ahora mismo tu `index.html` usa `localStorage` como fuente principal.
+Para que se vea global para todos, hay que cambiar la carga de datos a Supabase.
 
-Si esto se cumple, ya está centralizado para todo el mundo.
+## Modo sin backend recomendado
+- Lectura global: desde Supabase (público).
+- Cambios de datos: por Table Editor de Supabase o luego con login real (Supabase Auth) para admin.
 
-## 5) Nota técnica
-Tu `index.html` actual guarda en `localStorage`. Para que Supabase sea la fuente real global, el siguiente paso es conectar lectura/escritura a Supabase (por API o directamente con cliente anon para lectura).
+Así evitas montar backend y sigues teniendo datos globales para toda la web.
