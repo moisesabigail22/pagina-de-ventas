@@ -3961,15 +3961,51 @@
 
     // Datos de ejemplo - Oro
     const sampleGold = [
-        { id: 1, game: 'WoW Turtle', server: 'Ambershire', amount: '100g', price: '$3.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 2, game: 'WoW Turtle', server: 'Nordanaar', amount: '100g', price: '$2.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 3, game: 'WoW Turtle', server: 'Telabim', amount: '100g', price: '$4.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 4, game: 'WoW Turtle', server: 'South Sea', amount: '100g', price: '$3', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 5, game: 'WoW Privado', server: 'Bronzebeard', amount: '100g', price: '$3', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 6, game: 'WoW Privado', server: 'Warmane', amount: '1k', price: '$2.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 7, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '100g', price: '$4', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 8, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '100g', price: '$3', delivery: '5-20 minutos', stock: 20, status: 'available' },
-        { id: 9, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '100g', price: '$58', delivery: '15-40 minutos', stock: 10, status: 'limited' }
+        { id: 1, game: 'WoW Turtle', server: 'Ambershire', amount: '100g', price: '$3', status: 'available' },
+        { id: 2, game: 'WoW Turtle', server: 'Ambershire', amount: '200g', price: '$6', status: 'available' },
+        { id: 3, game: 'WoW Turtle', server: 'Ambershire', amount: '300g', price: '$9', status: 'available' },
+        { id: 4, game: 'WoW Turtle', server: 'Ambershire', amount: '500g', price: '$15', status: 'available' },
+        { id: 5, game: 'WoW Turtle', server: 'Ambershire', amount: '1000g', price: '$30', status: 'available' },
+        { id: 6, game: 'WoW Turtle', server: 'Nordanaar', amount: '100g', price: '$2.5', status: 'available' },
+        { id: 7, game: 'WoW Turtle', server: 'Nordanaar', amount: '200g', price: '$5', status: 'available' },
+        { id: 8, game: 'WoW Turtle', server: 'Nordanaar', amount: '300g', price: '$7.5', status: 'available' },
+        { id: 9, game: 'WoW Turtle', server: 'Nordanaar', amount: '500g', price: '$12.5', status: 'available' },
+        { id: 10, game: 'WoW Turtle', server: 'Nordanaar', amount: '1000g', price: '$25', status: 'available' },
+        { id: 11, game: 'WoW Turtle', server: 'Telabim', amount: '100g', price: '$4.5', status: 'available' },
+        { id: 12, game: 'WoW Turtle', server: 'Telabim', amount: '200g', price: '$9', status: 'available' },
+        { id: 13, game: 'WoW Turtle', server: 'Telabim', amount: '300g', price: '$13.5', status: 'available' },
+        { id: 14, game: 'WoW Turtle', server: 'Telabim', amount: '500g', price: '$22.5', status: 'available' },
+        { id: 15, game: 'WoW Turtle', server: 'Telabim', amount: '1000g', price: '$45', status: 'available' },
+        { id: 16, game: 'WoW Turtle', server: 'South Sea', amount: '100g', price: '$3', status: 'available' },
+        { id: 17, game: 'WoW Turtle', server: 'South Sea', amount: '200g', price: '$6', status: 'available' },
+        { id: 18, game: 'WoW Turtle', server: 'South Sea', amount: '300g', price: '$9', status: 'available' },
+        { id: 19, game: 'WoW Turtle', server: 'South Sea', amount: '500g', price: '$15', status: 'available' },
+        { id: 20, game: 'WoW Turtle', server: 'South Sea', amount: '1000g', price: '$30', status: 'available' },
+        { id: 21, game: 'WoW Privado', server: 'Bronzebeard', amount: '100g', price: '$3', status: 'available' },
+        { id: 22, game: 'WoW Privado', server: 'Bronzebeard', amount: '200g', price: '$6', status: 'available' },
+        { id: 23, game: 'WoW Privado', server: 'Bronzebeard', amount: '300g', price: '$9', status: 'available' },
+        { id: 24, game: 'WoW Privado', server: 'Bronzebeard', amount: '500g', price: '$15', status: 'available' },
+        { id: 25, game: 'WoW Privado', server: 'Bronzebeard', amount: '1000g', price: '$30', status: 'available' },
+        { id: 26, game: 'WoW Privado', server: 'Warmane', amount: '100g', price: '$0.25', status: 'available' },
+        { id: 27, game: 'WoW Privado', server: 'Warmane', amount: '200g', price: '$0.5', status: 'available' },
+        { id: 28, game: 'WoW Privado', server: 'Warmane', amount: '300g', price: '$0.75', status: 'available' },
+        { id: 29, game: 'WoW Privado', server: 'Warmane', amount: '500g', price: '$1.25', status: 'available' },
+        { id: 30, game: 'WoW Privado', server: 'Warmane', amount: '1000g', price: '$2.5', status: 'available' },
+        { id: 31, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '100g', price: '$4', status: 'available' },
+        { id: 32, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '200g', price: '$8', status: 'available' },
+        { id: 33, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '300g', price: '$12', status: 'available' },
+        { id: 34, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '500g', price: '$20', status: 'available' },
+        { id: 35, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '1000g', price: '$40', status: 'available' },
+        { id: 36, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '100g', price: '$3', status: 'available' },
+        { id: 37, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '200g', price: '$6', status: 'available' },
+        { id: 38, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '300g', price: '$9', status: 'available' },
+        { id: 39, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '500g', price: '$15', status: 'available' },
+        { id: 40, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '1000g', price: '$30', status: 'available' },
+        { id: 41, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '100g', price: '$5.8', status: 'available' },
+        { id: 42, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '200g', price: '$11.6', status: 'available' },
+        { id: 43, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '300g', price: '$17.4', status: 'available' },
+        { id: 44, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '500g', price: '$29', status: 'available' },
+        { id: 45, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '1000g', price: '$58', status: 'available' }
     ];
 
     const sampleServices = [
@@ -5582,7 +5618,7 @@
                         <i class="fas fa-coins"></i> ${item.game || 'Juego'} ${item.server ? '• ' + item.server : ''}
                     </div>
                     <h3 class="product-name">${item.amount || 'Paquete de oro'}</h3>
-                    <p class="product-description">Entrega: ${item.delivery || 'Coordinar por Discord'} · Stock: ${item.stock || 'Disponible'}</p>
+                    <p class="product-description">Paquete disponible para compra inmediata por Discord.</p>
                     <div class="product-details">
                         <div class="product-price">${String(item.price || '$0').startsWith('$') ? item.price : '$' + item.price}</div>
                         <a href="${DISCORD_LINK}" target="_blank" class="btn-buy">
