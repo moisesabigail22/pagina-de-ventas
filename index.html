@@ -3089,6 +3089,10 @@
             </button>
         </div>
 
+        <div class="products-grid" id="gold-prices-grid" style="margin-top: 28px;">
+            <!-- Los precios de oro se cargan aquí dinámicamente -->
+        </div>
+
         <div style="margin-top: 50px; padding: 35px; background: var(--panel); border-radius: 15px; border: 2px solid var(--wow-gold); position: relative; overflow: hidden;">
             <div class="feature-highlight">
                 <h3 style="color: var(--wow-gold); margin-bottom: 15px; font-size: 1.5rem;">
@@ -4404,6 +4408,9 @@
             }
         });
 
+        // Sincronizar con backend si /api/catalog está disponible
+        syncCatalogFromApi();
+
         // Mostrar mensaje de bienvenida
         setTimeout(() => {
             showMessage('¡Bienvenido a EPIC GOLD SHOP! 🎮✨', 'info');
@@ -4509,6 +4516,50 @@
 
         // Actualizar enlaces de contacto
         updateContactLinks();
+    }
+
+    async function syncCatalogFromApi() {
+        try {
+            const response = await fetch('/api/catalog', { cache: 'no-store' });
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            if (Array.isArray(data.accounts)) accounts = data.accounts;
+            if (Array.isArray(data.gold)) gold = data.gold;
+            if (Array.isArray(data.gold_categories)) goldCategories = data.gold_categories;
+            if (Array.isArray(data.customer_references)) references = data.customer_references.map(ref => ({
+                id: ref.id || Date.now() + Math.random(),
+                userName: ref.name || 'Cliente',
+                userInitial: (ref.name || 'C').charAt(0).toUpperCase(),
+                rating: Number(ref.rating || 5),
+                text: ref.comment || '',
+                date: new Date(ref.created_at || Date.now()).toLocaleDateString('es-ES')
+            }));
+            if (Array.isArray(data.game_servers)) gameServers = normalizeGameServers(data.game_servers);
+            if (Array.isArray(data.services)) services = data.services;
+            if (data.settings && typeof data.settings === 'object') {
+                settings = { ...settings, ...data.settings };
+            }
+
+            localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+            localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+            localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
+            localStorage.setItem('epicgoldshop_references', JSON.stringify(references));
+            localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+            localStorage.setItem('epicgoldshop_services', JSON.stringify(services));
+
+            renderAccounts(currentFilter || 'all');
+            renderGold();
+            renderServices();
+            renderReferences();
+            updateGoldOrderForm();
+            updateAverageRating();
+            updateCategorySelects();
+            updateContactLinks();
+        } catch (error) {
+            console.warn('No se pudo sincronizar el catálogo desde API:', error.message);
+        }
     }
 
     function updateAverageRating() {
@@ -5481,7 +5532,35 @@
     }
 
     function renderGold() {
-        // Esta función ahora solo se usa para el panel de administración
+        const container = document.getElementById('gold-prices-grid');
+        if (!container) return;
+
+        if (!Array.isArray(gold) || gold.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:40px; color: var(--text-gray);">
+                    No hay precios de oro cargados todavía.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = gold.map(item => `
+            <div class="product-card">
+                <div class="product-content">
+                    <div class="product-category">
+                        <i class="fas fa-coins"></i> ${item.game || 'Juego'} ${item.server ? '• ' + item.server : ''}
+                    </div>
+                    <h3 class="product-name">${item.amount || 'Paquete de oro'}</h3>
+                    <p class="product-description">Entrega: ${item.delivery || 'Coordinar por Discord'} · Stock: ${item.stock || 'Disponible'}</p>
+                    <div class="product-details">
+                        <div class="product-price">${String(item.price || '$0').startsWith('$') ? item.price : '$' + item.price}</div>
+                        <a href="${DISCORD_LINK}" target="_blank" class="btn-buy">
+                            <i class="fas fa-shopping-cart"></i> COMPRAR
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
     function renderServices() {
