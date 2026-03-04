@@ -27,15 +27,42 @@
     }
   ],
   "game_servers": [
-    { "game": "WoW Turtle", "name": "Ambershire" },
-    { "game": "WoW Turtle", "name": "Nordanaar" },
-    { "game": "WoW Turtle", "name": "Telabim" },
-    { "game": "WoW Turtle", "name": "South Sea" },
-    { "game": "WoW Privado", "name": "Bronzebeard" },
-    { "game": "WoW Privado", "name": "Warmane" },
-    { "game": "WoW Privado", "name": "Project Epoch - Kezan" },
-    { "game": "WoW Privado", "name": "Project Epoch - Gurubashi" },
-    { "game": "WoW Oficial", "name": "Nightslayer A/H" }
+    {
+      "game": "WoW Turtle",
+      "name": "Ambershire"
+    },
+    {
+      "game": "WoW Turtle",
+      "name": "Nordanaar"
+    },
+    {
+      "game": "WoW Turtle",
+      "name": "Telabim"
+    },
+    {
+      "game": "WoW Turtle",
+      "name": "South Sea"
+    },
+    {
+      "game": "WoW Privado",
+      "name": "Bronzebeard"
+    },
+    {
+      "game": "WoW Privado",
+      "name": "Warmane"
+    },
+    {
+      "game": "WoW Privado",
+      "name": "Project Epoch - Kezan"
+    },
+    {
+      "game": "WoW Privado",
+      "name": "Project Epoch - Gurubashi"
+    },
+    {
+      "game": "WoW Oficial",
+      "name": "Nightslayer A/H"
+    }
   ],
   "gold": [
     {
@@ -106,7 +133,39 @@
       "game": "WoW Oficial",
       "server": "Nightslayer A/H",
       "amount": 100,
-      "price": 58,
+      "price": 5.8,
+      "delivery": "15-40 minutos",
+      "stock": "Disponible"
+    },
+    {
+      "game": "WoW Oficial",
+      "server": "Nightslayer A/H",
+      "amount": 200,
+      "price": 11.6,
+      "delivery": "15-40 minutos",
+      "stock": "Disponible"
+    },
+    {
+      "game": "WoW Oficial",
+      "server": "Nightslayer A/H",
+      "amount": 300,
+      "price": 17.4,
+      "delivery": "15-40 minutos",
+      "stock": "Disponible"
+    },
+    {
+      "game": "WoW Oficial",
+      "server": "Nightslayer A/H",
+      "amount": 500,
+      "price": 29.0,
+      "delivery": "15-40 minutos",
+      "stock": "Disponible"
+    },
+    {
+      "game": "WoW Oficial",
+      "server": "Nightslayer A/H",
+      "amount": 1000,
+      "price": 58.0,
       "delivery": "15-40 minutos",
       "stock": "Disponible"
     }
