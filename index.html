@@ -3089,9 +3089,6 @@
             </button>
         </div>
 
-        <div class="products-grid" id="gold-prices-grid" style="margin-top: 28px;">
-            <!-- Los precios de oro se cargan aquí dinámicamente -->
-        </div>
 
         <div style="margin-top: 50px; padding: 35px; background: var(--panel); border-radius: 15px; border: 2px solid var(--wow-gold); position: relative; overflow: hidden;">
             <div class="feature-highlight">
@@ -5561,37 +5558,8 @@
             }
         });
     }
-
     function renderGold() {
-        const container = document.getElementById('gold-prices-grid');
-        if (!container) return;
-
-        if (!Array.isArray(gold) || gold.length === 0) {
-            container.innerHTML = `
-                <div style="text-align:center; padding:40px; color: var(--text-gray);">
-                    No hay precios de oro cargados todavía.
-                </div>
-            `;
-            return;
-        }
-
-        container.innerHTML = gold.map(item => `
-            <div class="product-card">
-                <div class="product-content">
-                    <div class="product-category">
-                        <i class="fas fa-coins"></i> ${item.game || 'Juego'} ${item.server ? '• ' + item.server : ''}
-                    </div>
-                    <h3 class="product-name">${item.amount || 'Paquete de oro'}</h3>
-                    <p class="product-description">Entrega: ${item.delivery || 'Coordinar por Discord'} · Stock: ${item.stock || 'Disponible'}</p>
-                    <div class="product-details">
-                        <div class="product-price">${String(item.price || '$0').startsWith('$') ? item.price : '$' + item.price}</div>
-                        <a href="${DISCORD_LINK}" target="_blank" class="btn-buy">
-                            <i class="fas fa-shopping-cart"></i> COMPRAR
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+        // La sección pública de Oro usa la compra rápida del modal (INICIAR COMPRA).
     }
 
     function renderServices() {
