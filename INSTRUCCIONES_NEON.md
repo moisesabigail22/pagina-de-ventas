@@ -262,3 +262,45 @@ Sin esos archivos en GitHub, siempre verás 404 en `/api/*`.
 
 ## Deploy nuevo guiado
 Si en GitHub no aparecen los archivos API, sigue `DEPLOY_NUEVO_GITHUB.md` paso a paso.
+
+---
+
+## Importar TODO desde tu archivo de precios (rápido)
+
+Si ya tienes un archivo con precios/productos, no tienes que cargar fila por fila.
+
+1. Crea `data/catalog.json` (puedes copiar `data/catalog.template.json` y reemplazar con tus datos).
+2. En tu terminal, ejecuta:
+
+```bash
+DATABASE_URL='postgresql://...'
+npm run import:catalog
+```
+
+> Si ya tienes `DATABASE_URL` exportada en el entorno, solo corre `npm run import:catalog`.
+
+### Formato soportado del JSON
+
+- `settings` (objeto)
+- `gold_categories` (array)
+- `game_servers` (array)
+- `gold` (array)
+- `accounts` (array)
+- `customer_references` (array)
+
+También acepta alias:
+- `goldCategories` en vez de `gold_categories`
+- `gameServers` en vez de `game_servers`
+- `references` en vez de `customer_references`
+
+### Resultado
+
+Al terminar, podrás verificar en:
+
+- `GET /api/catalog`
+
+Si quieres no borrar datos previos, puedes ejecutar el importador con:
+
+```bash
+node scripts/import_catalog_to_neon.js data/catalog.json --no-reset
+```
