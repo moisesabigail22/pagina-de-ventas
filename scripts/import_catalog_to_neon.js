@@ -45,6 +45,7 @@ async function main() {
   const gold = ensureArray(payload.gold);
   const accounts = ensureArray(payload.accounts);
   const customerReferences = ensureArray(pickReferences(payload));
+  const services = ensureArray(payload.services);
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
   const client = await pool.connect();
@@ -53,6 +54,7 @@ async function main() {
     await client.query('begin');
 
     if (resetArg) {
+      await client.query('delete from services');
       await client.query('delete from customer_references');
       await client.query('delete from accounts');
       await client.query('delete from gold');
@@ -136,6 +138,21 @@ async function main() {
       );
     }
 
+    for (const row of services) {
+      await client.query(
+        `insert into services (category, game, server, name, description, price, created_at, updated_at)
+         values ($1, $2, $3, $4, $5, $6, now(), now())`,
+        [
+          row.category || 'General',
+          row.game || null,
+          row.server || null,
+          row.name || 'Servicio',
+          row.description || null,
+          row.price !== undefined && row.price !== null ? String(row.price) : null
+        ]
+      );
+    }
+
     await client.query('commit');
 
     console.log('Importación completada ✅');
@@ -147,7 +164,8 @@ async function main() {
           game_servers: gameServers.length,
           gold: gold.length,
           accounts: accounts.length,
-          customer_references: customerReferences.length
+          customer_references: customerReferences.length,
+          services: services.length
         },
         null,
         2

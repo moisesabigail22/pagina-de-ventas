@@ -130,6 +130,18 @@ create table if not exists customer_references (
   image text,
   created_at timestamptz not null default now()
 );
+
+create table if not exists services (
+  id uuid primary key default gen_random_uuid(),
+  category text not null,
+  game text,
+  server text,
+  name text not null,
+  description text,
+  price text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 ```
 
 ---
@@ -287,6 +299,7 @@ npm run import:catalog
 - `gold` (array)
 - `accounts` (array)
 - `customer_references` (array)
+- `services` (array)
 
 También acepta alias:
 - `goldCategories` en vez de `gold_categories`

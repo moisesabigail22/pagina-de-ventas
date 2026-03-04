@@ -39,7 +39,10 @@
       "description": "Cuenta con equipo",
       "price": "$120",
       "image": "https://...",
-      "tags": ["80", "PvP"]
+      "tags": [
+        "80",
+        "PvP"
+      ]
     }
   ],
   "customer_references": [
@@ -48,6 +51,15 @@
       "comment": "Excelente servicio",
       "rating": 5,
       "image": "https://..."
+    }
+  ],
+  "services": [
+    {
+      "category": "Boosteo",
+      "game": "WoW Privado",
+      "name": "Boosteo cualquier clase",
+      "description": "Subida de personaje",
+      "price": 140
     }
   ]
 }
