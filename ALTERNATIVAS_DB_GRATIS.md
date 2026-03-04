@@ -12,21 +12,31 @@ Si quieres que **yo te implemente todo** (base de datos + estructura + pasos de 
 
 ---
 
-## Qué te puedo hacer yo usando Neon
+## ¿Y a largo plazo?
 
-1. Diseñar el esquema inicial (tablas principales).
-2. Crear el SQL de creación (`schema.sql`) listo para pegar/ejecutar.
-3. Preparar una API mínima para leer/escribir catálogo.
-4. Dejar variables de entorno y guía de deploy en Vercel.
-5. Dejar todo listo para que luego puedas crecer sin rehacer la base.
+También te conviene **Neon/PostgreSQL** por estas razones:
+- **Escalabilidad**: cuando crezca tráfico o datos, no tienes que rehacer el modelo.
+- **Mantenibilidad**: SQL facilita auditoría, reportes y consultas complejas.
+- **Portabilidad**: PostgreSQL es estándar; migrar de proveedor es mucho más fácil.
+- **Ecosistema**: funciona bien con ORMs y herramientas populares (Prisma, Drizzle, etc.).
+
+### Cuándo sí elegir Firebase a largo plazo
+- Si casi todo será frontend y necesitas tiempo real muy rápido.
+- Si tu equipo ya domina Firestore.
+
+Si no tienes una razón fuerte para Firestore, **PostgreSQL (Neon) suele ser mejor decisión de largo plazo**.
 
 ---
 
-## Alternativa ultra simple (si no quieres backend casi nada)
-- **Firebase/Firestore**.
-- Es más rápido de arrancar en frontend, pero para catálogos con relaciones y reportes normalmente SQL (Neon) queda mejor a mediano plazo.
+## Qué te puedo hacer yo usando Neon
+
+1. Diseñar el esquema inicial (tablas principales).
+2. Crear el SQL de creación (`schema.sql`) listo para ejecutar.
+3. Preparar una API mínima para leer/escribir catálogo.
+4. Dejar variables de entorno y guía de deploy en Vercel.
+5. Dejar base preparada para crecer sin rehacer todo.
 
 ---
 
 ## Decisión final recomendada
-Para que yo te lo construya completo y bien desde el inicio: **Neon**.
+Para que yo te lo construya completo, rápido y pensando en crecimiento: **Neon (PostgreSQL)**.
