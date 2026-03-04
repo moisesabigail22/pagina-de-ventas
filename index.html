@@ -4547,19 +4547,28 @@
 
             const data = await response.json();
 
-            if (Array.isArray(data.accounts)) accounts = data.accounts;
-            if (Array.isArray(data.gold)) gold = data.gold;
-            if (Array.isArray(data.gold_categories)) goldCategories = data.gold_categories;
-            if (Array.isArray(data.customer_references)) references = data.customer_references.map(ref => ({
-                id: ref.id || Date.now() + Math.random(),
-                userName: ref.name || 'Cliente',
-                userInitial: (ref.name || 'C').charAt(0).toUpperCase(),
-                rating: Number(ref.rating || 5),
-                text: ref.comment || '',
-                date: new Date(ref.created_at || Date.now()).toLocaleDateString('es-ES')
-            }));
-            if (Array.isArray(data.game_servers)) gameServers = normalizeGameServers(data.game_servers);
-            if (Array.isArray(data.services)) services = data.services;
+            // Solo pisar datos locales si la API trae contenido real
+            if (Array.isArray(data.accounts) && data.accounts.length > 0) accounts = data.accounts;
+            if (Array.isArray(data.gold) && data.gold.length > 0) gold = data.gold;
+            if (Array.isArray(data.gold_categories) && data.gold_categories.length > 0) {
+                goldCategories = data.gold_categories;
+            }
+            if (Array.isArray(data.customer_references) && data.customer_references.length > 0) {
+                references = data.customer_references.map(ref => ({
+                    id: ref.id || Date.now() + Math.random(),
+                    userName: ref.name || 'Cliente',
+                    userInitial: (ref.name || 'C').charAt(0).toUpperCase(),
+                    rating: Number(ref.rating || 5),
+                    text: ref.comment || '',
+                    date: new Date(ref.created_at || Date.now()).toLocaleDateString('es-ES')
+                }));
+            }
+            if (Array.isArray(data.game_servers) && data.game_servers.length > 0) {
+                gameServers = normalizeGameServers(data.game_servers);
+            }
+            if (Array.isArray(data.services) && data.services.length > 0) {
+                services = data.services;
+            }
             if (data.settings && typeof data.settings === 'object') {
                 settings = { ...settings, ...data.settings };
             }
