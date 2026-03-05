@@ -2950,6 +2950,9 @@
         <a href="#gold" class="nav-btn">
             <i class="fas fa-coins"></i> ORO
         </a>
+        <a href="#services" class="nav-btn">
+            <i class="fas fa-briefcase"></i> SERVICIOS
+        </a>
         <a href="#sell" class="nav-btn">
             <i class="fas fa-dollar-sign"></i> VENDER
         </a>
@@ -3015,6 +3018,10 @@
             <a href="#gold" class="quick-action-btn">
                 <i class="fas fa-coins" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
                 <span>Comprar Oro</span>
+            </a>
+            <a href="#services" class="quick-action-btn">
+                <i class="fas fa-briefcase" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
+                <span>Ver Servicios</span>
             </a>
             <a href="#sell" class="quick-action-btn">
                 <i class="fas fa-dollar-sign" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
@@ -3082,6 +3089,7 @@
             </button>
         </div>
 
+
         <div style="margin-top: 50px; padding: 35px; background: var(--panel); border-radius: 15px; border: 2px solid var(--wow-gold); position: relative; overflow: hidden;">
             <div class="feature-highlight">
                 <h3 style="color: var(--wow-gold); margin-bottom: 15px; font-size: 1.5rem;">
@@ -3099,6 +3107,18 @@
                     <span class="tag">Comunidad Activa</span>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Section -->
+<div class="container" id="services">
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Servicios MMORPG</h2>
+        </div>
+        <div class="products-grid" id="services-grid">
+            <!-- Los servicios se cargan aquí dinámicamente -->
         </div>
     </div>
 </div>
@@ -3779,6 +3799,7 @@
 
     // Estado de administrador
     let isAdmin = false;
+    let adminToken = '';
     let currentRating = 0;
     let editingAccountId = null;
     let editingGoldId = null;
@@ -3798,6 +3819,7 @@
     const TIKTOK_LINK = "https://www.tiktok.com/@farmers.de.mmorpg?_r=1&_t=ZS-93X7c7XttZv";
     const LOGO_URL = "https://i.imgur.com/ynvAS9B.png";
     const SITE_URL = `${window.location.origin}/`;
+    const CATALOG_SCHEMA_VERSION = 'catalog_v2_mmorpg_2026_04';
 
     // URLs de Imgur reales para ejemplos
     const IMGUR_IMAGE_URLS = {
@@ -3907,134 +3929,65 @@
         }
     ];
 
-    // Datos de ejemplo - Categorías de Oro MODIFICADAS
+    // Datos de ejemplo - Categorías de Oro
     const sampleGoldCategories = [
         {
             id: 1,
-            name: "Turtle WoW Gold",
-            game: "Turtle WoW",
-            server: "Nordanaar",
-            description: "Compra oro para Turtle WoW con entrega segura y rápida.",
+            name: 'WoW Turtle Gold',
+            game: 'WoW Turtle',
+            server: 'Nordanaar',
+            description: 'Gold para WoW Turtle (Ambershire, Nordanaar, Telabim y South Sea).',
             image: IMGUR_IMAGE_URLS.turtleWow2
         },
         {
             id: 2,
-            name: "Albion Online Silver",
-            game: "Albion Online",
-            server: "Americas",
-            description: "Silver de Albion Online con stock actualizado diariamente.",
-            image: IMGUR_IMAGE_URLS.albionOnline
-        },
-        {
-            id: 3,
-            name: "World of Warcraft Gold",
-            game: "World of Warcraft",
-            server: "Retail",
-            description: "Oro para WoW Retail y Classic con soporte 24/7.",
+            name: 'WoW Privado Gold',
+            game: 'WoW Privado',
+            server: 'Warmane',
+            description: 'Gold para servidores privados: Bronzebeard, Warmane y Project Epoch.',
             image: IMGUR_IMAGE_URLS.wowClassic
         },
         {
-            id: 4,
-            name: "Runescape Gold",
-            game: "Runescape",
-            server: "OSRS",
-            description: "Oro para Old School RuneScape y cuentas verificadas.",
-            image: IMGUR_IMAGE_URLS.goldCoins
+            id: 3,
+            name: 'WoW Oficial Gold',
+            game: 'WoW Oficial',
+            server: 'Nightslayer A/H',
+            description: 'Gold para WoW oficial en Nightslayer A/H.',
+            image: IMGUR_IMAGE_URLS.wowRetail
         }
     ];
 
     // Datos de ejemplo - Oro
     const sampleGold = [
-        {
-            id: 1,
-            game: 'Turtle WoW',
-            server: 'Nordanaar',
-            amount: '1,000',
-            price: '$24.99',
-            delivery: '5-15 minutos',
-            stock: 50,
-            status: 'available'
-        },
-        {
-            id: 2,
-            game: 'Turtle WoW',
-            server: 'Nordanaar',
-            amount: '5,000',
-            price: '$119.99',
-            delivery: '10-30 minutos',
-            stock: 25,
-            status: 'available'
-        },
-        {
-            id: 3,
-            game: 'Turtle WoW',
-            server: 'Tel\'Abim',
-            amount: '1,000',
-            price: '$27.99',
-            delivery: '5-15 minutos',
-            stock: 40,
-            status: 'available'
-        },
-        {
-            id: 4,
-            game: 'Albion Online',
-            server: 'Americas',
-            amount: '10M',
-            price: '$8.99',
-            delivery: 'Inmediato',
-            stock: 100,
-            status: 'available'
-        },
-        {
-            id: 5,
-            game: 'Albion Online',
-            server: 'Americas',
-            amount: '50M',
-            price: '$39.99',
-            delivery: 'Inmediato',
-            stock: 25,
-            status: 'limited'
-        },
-        {
-            id: 6,
-            game: 'World of Warcraft',
-            server: 'Retail',
-            amount: '100K',
-            price: '$29.99',
-            delivery: '15-30 minutos',
-            stock: 30,
-            status: 'available'
-        },
-        {
-            id: 7,
-            game: 'World of Warcraft',
-            server: 'Retail',
-            amount: '500K',
-            price: '$129.99',
-            delivery: '30-60 minutos',
-            stock: 10,
-            status: 'limited'
-        },
-        {
-            id: 8,
-            game: 'Runescape',
-            server: 'OSRS',
-            amount: '10M',
-            price: '$14.99',
-            delivery: '5-10 minutos',
-            stock: 80,
-            status: 'available'
-        },
-        {
-            id: 9,
-            game: 'Turtle WoW',
-            server: 'Nordanaar',
-            amount: '10,000',
-            price: '$229.99',
-            delivery: '30-60 minutos',
-            stock: 5,
-            status: 'limited'
-        }
+        { id: 1, game: 'WoW Turtle', server: 'Ambershire', amount: '100g', price: '$3.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 2, game: 'WoW Turtle', server: 'Nordanaar', amount: '100g', price: '$2.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 3, game: 'WoW Turtle', server: 'Telabim', amount: '100g', price: '$4.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 4, game: 'WoW Turtle', server: 'South Sea', amount: '100g', price: '$3', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 5, game: 'WoW Privado', server: 'Bronzebeard', amount: '100g', price: '$3', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 6, game: 'WoW Privado', server: 'Warmane', amount: '1k', price: '$2.5', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 7, game: 'WoW Privado', server: 'Project Epoch - Kezan', amount: '100g', price: '$4', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 8, game: 'WoW Privado', server: 'Project Epoch - Gurubashi', amount: '100g', price: '$3', delivery: '5-20 minutos', stock: 20, status: 'available' },
+        { id: 9, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '100g', price: '$5.8', delivery: '15-40 minutos', stock: 10, status: 'available' },
+        { id: 10, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '200g', price: '$11.6', delivery: '15-40 minutos', stock: 10, status: 'available' },
+        { id: 11, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '300g', price: '$17.4', delivery: '15-40 minutos', stock: 10, status: 'available' },
+        { id: 12, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '500g', price: '$29', delivery: '15-40 minutos', stock: 10, status: 'available' },
+        { id: 13, game: 'WoW Oficial', server: 'Nightslayer A/H', amount: '1000g', price: '$58', delivery: '15-40 minutos', stock: 10, status: 'available' }
+    ];
+
+    const sampleServices = [
+        { id: 1, category: 'Boosteo', game: 'WoW Privado', name: 'Boosteo cualquier clase', description: 'Servicio de boosteo completo para cualquier clase.', price: '$140' },
+        { id: 2, category: 'Profesiones', game: 'WoW', name: 'Herboristería / Minería', description: 'Subida de profesión completa.', price: '$30' },
+        { id: 3, category: 'Profesiones', game: 'WoW', name: 'Sastrería', description: 'Subida de profesión completa.', price: '$40' },
+        { id: 4, category: 'Profesiones', game: 'WoW', name: 'Cocina', description: 'Subida de profesión completa.', price: '$30' },
+        { id: 5, category: 'Profesiones', game: 'WoW', name: 'Pesca', description: 'Subida de profesión completa.', price: '$40' },
+        { id: 6, category: 'Profesiones', game: 'WoW', name: 'Peletería', description: 'Subida de profesión completa.', price: '$40' },
+        { id: 7, category: 'Profesiones', game: 'WoW', name: 'Encantamiento', description: 'Subida de profesión completa.', price: '$40' },
+        { id: 8, category: 'Profesiones', game: 'WoW', name: 'Herrería', description: 'Subida de profesión completa.', price: '$50' },
+        { id: 9, category: 'Profesiones', game: 'WoW', name: 'Ingeniería', description: 'Subida de profesión completa.', price: '$55' },
+        { id: 10, category: 'Profesiones', game: 'WoW', name: 'Alquimia', description: 'Subida de profesión completa.', price: '$40' },
+        { id: 11, category: 'Profesiones', game: 'WoW', name: 'Crafting', description: 'Subida de profesión completa.', price: '$50' },
+        { id: 12, category: 'Profesiones', game: 'WoW', name: 'Desuello', description: 'Subida de profesión completa.', price: '$30' },
+        { id: 13, category: 'PVP', game: 'WoW', name: 'PVP Rank Boosting', description: 'Boosting por rango.', price: '$15' }
     ];
 
     const sampleReferences = [
@@ -4127,6 +4080,7 @@
     let settings = { ...contactInfo };
     let categories = [...defaultCategories];
     let gameServers = [];
+    let services = [];
 
     // ============================================
     // SISTEMA DE IMÁGENES MEJORADO
@@ -4288,10 +4242,7 @@
             return;
         }
 
-        // Asegurar formato correcto de Imgur
-        if (url.includes('imgur.com') && !url.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-            url += '.jpg';
-        }
+        const normalizedUrl = normalizeImageUrl(url);
 
         try {
             // Mostrar loading
@@ -4329,7 +4280,7 @@
                 showMessage('❌ No se pudo cargar la imagen. Verifica la URL', 'error');
             };
 
-            img.src = url;
+            img.src = normalizedUrl;
 
         } catch (error) {
             console.error('Error loading image:', error);
@@ -4411,6 +4362,7 @@
         // Renderizar contenido inicial
         renderAccounts();
         renderGold();
+        renderServices();
         renderReferences();
         updateGoldOrderForm();
 
@@ -4456,6 +4408,9 @@
             }
         });
 
+        // Sincronizar con backend si /api/catalog está disponible
+        syncCatalogFromApi();
+
         // Mostrar mensaje de bienvenida
         setTimeout(() => {
             showMessage('¡Bienvenido a EPIC GOLD SHOP! 🎮✨', 'info');
@@ -4483,6 +4438,24 @@
         });
     }
 
+    function resetLocalCatalogDataIfNeeded() {
+        const savedVersion = localStorage.getItem('epicgoldshop_catalog_version');
+        if (savedVersion === CATALOG_SCHEMA_VERSION) return;
+
+        const keysToReset = [
+            'epicgoldshop_accounts',
+            'epicgoldshop_gold',
+            'epicgoldshop_gold_categories',
+            'epicgoldshop_references',
+            'epicgoldshop_categories',
+            'epicgoldshop_game_servers',
+            'epicgoldshop_services'
+        ];
+
+        keysToReset.forEach((key) => localStorage.removeItem(key));
+        localStorage.setItem('epicgoldshop_catalog_version', CATALOG_SCHEMA_VERSION);
+    }
+
     function buildGameServersFromData() {
         const serverMap = new Map();
         const add = (game, serverName) => {
@@ -4501,6 +4474,8 @@
     }
 
     function loadData() {
+        resetLocalCatalogDataIfNeeded();
+
         // Cargar datos del localStorage
         const savedAccounts = localStorage.getItem('epicgoldshop_accounts');
         const savedGold = localStorage.getItem('epicgoldshop_gold');
@@ -4509,8 +4484,10 @@
         const savedSettings = localStorage.getItem('epicgoldshop_settings');
         const savedCategories = localStorage.getItem('epicgoldshop_categories');
         const savedGameServers = localStorage.getItem('epicgoldshop_game_servers');
+        const savedServices = localStorage.getItem('epicgoldshop_services');
 
         if (savedAccounts) accounts = JSON.parse(savedAccounts);
+        sanitizeAccountImages();
         if (savedGold) gold = JSON.parse(savedGold);
         if (savedGoldCategories) goldCategories = JSON.parse(savedGoldCategories);
         sanitizeGoldCategoryImages();
@@ -4520,6 +4497,12 @@
         if (savedGameServers) {
             gameServers = normalizeGameServers(JSON.parse(savedGameServers));
         }
+        if (savedServices) services = JSON.parse(savedServices);
+
+        if (!Array.isArray(goldCategories) || goldCategories.length === 0) goldCategories = [...sampleGoldCategories];
+        if (!Array.isArray(gold) || gold.length === 0) gold = [...sampleGold];
+        if (!Array.isArray(references) || references.length === 0) references = [...sampleReferences];
+        if (!Array.isArray(services) || services.length === 0) services = [...sampleServices];
 
         if (!Array.isArray(gameServers) || gameServers.length === 0) {
             gameServers = buildGameServersFromData();
@@ -4550,9 +4533,64 @@
         localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
         localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
         localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+        localStorage.setItem('epicgoldshop_services', JSON.stringify(services));
+        localStorage.setItem('epicgoldshop_catalog_version', CATALOG_SCHEMA_VERSION);
 
         // Actualizar enlaces de contacto
         updateContactLinks();
+    }
+
+    async function syncCatalogFromApi() {
+        try {
+            const response = await fetch('/api/catalog', { cache: 'no-store' });
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            // Solo pisar datos locales si la API trae contenido real
+            if (Array.isArray(data.accounts) && data.accounts.length > 0) accounts = data.accounts;
+            if (Array.isArray(data.gold) && data.gold.length > 0) gold = data.gold;
+            if (Array.isArray(data.gold_categories) && data.gold_categories.length > 0) {
+                goldCategories = data.gold_categories;
+            }
+            if (Array.isArray(data.customer_references) && data.customer_references.length > 0) {
+                references = data.customer_references.map(ref => ({
+                    id: ref.id || Date.now() + Math.random(),
+                    userName: ref.name || 'Cliente',
+                    userInitial: (ref.name || 'C').charAt(0).toUpperCase(),
+                    rating: Number(ref.rating || 5),
+                    text: ref.comment || '',
+                    date: new Date(ref.created_at || Date.now()).toLocaleDateString('es-ES')
+                }));
+            }
+            if (Array.isArray(data.game_servers) && data.game_servers.length > 0) {
+                gameServers = normalizeGameServers(data.game_servers);
+            }
+            if (Array.isArray(data.services) && data.services.length > 0) {
+                services = data.services;
+            }
+            if (data.settings && typeof data.settings === 'object') {
+                settings = { ...settings, ...data.settings };
+            }
+
+            localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+            localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+            localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
+            localStorage.setItem('epicgoldshop_references', JSON.stringify(references));
+            localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+            localStorage.setItem('epicgoldshop_services', JSON.stringify(services));
+
+            renderAccounts(currentFilter || 'all');
+            renderGold();
+            renderServices();
+            renderReferences();
+            updateGoldOrderForm();
+            updateAverageRating();
+            updateCategorySelects();
+            updateContactLinks();
+        } catch (error) {
+            console.warn('No se pudo sincronizar el catálogo desde API:', error.message);
+        }
     }
 
     function updateAverageRating() {
@@ -5523,9 +5561,40 @@
             }
         });
     }
-
     function renderGold() {
-        // Esta función ahora solo se usa para el panel de administración
+        // La sección pública de Oro usa la compra rápida del modal (INICIAR COMPRA).
+    }
+
+    function renderServices() {
+        const container = document.getElementById('services-grid');
+        if (!container) return;
+
+        if (!Array.isArray(services) || services.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:40px; color: var(--text-gray);">
+                    No hay servicios disponibles por ahora.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = services.map(service => `
+            <div class="product-card">
+                <div class="product-content">
+                    <div class="product-category">
+                        <i class="fas fa-briefcase"></i> ${service.category || 'Servicio'} ${service.game ? '• ' + service.game : ''}
+                    </div>
+                    <h3 class="product-name">${service.name || 'Servicio MMORPG'}</h3>
+                    <p class="product-description">${service.description || 'Servicio disponible para tu personaje.'}</p>
+                    <div class="product-details">
+                        <div class="product-price">${String(service.price || '$0').startsWith('$') ? service.price : '$' + service.price}</div>
+                        <a href="${DISCORD_LINK}" target="_blank" class="btn-buy">
+                            <i class="fas fa-message"></i> PEDIR
+                        </a>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
     function renderReferences() {
@@ -5687,11 +5756,12 @@
         showModal('login-modal');
         document.getElementById('admin-username').focus();
     }
-
-    function loginAdmin() {
+    async function loginAdmin() {
         const username = document.getElementById('admin-username').value.trim();
         const password = document.getElementById('admin-password').value.trim();
         const message = document.getElementById('login-message');
+        const loginBtn = document.querySelector('#login-modal .btn-primary');
+        const originalText = loginBtn.innerHTML;
 
         message.style.display = 'none';
 
@@ -5702,37 +5772,54 @@
             return;
         }
 
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> INGRESANDO...';
+        loginBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                isAdmin = true;
+                adminToken = data.token || '';
+                sessionStorage.setItem('isAdmin', 'true');
+                sessionStorage.setItem('adminToken', adminToken);
+
+                message.textContent = '✓ Acceso concedido. Redirigiendo...';
+                message.className = 'message success';
+                message.style.display = 'block';
+
+                setTimeout(() => {
+                    closeModal();
+                    showAdmin();
+                    showMessage('✅ Sesión de administrador iniciada', 'success');
+                }, 500);
+                return;
+            }
+        } catch (error) {
+            console.warn('Login API no disponible, usando fallback local:', error.message);
+        } finally {
+            loginBtn.innerHTML = originalText;
+            loginBtn.disabled = false;
+        }
+
+        // Fallback local para no bloquear acceso si la API no está disponible
         if (username === 'admin' && password === 'admin123') {
             isAdmin = true;
+            adminToken = '';
             sessionStorage.setItem('isAdmin', 'true');
-
-            message.textContent = '✓ Acceso concedido. Redirigiendo...';
-            message.className = 'message success';
-            message.style.display = 'block';
-
-            const loginBtn = document.querySelector('#login-modal .btn-primary');
-            const originalText = loginBtn.innerHTML;
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> INGRESANDO...';
-            loginBtn.disabled = true;
-
-            setTimeout(() => {
-                closeModal();
-                showAdmin();
-                showMessage('✅ Sesión de administrador iniciada', 'success');
-
-                loginBtn.innerHTML = originalText;
-                loginBtn.disabled = false;
-            }, 800);
+            sessionStorage.removeItem('adminToken');
+            closeModal();
+            showAdmin();
+            showMessage('✅ Sesión local iniciada (sin API)', 'info');
         } else {
             message.textContent = '✗ Credenciales incorrectas';
             message.className = 'message error';
             message.style.display = 'block';
-
-            message.style.animation = 'none';
-            setTimeout(() => {
-                message.style.animation = 'messageAppear 0.3s ease-out';
-            }, 10);
-
             document.getElementById('admin-password').value = '';
             document.getElementById('admin-password').focus();
         }
@@ -5743,6 +5830,8 @@
 
         isAdmin = false;
         sessionStorage.removeItem('isAdmin');
+        sessionStorage.removeItem('adminToken');
+        adminToken = '';
 
         document.getElementById('admin-section').style.display = 'none';
         updateBodyScrollLock();
@@ -5762,6 +5851,7 @@
         const savedAdmin = sessionStorage.getItem('isAdmin');
         if (savedAdmin === 'true') {
             isAdmin = true;
+            adminToken = sessionStorage.getItem('adminToken') || '';
             document.getElementById('acceso-btn').innerHTML = '<i class="fas fa-user-shield"></i> PANEL ADMIN';
         }
     }
@@ -6520,17 +6610,60 @@
         const value = (url || '').trim();
         if (!value) return '';
 
-        const imgurDirect = value.match(/^https?:\/\/(?:i\.)?imgur\.com\/([a-zA-Z0-9]+)(?:\.[a-zA-Z]{3,4})?$/i);
+        if (value.startsWith('data:image/')) return value;
+
+        let normalized = value;
+        if (normalized.startsWith('//')) {
+            normalized = `https:${normalized}`;
+        }
+
+        const imgurDirect = normalized.match(/^https?:\/\/(?:i\.)?imgur\.com\/([a-zA-Z0-9]+)(?:\.[a-zA-Z]{3,4})?(?:\?.*)?$/i);
         if (imgurDirect) {
             return `https://i.imgur.com/${imgurDirect[1]}.jpg`;
         }
 
-        const imgurPage = value.match(/^https?:\/\/imgur\.com\/(?:gallery\/|a\/)?([a-zA-Z0-9]+)$/i);
+        const imgurPage = normalized.match(/^https?:\/\/imgur\.com\/(?:gallery\/|a\/)?([a-zA-Z0-9]+)(?:\?.*)?$/i);
         if (imgurPage) {
             return `https://i.imgur.com/${imgurPage[1]}.jpg`;
         }
 
-        return value;
+        const googleDriveFile = normalized.match(/^https?:\/\/drive\.google\.com\/file\/d\/([^/]+)\//i);
+        if (googleDriveFile) {
+            return `https://drive.google.com/uc?export=view&id=${googleDriveFile[1]}`;
+        }
+
+        const googleDriveOpen = normalized.match(/^https?:\/\/drive\.google\.com\/open\?id=([^&]+)/i);
+        if (googleDriveOpen) {
+            return `https://drive.google.com/uc?export=view&id=${googleDriveOpen[1]}`;
+        }
+
+        if (/^https?:\/\/(?:www\.)?dropbox\.com\//i.test(normalized)) {
+            return normalized
+                .replace('?dl=0', '?raw=1')
+                .replace('&dl=0', '&raw=1');
+        }
+
+        return normalized;
+    }
+
+    function sanitizeAccountImages() {
+        if (!Array.isArray(accounts)) return;
+        let changed = false;
+
+        accounts = accounts.map(account => {
+            const current = (account?.image || '').trim();
+            if (!current || current.startsWith('data:image/')) return account;
+            const next = normalizeImageUrl(current);
+            if (next !== current) {
+                changed = true;
+                return { ...account, image: next };
+            }
+            return account;
+        });
+
+        if (changed) {
+            localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+        }
     }
 
     function getGameImage(game = '') {
@@ -6828,6 +6961,14 @@
         document.getElementById('account-name').focus();
     }
 
+    function mapAccountFromApi(row) {
+        if (!row) return null;
+        return {
+            ...row,
+            tags: Array.isArray(row.tags) ? row.tags : []
+        };
+    }
+
     async function saveAccount() {
         const name = document.getElementById('account-name').value.trim();
         const category = document.getElementById('account-category').value;
@@ -6871,7 +7012,7 @@
 
         const formattedPrice = price.startsWith('$') ? price : `$${price}`;
 
-        let image = imageUrl;
+        let image = normalizeImageUrl(imageUrl);
         if (currentImageData) {
             image = currentImageData;
         } else if (!imageUrl) {
@@ -6881,11 +7022,56 @@
                 <rect x="10" y="10" width="330" height="230" rx="15" fill="%231a365d" stroke="%23c8aa6d" stroke-width="2"/>
                 <text x="175" y="125" fill="%23c8aa6d" font-family="Arial" font-size="16" text-anchor="middle">${encodeURIComponent(name.substring(0, 30))}</text>
             </svg>`;
-        } else if (imageUrl.includes('imgur.com') && !imageUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
-            image = imageUrl + '.jpg';
         }
 
         const tags = generateTags(description, category, name);
+
+        if (isAdmin && adminToken) {
+            try {
+                const endpoint = '/api/admin/accounts';
+                const method = editingAccountId ? 'PUT' : 'POST';
+                const payload = {
+                    type: 'account',
+                    category,
+                    server,
+                    name,
+                    description,
+                    price: formattedPrice,
+                    image,
+                    tags
+                };
+                if (editingAccountId) payload.id = editingAccountId;
+
+                const response = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const saved = mapAccountFromApi(await response.json());
+                    if (editingAccountId) {
+                        const index = accounts.findIndex(a => String(a.id) === String(editingAccountId));
+                        if (index !== -1) accounts[index] = saved;
+                    } else {
+                        accounts.push(saved);
+                    }
+
+                    localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+                    renderAccounts(currentFilter);
+                    renderCategoryDropdown();
+                    closeModal();
+                    if (isAdmin) switchAdminTab('accounts');
+                    showMessage(editingAccountId ? '✅ Cuenta actualizada en base de datos' : '✅ Cuenta agregada en base de datos', 'success');
+                    return;
+                }
+            } catch (error) {
+                console.warn('Error guardando cuenta en API, usando modo local:', error.message);
+            }
+        }
 
         if (editingAccountId) {
             const index = accounts.findIndex(a => a.id === editingAccountId);
@@ -6960,10 +7146,31 @@
         return [...new Set(tags)].slice(0, 5);
     }
 
-    function deleteAccount(id) {
+    async function deleteAccount(id) {
         if (!confirm('¿Estás seguro de eliminar esta cuenta? Esta acción no se puede deshacer.')) return;
 
-        const index = accounts.findIndex(a => a.id === id);
+        if (isAdmin && adminToken) {
+            try {
+                const response = await fetch(`/api/admin/accounts?id=${encodeURIComponent(id)}`, {
+                    method: 'DELETE',
+                    headers: { Authorization: `Bearer ${adminToken}` }
+                });
+                if (response.ok) {
+                    const index = accounts.findIndex(a => String(a.id) === String(id));
+                    if (index !== -1) accounts.splice(index, 1);
+                    localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+                    renderAccounts(currentFilter);
+                    renderCategoryDropdown();
+                    if (isAdmin) switchAdminTab('accounts');
+                    showMessage('✅ Cuenta eliminada de base de datos', 'success');
+                    return;
+                }
+            } catch (error) {
+                console.warn('Error eliminando cuenta en API, usando modo local:', error.message);
+            }
+        }
+
+        const index = accounts.findIndex(a => String(a.id) === String(id));
         if (index !== -1) {
             accounts.splice(index, 1);
             localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
@@ -7286,6 +7493,8 @@
         localStorage.setItem('epicgoldshop_settings', JSON.stringify(settings));
         localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
         localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+        localStorage.setItem('epicgoldshop_services', JSON.stringify(services));
+        localStorage.setItem('epicgoldshop_catalog_version', CATALOG_SCHEMA_VERSION);
     });
 </script>
 </body>
