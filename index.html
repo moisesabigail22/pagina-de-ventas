@@ -5807,22 +5807,11 @@
             loginBtn.disabled = false;
         }
 
-        // Fallback local para no bloquear acceso si la API no está disponible
-        if (username === 'admin' && password === 'admin123') {
-            isAdmin = true;
-            adminToken = '';
-            sessionStorage.setItem('isAdmin', 'true');
-            sessionStorage.removeItem('adminToken');
-            closeModal();
-            showAdmin();
-            showMessage('✅ Sesión local iniciada (sin API)', 'info');
-        } else {
-            message.textContent = '✗ Credenciales incorrectas';
-            message.className = 'message error';
-            message.style.display = 'block';
-            document.getElementById('admin-password').value = '';
-            document.getElementById('admin-password').focus();
-        }
+        message.textContent = '✗ No se pudo iniciar sesión contra la API. Revisa variables de entorno/deploy.';
+        message.className = 'message error';
+        message.style.display = 'block';
+        document.getElementById('admin-password').value = '';
+        document.getElementById('admin-password').focus();
     }
 
     function logoutAdmin() {
@@ -7026,6 +7015,11 @@
 
         const tags = generateTags(description, category, name);
 
+        if (isAdmin && !adminToken) {
+            showMessage('⚠️ Esta sesión no tiene token API. Vuelve a iniciar sesión para guardar en base de datos.', 'error');
+            return;
+        }
+
         if (isAdmin && adminToken) {
             try {
                 const endpoint = '/api/admin/accounts';
@@ -7068,8 +7062,13 @@
                     showMessage(editingAccountId ? '✅ Cuenta actualizada en base de datos' : '✅ Cuenta agregada en base de datos', 'success');
                     return;
                 }
+
+                showMessage('❌ No se pudo guardar en la API. Revisa token/permisos.', 'error');
+                return;
             } catch (error) {
-                console.warn('Error guardando cuenta en API, usando modo local:', error.message);
+                console.warn('Error guardando cuenta en API:', error.message);
+                showMessage('❌ Error de conexión con API al guardar cuenta.', 'error');
+                return;
             }
         }
 
@@ -7149,35 +7148,31 @@
     async function deleteAccount(id) {
         if (!confirm('¿Estás seguro de eliminar esta cuenta? Esta acción no se puede deshacer.')) return;
 
-        if (isAdmin && adminToken) {
-            try {
-                const response = await fetch(`/api/admin/accounts?id=${encodeURIComponent(id)}`, {
-                    method: 'DELETE',
-                    headers: { Authorization: `Bearer ${adminToken}` }
-                });
-                if (response.ok) {
-                    const index = accounts.findIndex(a => String(a.id) === String(id));
-                    if (index !== -1) accounts.splice(index, 1);
-                    localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
-                    renderAccounts(currentFilter);
-                    renderCategoryDropdown();
-                    if (isAdmin) switchAdminTab('accounts');
-                    showMessage('✅ Cuenta eliminada de base de datos', 'success');
-                    return;
-                }
-            } catch (error) {
-                console.warn('Error eliminando cuenta en API, usando modo local:', error.message);
-            }
+        if (!isAdmin || !adminToken) {
+            showMessage('⚠️ Debes iniciar sesión con API para eliminar en base de datos.', 'error');
+            return;
         }
 
-        const index = accounts.findIndex(a => String(a.id) === String(id));
-        if (index !== -1) {
-            accounts.splice(index, 1);
-            localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
-            renderAccounts(currentFilter);
-            renderCategoryDropdown(); // Actualizar dropdown de categorías
-            if (isAdmin) switchAdminTab('accounts');
-            showMessage('✅ Cuenta eliminada exitosamente', 'success');
+        try {
+            const response = await fetch(`/api/admin/accounts?id=${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${adminToken}` }
+            });
+            if (response.ok) {
+                const index = accounts.findIndex(a => String(a.id) === String(id));
+                if (index !== -1) accounts.splice(index, 1);
+                localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+                renderAccounts(currentFilter);
+                renderCategoryDropdown();
+                if (isAdmin) switchAdminTab('accounts');
+                showMessage('✅ Cuenta eliminada de base de datos', 'success');
+                return;
+            }
+
+            showMessage('❌ No se pudo eliminar en la API. Revisa token/permisos.', 'error');
+        } catch (error) {
+            console.warn('Error eliminando cuenta en API:', error.message);
+            showMessage('❌ Error de conexión con API al eliminar cuenta.', 'error');
         }
     }
 
