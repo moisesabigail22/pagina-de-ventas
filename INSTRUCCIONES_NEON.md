@@ -357,3 +357,11 @@ alter table gold drop column if exists stock;
 
 Luego puedes cargar tramos automáticos (100, 200, 300, 500, 1000) con:
 - `data/sql/gold_tiers_seed.sql`
+
+
+## Migración recomendada (icono de servicios)
+Para guardar iconos de servicios (archivo o link) en DB:
+
+```sql
+alter table services add column if not exists image text;
+```
