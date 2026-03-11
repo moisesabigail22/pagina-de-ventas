@@ -38,15 +38,30 @@ Solo pega el contenido del script, desde `(() => {` hasta `})();`.
 
 Alternativa: abre `docs/EXPORTAR_LOCALSTORAGE_SNIPPET.js` y copia ese archivo completo en la consola.
 
-## 2) Volver a llenar Supabase rápido
+## 2) Convertir tu backup a SQL (automático)
+Si ya tienes un JSON como el que compartiste en el chat, guárdalo como:
+- `docs/mi-backup-localstorage.json`
+
+Luego ejecuta:
+
+```bash
+python3 scripts/localstorage_backup_to_sql.py docs/mi-backup-localstorage.json --out supabase/restore_from_localstorage.sql
+```
+
+Eso genera un SQL listo para pegar en Supabase SQL Editor.
+
+## 3) Restaurar en Supabase
 En Supabase SQL Editor ejecuta en este orden:
+1. `supabase/schema.sql`
+2. `supabase/restore_from_localstorage.sql` (el generado por script)
+3. `supabase/diagnostico_catalog.sql`
+
+## 4) Volver a llenar Supabase rápido con seed base (opcional)
+Si no tienes backup personalizado, usa:
 1. `supabase/schema.sql`
 2. `supabase/seed_catalog.sql`
 3. `supabase/diagnostico_catalog.sql`
 
-## 3) Si quieres recuperar tus datos exactos del navegador
-Pásame el archivo `epicgoldshop-localstorage-backup.json` y te lo convierto a SQL listo para pegar en Supabase.
-
-## 4) Evitar que vuelva a pasar
+## 5) Evitar que vuelva a pasar
 - Confirma en Vercel que `SUPABASE_URL` y `SUPABASE_ANON_KEY` apuntan al proyecto correcto.
 - Trabaja en incógnito al validar para no confundir datos locales con datos DB.

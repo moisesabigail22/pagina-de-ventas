@@ -68,5 +68,5 @@ Eso casi siempre significa que la web estaba leyendo `localStorage` (datos del n
 Pasos rápidos:
 1. Ejecuta `supabase/diagnostico_catalog.sql` en Supabase.
 2. Si está vacío, corre `supabase/schema.sql` y luego `supabase/seed_catalog.sql`.
-3. Si en la web había datos personalizados, recupéralos con `docs/RECUPERAR_DATOS_LOCALSTORAGE.md`.
+3. Si en la web había datos personalizados, recupéralos con `docs/RECUPERAR_DATOS_LOCALSTORAGE.md` (incluye conversión automática a SQL con `scripts/localstorage_backup_to_sql.py`).
 
