@@ -75,37 +75,3 @@ create table if not exists public.services (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
-
--- función y triggers para updated_at
-create or replace function public.set_updated_at()
-returns trigger as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$ language plpgsql;
-
-drop trigger if exists trg_settings_updated_at on public.settings;
-create trigger trg_settings_updated_at
-before update on public.settings
-for each row execute function public.set_updated_at();
-
-drop trigger if exists trg_gold_categories_updated_at on public.gold_categories;
-create trigger trg_gold_categories_updated_at
-before update on public.gold_categories
-for each row execute function public.set_updated_at();
-
-drop trigger if exists trg_gold_updated_at on public.gold;
-create trigger trg_gold_updated_at
-before update on public.gold
-for each row execute function public.set_updated_at();
-
-drop trigger if exists trg_accounts_updated_at on public.accounts;
-create trigger trg_accounts_updated_at
-before update on public.accounts
-for each row execute function public.set_updated_at();
-
-drop trigger if exists trg_services_updated_at on public.services;
-create trigger trg_services_updated_at
-before update on public.services
-for each row execute function public.set_updated_at();
