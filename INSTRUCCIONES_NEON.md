@@ -338,3 +338,23 @@ Si quieres no borrar datos previos, puedes ejecutar el importador con:
 ```bash
 node scripts/import_catalog_to_neon.js data/catalog.json --no-reset
 ```
+
+
+## Migración recomendada (Gold sin stock/entrega)
+Si quieres quitar `stock` y `delivery` de base de datos, ejecuta:
+
+```sql
+alter table gold drop column if exists delivery;
+alter table gold drop column if exists stock;
+```
+
+Luego puedes cargar tramos automáticos (100, 200, 300, 500, 1000) con:
+- `data/sql/gold_tiers_seed.sql`
+
+
+## Migración recomendada (icono de servicios)
+Para guardar iconos de servicios (archivo o link) en DB:
+
+```sql
+alter table services add column if not exists image text;
+```
