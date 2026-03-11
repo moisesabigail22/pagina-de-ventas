@@ -27,7 +27,7 @@ Ejemplo (si tu rama es `work`):
 ```bash
 git checkout work
 git add -A
-git commit -m "Deploy-ready: Neon API + Vercel config"
+git commit -m "Deploy-ready: Supabase API + Vercel config"
 git push origin work
 ```
 

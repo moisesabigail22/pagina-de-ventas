@@ -8,7 +8,7 @@ if [ -z "${DATABASE_URL:-}" ]; then
   exit 1
 fi
 
-echo "🚀 Importando data/catalog.json a Neon..."
-node scripts/import_catalog_to_neon.js data/catalog.json
+echo "🚀 Importando data/catalog.json a Supabase..."
+node scripts/import_catalog_to_supabase.js data/catalog.json
 
 echo "✅ Importación finalizada. Verifica en /api/catalog"

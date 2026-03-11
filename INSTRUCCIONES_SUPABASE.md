@@ -1,4 +1,4 @@
-# GUÍA RÁPIDA (SIN ENREDO): crear tu base en Neon
+# GUÍA RÁPIDA (SIN ENREDO): crear tu base en Supabase
 
 Si estás perdido, sigue **exactamente** esto.
 No necesitas saber base de datos.
@@ -7,7 +7,7 @@ No necesitas saber base de datos.
 
 ## Objetivo de hoy
 Terminar con esto listo:
-- Base creada en Neon ✅
+- Base creada en Supabase ✅
 - Variables en Vercel ✅
 
 ---
@@ -20,7 +20,7 @@ Siempre se ve como un texto largo que empieza con:
 `postgresql://...`
 
 ### ¿Dónde lo saco?
-1. En Neon, entra a tu proyecto.
+1. En Supabase, entra a tu proyecto.
 2. Arriba a la derecha, haz clic en **Connect**.
 3. En la ventana, busca **Connection string**.
 4. Copia el texto completo que empieza con `postgresql://...`.
@@ -39,7 +39,7 @@ Haz esto y ya:
 1. Ve a **Vercel → tu proyecto → Settings → Environment Variables**.
 2. Crea esta variable:
    - **Name**: `DATABASE_URL`
-   - **Value**: (pega lo que copiaste de Neon)
+   - **Value**: (pega lo que copiaste de Supabase)
 3. Crea esta otra:
    - **Name**: `ADMIN_JWT_SECRET`
    - **Value**: `EGS_admin_2026_super_clave_larga_93XkLmPqT7vNw2Rz`
@@ -64,7 +64,7 @@ Listo. Con eso ya queda conectada la base a nivel de entorno.
 ## PASO 4 — SQL (solo si aún no lo corriste)
 Si **ya corriste SQL y te creó tablas**, SALTA este paso.
 
-Si no lo corriste, en Neon → **SQL Editor** pega y ejecuta:
+Si no lo corriste, en Supabase → **SQL Editor** pega y ejecuta:
 
 ```sql
 create extension if not exists pgcrypto;
@@ -176,6 +176,13 @@ Escríbeme solo esto: **"listo"**.
 - `DELETE /api/admin/services?id=<ID>`
 
 
+
+## ¿De dónde salen los datos si no los ves en Supabase?
+1. Prueba `GET /api/catalog` (es la fuente del frontend).
+2. Inicia sesión admin y prueba `GET /api/admin/db-status` para ver conteos reales por tabla en la base conectada por `DATABASE_URL`.
+3. Si `db-status` trae conteos > 0 y en tu panel ves 0, estás mirando otro proyecto/base en Supabase.
+4. Si todo da 0, carga datos con el import (`npm run import:catalog`) o desde el panel admin.
+
 ## Si `https://tu-dominio.com/api/catalog` da 404
 Eso significa que el deploy activo no tiene la carpeta `api/` publicada todavía.
 
@@ -205,7 +212,7 @@ Haz esto exacto:
 
 1. Prueba primero este endpoint de diagnóstico:
    - `https://TU-DEPLOY.vercel.app/api/ping`
-2. Si `/api/ping` también da 404, el problema NO es Neon: es configuración/deploy de Vercel.
+2. Si `/api/ping` también da 404, el problema NO es Supabase: es configuración/deploy de Vercel.
 3. En **Vercel → Project Settings → General** revisa:
    - **Root Directory**: debe apuntar a la carpeta donde está `api/` (en este repo es la raíz).
    - **Production Branch**: debe ser la rama donde subiste estos archivos.
@@ -295,10 +302,10 @@ Ejecuta estos comandos en tu máquina/local:
 
 ```bash
 export DATABASE_URL='postgresql://USER:PASS@HOST/DB?sslmode=require'
-./scripts/seed_neon_from_catalog.sh
+./scripts/seed_supabase_from_catalog.sh
 ```
 
-Esto carga automáticamente `data/catalog.json` en Neon.
+Esto carga automáticamente `data/catalog.json` en Supabase.
 Luego prueba:
 
 - `GET /api/catalog`
@@ -343,7 +350,7 @@ Al terminar, podrás verificar en:
 Si quieres no borrar datos previos, puedes ejecutar el importador con:
 
 ```bash
-node scripts/import_catalog_to_neon.js data/catalog.json --no-reset
+node scripts/import_catalog_to_supabase.js data/catalog.json --no-reset
 ```
 
 

@@ -2,9 +2,9 @@
 
 Si quieres que **yo te implemente todo** (base de datos + estructura + pasos de despliegue) con la menor fricción, mi recomendación es:
 
-## ✅ Opción recomendada: **Neon (PostgreSQL)**
+## ✅ Opción recomendada: **Supabase (PostgreSQL)**
 
-### ¿Por qué Neon para tu caso?
+### ¿Por qué Supabase para tu caso?
 - Es **PostgreSQL real** (estándar y fácil de escalar después).
 - Tiene **plan gratis** suficiente para un proyecto pequeño.
 - Se integra muy bien con **Vercel** y APIs simples.
@@ -14,7 +14,7 @@ Si quieres que **yo te implemente todo** (base de datos + estructura + pasos de 
 
 ## ¿Y a largo plazo?
 
-También te conviene **Neon/PostgreSQL** por estas razones:
+También te conviene **Supabase/PostgreSQL** por estas razones:
 - **Escalabilidad**: cuando crezca tráfico o datos, no tienes que rehacer el modelo.
 - **Mantenibilidad**: SQL facilita auditoría, reportes y consultas complejas.
 - **Portabilidad**: PostgreSQL es estándar; migrar de proveedor es mucho más fácil.
@@ -24,11 +24,11 @@ También te conviene **Neon/PostgreSQL** por estas razones:
 - Si casi todo será frontend y necesitas tiempo real muy rápido.
 - Si tu equipo ya domina Firestore.
 
-Si no tienes una razón fuerte para Firestore, **PostgreSQL (Neon) suele ser mejor decisión de largo plazo**.
+Si no tienes una razón fuerte para Firestore, **PostgreSQL (Supabase) suele ser mejor decisión de largo plazo**.
 
 ---
 
-## Qué te puedo hacer yo usando Neon
+## Qué te puedo hacer yo usando Supabase
 
 1. Diseñar el esquema inicial (tablas principales).
 2. Crear el SQL de creación (`schema.sql`) listo para ejecutar.
@@ -39,8 +39,8 @@ Si no tienes una razón fuerte para Firestore, **PostgreSQL (Neon) suele ser mej
 ---
 
 ## Decisión final recomendada
-Para que yo te lo construya completo, rápido y pensando en crecimiento: **Neon (PostgreSQL)**.
+Para que yo te lo construya completo, rápido y pensando en crecimiento: **Supabase (PostgreSQL)**.
 
 
 ## Guía práctica
-- Sigue el paso a paso en `INSTRUCCIONES_NEON.md`.
+- Sigue el paso a paso en `INSTRUCCIONES_SUPABASE.md`.

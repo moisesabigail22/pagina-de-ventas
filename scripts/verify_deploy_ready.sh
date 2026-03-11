@@ -9,6 +9,7 @@ required=(
   "api/admin/gold-categories.js"
   "api/admin/game-servers.js"
   "api/admin/services.js"
+  "api/admin/db-status.js"
   "api/_lib/db.js"
   "api/_lib/auth.js"
   "package.json"

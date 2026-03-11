@@ -1,6 +1,6 @@
 -- Seed de ORO por tramos (100g, 200g, 300g, 500g, 1000g)
 -- 1) Ajusta la tabla base_prices con tu precio por 100g para cada juego/servidor.
--- 2) Ejecuta el script en Neon.
+-- 2) Ejecuta el script en Supabase.
 
 begin;
 
