@@ -7,6 +7,7 @@
     "pg": "^8.12.0"
   },
   "scripts": {
-    "import:catalog": "node scripts/import_catalog_to_supabase.js data/catalog.json"
+    "import:catalog": "node scripts/import_catalog_to_supabase.js data/catalog.json",
+    "export:schema": "node scripts/export_schema_snapshot.js data/sql/schema_snapshot.sql"
   }
 }

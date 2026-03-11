@@ -12,6 +12,17 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    const conn = process.env.DATABASE_URL || '';
+    let host = null;
+    let port = null;
+    let databaseFromUrl = null;
+    try {
+      const parsed = new URL(conn);
+      host = parsed.hostname || null;
+      port = parsed.port || null;
+      databaseFromUrl = (parsed.pathname || '').replace(/^\//, '') || null;
+    } catch {}
+
     const [dbInfo, counts] = await Promise.all([
       query('select current_database() as database, current_user as user_name'),
       query(`
@@ -28,6 +39,11 @@ module.exports = async function handler(req, res) {
 
     return res.status(200).json({
       ok: true,
+      connection: {
+        host,
+        port,
+        database_from_url: databaseFromUrl
+      },
       database: dbInfo.rows[0]?.database || null,
       user: dbInfo.rows[0]?.user_name || null,
       counts: counts.rows[0] || {}

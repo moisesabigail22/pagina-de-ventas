@@ -183,6 +183,30 @@ Escríbeme solo esto: **"listo"**.
 3. Si `db-status` trae conteos > 0 y en tu panel ves 0, estás mirando otro proyecto/base en Supabase.
 4. Si todo da 0, carga datos con el import (`npm run import:catalog`) o desde el panel admin.
 
+## Verificar exactamente qué base está usando producción
+1. Haz login admin en `POST /api/admin/login` para obtener token.
+2. Llama `GET /api/admin/db-status` con `Authorization: Bearer <token>`.
+3. Revisa en respuesta: `connection.host`, `connection.port`, `connection.database_from_url`, `database` y `counts`.
+4. Si eso no coincide con tu proyecto en Supabase, estás mirando otra base.
+
+### Sacar esquema actual (snapshot)
+Con `DATABASE_URL` de la base actual:
+
+```bash
+npm run export:schema
+```
+
+Genera: `data/sql/schema_snapshot.sql`.
+
+### Migrar la base actual a una nueva en Supabase
+Necesitas `pg_dump` y `psql` instalados:
+
+```bash
+export SRC_DATABASE_URL='postgresql://...origen...'
+export DEST_DATABASE_URL='postgresql://...supabase-destino...'
+./scripts/migrate_db_to_supabase.sh
+```
+
 ## Si `https://tu-dominio.com/api/catalog` da 404
 Eso significa que el deploy activo no tiene la carpeta `api/` publicada todavía.
 
