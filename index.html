@@ -1105,7 +1105,7 @@
             width: 100%;
             height: 120px;
             object-fit: cover;
-            object-position: center;
+            object-position: center center;
             display: block;
             border-bottom: 1px solid rgba(200, 170, 109, 0.35);
             background: rgba(10, 25, 41, 0.85);
@@ -2037,7 +2037,7 @@
             width: 100%;
             max-height: 350px;
             object-fit: cover;
-            object-position: center;
+            object-position: center center;
             border-radius: 10px;
             margin-top: 20px;
             display: none;
@@ -3640,14 +3640,6 @@
         </div>
 
         <div class="form-grid">
-            <div class="form-group">
-                <label class="form-label">Estado</label>
-                <select id="gold-status">
-                    <option value="available">Disponible</option>
-                    <option value="limited">Stock Limitado</option>
-                    <option value="soldout">Agotado</option>
-                </select>
-            </div>
         </div>
 
         <div style="display: flex; gap: 20px; margin-top: 40px;">
@@ -5048,9 +5040,7 @@
         const serverSelect = document.getElementById('admin-gold-edit-server');
         const packageSelect = document.getElementById('admin-gold-edit-package');
         const priceInput = document.getElementById('admin-gold-edit-price');
-        const stockInput = document.getElementById('admin-gold-edit-stock');
-        const statusSelect = document.getElementById('admin-gold-edit-status');
-
+                
         if (!gameSelect || !serverSelect || !packageSelect) return;
 
         const games = getAdminGoldGames();
@@ -5061,8 +5051,6 @@
             packageSelect.innerHTML = '<option value="">Sin paquetes</option>';
             packageSelect.disabled = true;
             if (priceInput) priceInput.value = '';
-            if (stockInput) stockInput.value = 0;
-            if (statusSelect) statusSelect.value = 'available';
             return;
         }
         gameSelect.innerHTML = games.map(game => `<option value="${game}">${game}</option>`).join('');
@@ -5079,9 +5067,7 @@
                 packageSelect.innerHTML = '<option value="">Sin paquetes</option>';
                 packageSelect.disabled = true;
                 if (priceInput) priceInput.value = '';
-                if (stockInput) stockInput.value = 0;
-                if (statusSelect) statusSelect.value = 'available';
-                return;
+                        return;
             }
             serverSelect.disabled = false;
             serverSelect.innerHTML = uniqueServers.map(server => `<option value="${server}">${server}</option>`).join('');
@@ -5096,9 +5082,7 @@
                 packageSelect.innerHTML = '<option value="">Sin paquetes</option>';
                 packageSelect.disabled = true;
                 if (priceInput) priceInput.value = '';
-                if (stockInput) stockInput.value = 0;
-                if (statusSelect) statusSelect.value = 'available';
-                return;
+                        return;
             }
             packageSelect.disabled = false;
             packageSelect.innerHTML = packages.map(item => `
@@ -5112,8 +5096,6 @@
             const item = gold.find(entry => entry.id === selectedId);
             if (!item) return;
             if (priceInput) priceInput.value = item.price;
-            if (stockInput) stockInput.value = item.stock ?? 0;
-            if (statusSelect) statusSelect.value = item.status;
         };
 
         gameSelect.addEventListener('change', updateServers);
@@ -5126,9 +5108,7 @@
     function saveAdminGoldEdit() {
         const packageSelect = document.getElementById('admin-gold-edit-package');
         const priceInput = document.getElementById('admin-gold-edit-price');
-        const stockInput = document.getElementById('admin-gold-edit-stock');
-        const statusSelect = document.getElementById('admin-gold-edit-status');
-
+                
         if (!packageSelect || !packageSelect.value) {
             showMessage('Selecciona un paquete válido', 'error');
             return;
@@ -5145,8 +5125,6 @@
         }
 
         item.price = newPrice.startsWith('$') ? newPrice : `$${newPrice}`;
-        item.stock = parseInt(stockInput?.value, 10) || 0;
-        item.status = statusSelect?.value || 'available';
 
         localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
         updateGoldOrderForm();
@@ -5178,9 +5156,6 @@
         const server = document.getElementById('admin-gold-price-server')?.value;
         const amount = document.getElementById('admin-gold-price-amount')?.value.trim();
         const price = document.getElementById('admin-gold-price-price')?.value.trim();
-        const delivery = document.getElementById('admin-gold-price-delivery')?.value.trim() || 'Por confirmar';
-        const stock = parseInt(document.getElementById('admin-gold-price-stock')?.value, 10) || 0;
-        const status = document.getElementById('admin-gold-price-status')?.value || 'available';
 
         if (!game) {
             showMessage('Selecciona un juego válido', 'error');
@@ -5215,9 +5190,6 @@
             server,
             amount,
             price: formattedPrice,
-            delivery,
-            stock,
-            status
         });
 
         localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
@@ -6062,22 +6034,6 @@
                         <label class="form-label">Precio (USD)</label>
                         <input type="text" id="admin-gold-price-price" placeholder="Ej: $24.99" maxlength="20">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Entrega</label>
-                        <input type="text" id="admin-gold-price-delivery" placeholder="Ej: 5-15 minutos" maxlength="30">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Stock</label>
-                        <input type="number" id="admin-gold-price-stock" placeholder="0" min="0" value="10">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Estado</label>
-                        <select id="admin-gold-price-status">
-                            <option value="available">Disponible</option>
-                            <option value="limited">Stock Limitado</option>
-                            <option value="soldout">Agotado</option>
-                        </select>
-                    </div>
                 </div>
                 <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 15px;">
                     <button class="btn-primary" onclick="addGoldPriceFromAdmin()">
@@ -6109,18 +6065,6 @@
                     <div class="form-group">
                         <label class="form-label">Precio (USD)</label>
                         <input type="text" id="admin-gold-edit-price" placeholder="Ej: $24.99">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Stock</label>
-                        <input type="number" id="admin-gold-edit-stock" min="0" value="0">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Estado</label>
-                        <select id="admin-gold-edit-status">
-                            <option value="available">Disponible</option>
-                            <option value="limited">Stock Limitado</option>
-                            <option value="soldout">Agotado</option>
-                        </select>
                     </div>
                 </div>
 
@@ -6164,7 +6108,7 @@
                     </div>
                     <div style="text-align: center;">
                         <div style="font-size: 2.2rem; font-weight: 900; color: var(--wow-gold);">${categoriesWithPackages}</div>
-                        <div style="color: var(--text-gray); font-size: 0.9rem;">Con Stock</div>
+                        <div style="color: var(--text-gray); font-size: 0.9rem;">Con Paquetes</div>
                     </div>
                 </div>
             </div>
@@ -7291,7 +7235,6 @@
         document.getElementById('gold-server-custom').style.display = 'none';
         document.getElementById('gold-amount').value = '';
         document.getElementById('gold-price').value = '';
-                document.getElementById('gold-status').value = 'available';
 
         // Actualizar select de categorías
         updateCategorySelects();
@@ -7310,7 +7253,6 @@
         const server = getSelectedGoldServer();
         const amount = document.getElementById('gold-amount').value.trim();
         const price = document.getElementById('gold-price').value.trim();
-                const status = document.getElementById('gold-status').value;
         const message = document.getElementById('gold-message');
 
         if (!game) {
@@ -7371,8 +7313,7 @@
                     server,
                     amount,
                     price: formattedPrice,
-                    status
-                };
+                        };
 
                 showMessage('✅ Oro actualizado exitosamente', 'success');
             }
@@ -7383,8 +7324,7 @@
                 server,
                 amount,
                 price: formattedPrice,
-                status
-            };
+                };
             gold.push(newGold);
 
             showMessage('✅ Oro agregado exitosamente', 'success');
@@ -7408,8 +7348,6 @@
         if (!item) return;
 
         const newPrice = document.getElementById(`price-${id}`).value.trim();
-        const newStock = parseInt(document.getElementById(`stock-${id}`).value);
-        const newStatus = document.getElementById(`status-${id}`).value;
 
         if (!newPrice.match(/^\$?\d+(\.\d{2})?$/)) {
             showMessage('Formato de precio inválido. Usa: $99.99', 'error');
@@ -7419,8 +7357,6 @@
         const formattedPrice = newPrice.startsWith('$') ? newPrice : `$${newPrice}`;
 
         item.price = formattedPrice;
-        item.stock = isNaN(newStock) ? 0 : newStock;
-        item.status = newStatus;
 
         localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
         updateGoldOrderForm();
