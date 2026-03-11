@@ -5,9 +5,9 @@ Si la web muestra datos pero en Supabase no ves nada, normalmente esos datos est
 ## 1) Exportar datos del navegador que SÍ los muestra
 Abre la web en el navegador donde ves los datos (PC/telefono) y abre consola del navegador.
 
-Pega esto y presiona Enter:
+Pega este script y presiona Enter (**solo el código**, no la palabra `js`):
 
-```js
+```javascript
 (() => {
   const keys = [
     'epicgoldshop_settings',
@@ -32,6 +32,11 @@ Pega esto y presiona Enter:
   console.log('Backup descargado: epicgoldshop-localstorage-backup.json');
 })();
 ```
+
+Si te sale `Uncaught ReferenceError: js is not defined`, significa que pegaste la palabra `js` en consola.
+Solo pega el contenido del script, desde `(() => {` hasta `})();`.
+
+Alternativa: abre `docs/EXPORTAR_LOCALSTORAGE_SNIPPET.js` y copia ese archivo completo en la consola.
 
 ## 2) Volver a llenar Supabase rápido
 En Supabase SQL Editor ejecuta en este orden:
