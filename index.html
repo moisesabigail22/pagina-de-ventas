@@ -3895,6 +3895,8 @@
     const LOGO_URL = "https://i.imgur.com/ynvAS9B.png";
     const SITE_URL = `${window.location.origin}/`;
     const CATALOG_SCHEMA_VERSION = 'catalog_v2_mmorpg_2026_04';
+    const LOCAL_ADMIN_USER = 'admin';
+    const LOCAL_ADMIN_PASSWORD = 'admin123';
 
     // URLs de Imgur reales para ejemplos
     const IMGUR_IMAGE_URLS = {
@@ -5881,25 +5883,52 @@
                 sessionStorage.setItem('isAdmin', 'true');
                 sessionStorage.setItem('adminToken', adminToken);
 
-                message.textContent = '✓ Acceso concedido. Redirigiendo...';
+                message.textContent = '✓ Acceso concedido (API). Redirigiendo...';
                 message.className = 'message success';
                 message.style.display = 'block';
 
                 setTimeout(() => {
                     closeModal();
                     showAdmin();
-                    showMessage('✅ Sesión de administrador iniciada', 'success');
+                    showMessage('✅ Sesión de administrador iniciada (API)', 'success');
                 }, 500);
                 return;
             }
+
+            if (response.status === 401) {
+                message.textContent = '✗ Credenciales incorrectas';
+                message.className = 'message error';
+                message.style.display = 'block';
+                document.getElementById('admin-password').value = '';
+                document.getElementById('admin-password').focus();
+                return;
+            }
         } catch (error) {
-            console.warn('Login API no disponible, usando fallback local:', error.message);
+            console.warn('Login API no disponible. Intentando modo local:', error.message);
         } finally {
             loginBtn.innerHTML = originalText;
             loginBtn.disabled = false;
         }
 
-        message.textContent = '✗ No se pudo iniciar sesión contra la API. Revisa variables de entorno/deploy.';
+        if (username === LOCAL_ADMIN_USER && password === LOCAL_ADMIN_PASSWORD) {
+            isAdmin = true;
+            adminToken = '';
+            sessionStorage.setItem('isAdmin', 'true');
+            sessionStorage.removeItem('adminToken');
+
+            message.textContent = '✓ Acceso en modo local (sin API).';
+            message.className = 'message success';
+            message.style.display = 'block';
+
+            setTimeout(() => {
+                closeModal();
+                showAdmin();
+                showMessage('⚠️ Sesión local iniciada. Para guardar en base de datos usa login API.', 'info');
+            }, 500);
+            return;
+        }
+
+        message.textContent = '✗ No se pudo iniciar sesión contra la API. Si estás en local usa admin/admin123.';
         message.className = 'message error';
         message.style.display = 'block';
         document.getElementById('admin-password').value = '';
