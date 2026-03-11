@@ -3772,6 +3772,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
     // ============================================
     // DATOS Y CONFIGURACIÓN
@@ -3798,6 +3799,12 @@
     const TIKTOK_LINK = "https://www.tiktok.com/@farmers.de.mmorpg?_r=1&_t=ZS-93X7c7XttZv";
     const LOGO_URL = "https://i.imgur.com/ynvAS9B.png";
     const SITE_URL = `${window.location.origin}/`;
+
+    const SUPABASE_URL = 'https://meeloixabjkrniwocrzp.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZWxvaXhhYmprcm5pd29jcnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTczNzMsImV4cCI6MjA4ODA3MzM3M30.aKCFB4AK1C8A-RC0DhRph9FvyWcwwqaI0mB6s7BPz00';
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const ENABLE_LOCALSTORAGE = false;
+
 
     // URLs de Imgur reales para ejemplos
     const IMGUR_IMAGE_URLS = {
@@ -4404,9 +4411,8 @@
     // FUNCIONES DE INICIALIZACIÓN
     // ============================================
 
-    function init() {
-        // Cargar datos
-        loadData();
+    async function init() {
+        await loadData();
 
         // Renderizar contenido inicial
         renderAccounts();
@@ -4456,7 +4462,6 @@
             }
         });
 
-        // Mostrar mensaje de bienvenida
         setTimeout(() => {
             showMessage('¡Bienvenido a EPIC GOLD SHOP! 🎮✨', 'info');
         }, 1000);
@@ -4500,59 +4505,140 @@
         return Array.from(serverMap.values());
     }
 
-    function loadData() {
-        // Cargar datos del localStorage
-        const savedAccounts = localStorage.getItem('epicgoldshop_accounts');
-        const savedGold = localStorage.getItem('epicgoldshop_gold');
-        const savedGoldCategories = localStorage.getItem('epicgoldshop_gold_categories');
-        const savedReferences = localStorage.getItem('epicgoldshop_references');
-        const savedSettings = localStorage.getItem('epicgoldshop_settings');
-        const savedCategories = localStorage.getItem('epicgoldshop_categories');
-        const savedGameServers = localStorage.getItem('epicgoldshop_game_servers');
+    async function loadData() {
+        try {
+            const [settingsRes, categoriesRes, serversRes, goldRes, accountsRes, refsRes] = await Promise.all([
+                supabaseClient.from('settings').select('*').limit(1).maybeSingle(),
+                supabaseClient.from('gold_categories').select('*').order('created_at', { ascending: true }),
+                supabaseClient.from('game_servers').select('*').order('created_at', { ascending: true }),
+                supabaseClient.from('gold').select('*').order('created_at', { ascending: true }),
+                supabaseClient.from('accounts').select('*').order('created_at', { ascending: true }),
+                supabaseClient.from('customer_references').select('*').order('created_at', { ascending: true })
+            ]);
 
-        if (savedAccounts) accounts = JSON.parse(savedAccounts);
-        if (savedGold) gold = JSON.parse(savedGold);
-        if (savedGoldCategories) goldCategories = JSON.parse(savedGoldCategories);
-        sanitizeGoldCategoryImages();
-        if (savedReferences) references = JSON.parse(savedReferences);
-        if (savedSettings) settings = JSON.parse(savedSettings);
-        if (savedCategories) categories = JSON.parse(savedCategories);
-        if (savedGameServers) {
-            gameServers = normalizeGameServers(JSON.parse(savedGameServers));
-        }
+            if (settingsRes.data) {
+                settings = {
+                    ...settings,
+                    discord: settingsRes.data.discord || settings.discord,
+                    whatsapp: settingsRes.data.whatsapp || settings.whatsapp,
+                    tiktok: settingsRes.data.tiktok || settings.tiktok,
+                    email: settingsRes.data.email || settings.email,
+                    site: settingsRes.data.site || settings.site
+                };
+            }
 
-        if (!Array.isArray(gameServers) || gameServers.length === 0) {
+            goldCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data : [];
+            sanitizeGoldCategoryImages();
+            gameServers = Array.isArray(serversRes.data) ? normalizeGameServers(serversRes.data) : [];
+            gold = Array.isArray(goldRes.data) ? goldRes.data.map(item => ({
+                ...item,
+                amount: item.amount != null ? String(item.amount) : '',
+                price: item.price != null ? String(item.price) : '',
+                status: item.status || 'available'
+            })) : [];
+            accounts = Array.isArray(accountsRes.data) ? accountsRes.data : [];
+            references = Array.isArray(refsRes.data)
+                ? refsRes.data.map(r => ({
+                    id: r.id,
+                    userName: r.name || 'Cliente',
+                    userInitial: (r.name || 'C').charAt(0).toUpperCase(),
+                    rating: r.rating || 5,
+                    text: r.comment || '',
+                    date: r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : ''
+                }))
+                : [];
+
+            categories = Array.from(new Set([...(goldCategories.map(c => c.game).filter(Boolean)), ...defaultCategories]));
+
+            if (!Array.isArray(gameServers) || gameServers.length === 0) {
+                gameServers = buildGameServersFromData();
+            }
+
+            updateContactLinks();
+        } catch (error) {
+            console.error('Error cargando Supabase:', error);
+            showMessage('⚠️ No se pudo cargar la base de datos. Revisa conexión/credenciales.', 'error');
+            accounts = [...sampleAccounts];
+            gold = [...sampleGold];
+            goldCategories = [...sampleGoldCategories];
+            references = [...sampleReferences];
             gameServers = buildGameServersFromData();
         }
+    }
 
-        // Mantener las categorías generales separadas de juegos de Oro
-        // (si una categoría coincide con un juego de oro y no la usa ninguna cuenta, se limpia)
-        const accountCategoriesInUse = new Set(accounts.map(account => account.category).filter(Boolean));
-        const goldCategoryGames = new Set(getGoldCategoryGames());
-        categories = Array.from(new Set(categories.filter(Boolean))).filter(category => {
-            if (accountCategoriesInUse.has(category)) return true;
-            return !goldCategoryGames.has(category);
-        }).sort();
+    async function syncToSupabaseByKey(key, rawValue) {
+        let parsed;
+        try { parsed = JSON.parse(rawValue); } catch { return; }
 
-        // Asegurar que los enlaces estén actualizados
-        if (!settings.discord || settings.discord !== DISCORD_LINK) {
-            settings.discord = DISCORD_LINK;
-        }
-        if (!settings.tiktok || settings.tiktok !== TIKTOK_LINK) {
-            settings.tiktok = TIKTOK_LINK;
-        }
-        if (!settings.site || settings.site !== SITE_URL) {
-            settings.site = SITE_URL;
+        if (key === 'epicgoldshop_settings') {
+            await supabaseClient.from('settings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabaseClient.from('settings').insert({
+                discord: parsed.discord || null,
+                whatsapp: parsed.whatsapp || null,
+                tiktok: parsed.tiktok || null,
+                email: parsed.email || null,
+                site: parsed.site || null
+            });
+            return;
         }
 
-        // Guardar configuración actualizada
-        localStorage.setItem('epicgoldshop_settings', JSON.stringify(settings));
-        localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
-        localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
-        localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+        const tableMap = {
+            epicgoldshop_gold_categories: 'gold_categories',
+            epicgoldshop_game_servers: 'game_servers',
+            epicgoldshop_gold: 'gold',
+            epicgoldshop_accounts: 'accounts',
+            epicgoldshop_references: 'customer_references'
+        };
 
-        // Actualizar enlaces de contacto
-        updateContactLinks();
+        const table = tableMap[key];
+        if (!table || !Array.isArray(parsed)) return;
+
+        await supabaseClient.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+
+        if (table === 'customer_references') {
+            const rows = parsed.map((r) => ({
+                name: r.name || r.userName || 'Cliente',
+                comment: r.comment || r.text || '',
+                rating: Number.isFinite(Number(r.rating)) ? Number(r.rating) : null,
+                image: r.image || null
+            }));
+            if (rows.length) await supabaseClient.from(table).insert(rows);
+            return;
+        }
+
+        const rows = parsed.map((r) => {
+            if (table === 'gold') {
+                const rawPrice = String(r.price ?? '').replace(/[^0-9.]/g, '');
+                return {
+                    game: r.game || null,
+                    server: r.server || null,
+                    amount: Number.isFinite(Number(r.amount)) ? Number(r.amount) : 0,
+                    price: Number.isFinite(Number(r.price)) ? Number(r.price) : parseFloat(rawPrice || '0'),
+                    delivery: r.delivery || null,
+                    stock: r.stock != null ? String(r.stock) : null,
+                    status: r.status || null
+                };
+            }
+            if (table === 'game_servers') {
+                return { game: r.game || null, name: r.name || r.server || null };
+            }
+            return {
+                ...r,
+                id: undefined,
+                created_at: undefined,
+                updated_at: undefined
+            };
+        });
+
+        if (rows.length) await supabaseClient.from(table).insert(rows);
+    }
+
+    if (!ENABLE_LOCALSTORAGE) {
+        const originalSetItem = localStorage.setItem.bind(localStorage);
+        localStorage.setItem = function(key, value) {
+            syncToSupabaseByKey(key, value).catch((err) => console.error('sync supabase error', err));
+            return originalSetItem(key, value);
+        };
     }
 
     function updateAverageRating() {
@@ -7276,16 +7362,6 @@
     document.addEventListener('DOMContentLoaded', function() {
         window.scrollTo(0, 0);
         init();
-    });
-
-    window.addEventListener('beforeunload', function() {
-        localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
-        localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
-        localStorage.setItem('epicgoldshop_references', JSON.stringify(references));
-        localStorage.setItem('epicgoldshop_settings', JSON.stringify(settings));
-        localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
-        localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
     });
 </script>
 </body>
