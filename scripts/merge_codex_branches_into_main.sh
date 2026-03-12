@@ -4,6 +4,7 @@ set -euo pipefail
 # Mergea ramas remotas codex/* dentro de main de forma segura.
 # - Solo borra ramas que YA estén confirmadas dentro de origin/main.
 # - Puede hacer limpieza de ramas ya mergeadas antes/después de integrar.
+# - Opcionalmente auto-resuelve conflictos con estrategia ours/theirs.
 #
 # Uso:
 #   bash scripts/merge_codex_branches_into_main.sh
@@ -15,6 +16,7 @@ set -euo pipefail
 #   DELETE_MERGED=false|true
 #   KEEP_CURRENT_REMOTE_BRANCH=true|false
 #   CLEAN_UNTRACKED_BETWEEN_MERGES=true|false
+#   CONFLICT_STRATEGY=manual|ours|theirs
 
 REMOTE="${REMOTE:-origin}"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
@@ -23,9 +25,15 @@ PUSH_EACH="${PUSH_EACH:-true}"
 DELETE_MERGED="${DELETE_MERGED:-false}"
 KEEP_CURRENT_REMOTE_BRANCH="${KEEP_CURRENT_REMOTE_BRANCH:-true}"
 CLEAN_UNTRACKED_BETWEEN_MERGES="${CLEAN_UNTRACKED_BETWEEN_MERGES:-true}"
+CONFLICT_STRATEGY="${CONFLICT_STRATEGY:-manual}"
 
 if ! git rev-parse --git-dir >/dev/null 2>&1; then
   echo "❌ Este script debe ejecutarse dentro de un repositorio git."
+  exit 1
+fi
+
+if [ "$CONFLICT_STRATEGY" != "manual" ] && [ "$CONFLICT_STRATEGY" != "ours" ] && [ "$CONFLICT_STRATEGY" != "theirs" ]; then
+  echo "❌ CONFLICT_STRATEGY inválida: $CONFLICT_STRATEGY (usa manual|ours|theirs)"
   exit 1
 fi
 
@@ -47,6 +55,37 @@ reset_to_main_state() {
   if [ "$CLEAN_UNTRACKED_BETWEEN_MERGES" = "true" ]; then
     git clean -fd >/dev/null
   fi
+}
+
+auto_resolve_conflict() {
+  local remote_branch="$1"
+  local local_branch="$2"
+
+  if [ "$CONFLICT_STRATEGY" = "manual" ]; then
+    return 1
+  fi
+
+  local checkout_flag="--ours"
+  if [ "$CONFLICT_STRATEGY" = "theirs" ]; then
+    checkout_flag="--theirs"
+  fi
+
+  echo "⚠️ Intentando auto-resolver conflicto con estrategia: $CONFLICT_STRATEGY"
+
+  if git ls-files -u | awk '{print $4}' | sort -u | grep -q .; then
+    git ls-files -u | awk '{print $4}' | sort -u | xargs -r git checkout "$checkout_flag" --
+  fi
+
+  git add -A
+
+  if git diff --cached --quiet; then
+    # No hay cambios staged; no se puede crear commit de merge
+    return 1
+  fi
+
+  git commit -m "Auto-merge ${local_branch} into ${MAIN_BRANCH} (${CONFLICT_STRATEGY})" >/dev/null
+  echo "✅ Conflicto resuelto automáticamente: $local_branch"
+  return 0
 }
 
 echo "===> Fetch de ramas remotas"
@@ -72,6 +111,7 @@ echo "===> Ramas detectadas (${#REMOTE_BRANCHES[@]}):"
 printf ' - %s\n' "${REMOTE_BRANCHES[@]}"
 
 MERGED_NOW=()
+AUTO_RESOLVED=()
 ALREADY_IN_MAIN=()
 CONFLICTS=()
 DELETED=()
@@ -137,6 +177,19 @@ for remote_branch in "${REMOTE_BRANCHES[@]}"; do
       safe_delete_remote_branch "$local_branch"
     fi
   else
+    if auto_resolve_conflict "$remote_branch" "$local_branch"; then
+      MERGED_NOW+=("$local_branch")
+      AUTO_RESOLVED+=("$local_branch")
+
+      if [ "$PUSH_EACH" = "true" ]; then
+        git push "$REMOTE" "$MAIN_BRANCH"
+        git fetch "$REMOTE" --prune
+        echo "⬆️ Push realizado (auto-resuelto)"
+        safe_delete_remote_branch "$local_branch"
+      fi
+      continue
+    fi
+
     echo "❌ Conflicto en: $local_branch"
     CONFLICTS+=("$local_branch")
 
@@ -162,6 +215,11 @@ echo ""
 echo "================ RESUMEN ================"
 echo "✅ Integradas en esta ejecución: ${#MERGED_NOW[@]}"
 for b in "${MERGED_NOW[@]:-}"; do
+  [ -n "$b" ] && echo "   - $b"
+done
+
+echo "🤖 Auto-resueltas: ${#AUTO_RESOLVED[@]}"
+for b in "${AUTO_RESOLVED[@]:-}"; do
   [ -n "$b" ] && echo "   - $b"
 done
 
