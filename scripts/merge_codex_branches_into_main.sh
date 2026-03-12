@@ -14,6 +14,7 @@ set -euo pipefail
 #   PUSH_EACH=true|false
 #   DELETE_MERGED=false|true
 #   KEEP_CURRENT_REMOTE_BRANCH=true|false
+#   CLEAN_UNTRACKED_BETWEEN_MERGES=true|false
 
 REMOTE="${REMOTE:-origin}"
 MAIN_BRANCH="${MAIN_BRANCH:-main}"
@@ -21,6 +22,7 @@ PREFIX="${PREFIX:-codex/}"
 PUSH_EACH="${PUSH_EACH:-true}"
 DELETE_MERGED="${DELETE_MERGED:-false}"
 KEEP_CURRENT_REMOTE_BRANCH="${KEEP_CURRENT_REMOTE_BRANCH:-true}"
+CLEAN_UNTRACKED_BETWEEN_MERGES="${CLEAN_UNTRACKED_BETWEEN_MERGES:-true}"
 
 if ! git rev-parse --git-dir >/dev/null 2>&1; then
   echo "❌ Este script debe ejecutarse dentro de un repositorio git."
@@ -39,6 +41,13 @@ cleanup() {
   git checkout "$CURRENT_BRANCH" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
+
+reset_to_main_state() {
+  git reset --hard "${REMOTE}/${MAIN_BRANCH}" >/dev/null
+  if [ "$CLEAN_UNTRACKED_BETWEEN_MERGES" = "true" ]; then
+    git clean -fd >/dev/null
+  fi
+}
 
 echo "===> Fetch de ramas remotas"
 git fetch "$REMOTE" --prune
@@ -106,6 +115,10 @@ for remote_branch in "${REMOTE_BRANCHES[@]}"; do
   echo ""
   echo "===> Procesando: $remote_branch"
 
+  # Garantiza estado limpio entre intentos para evitar residuos de conflictos
+  # (por ejemplo archivos untracked que bloquean el siguiente merge).
+  reset_to_main_state
+
   if is_merged_in_main "$remote_branch"; then
     echo "✅ Ya estaba mergeada en ${REMOTE}/${MAIN_BRANCH}: $local_branch"
     ALREADY_IN_MAIN+=("$local_branch")
@@ -126,7 +139,12 @@ for remote_branch in "${REMOTE_BRANCHES[@]}"; do
   else
     echo "❌ Conflicto en: $local_branch"
     CONFLICTS+=("$local_branch")
-    git merge --abort || true
+
+    if git rev-parse -q --verify MERGE_HEAD >/dev/null 2>&1; then
+      git merge --abort || true
+    fi
+
+    reset_to_main_state
   fi
 done
 
