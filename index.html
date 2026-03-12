@@ -3804,6 +3804,7 @@
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZWxvaXhhYmprcm5pd29jcnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTczNzMsImV4cCI6MjA4ODA3MzM3M30.aKCFB4AK1C8A-RC0DhRph9FvyWcwwqaI0mB6s7BPz00';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const ENABLE_LOCALSTORAGE = false;
+    const SHOW_CONNECTION_MESSAGES = true;
 
 
     // URLs de Imgur reales para ejemplos
@@ -4412,6 +4413,7 @@
     // ============================================
 
     async function init() {
+        await checkSupabaseConnection('inicio');
         await loadData();
 
         // Renderizar contenido inicial
@@ -4505,7 +4507,36 @@
         return Array.from(serverMap.values());
     }
 
+    function connectionLog(message, type = 'info') {
+        const text = `🔌 ${message}`;
+        console.log(text);
+        if (SHOW_CONNECTION_MESSAGES) {
+            showMessage(text, type);
+        }
+    }
+
+    async function checkSupabaseConnection(context = '') {
+        const label = context ? ` (${context})` : '';
+        try {
+            const { count, error } = await supabaseClient
+                .from('settings')
+                .select('*', { count: 'exact', head: true });
+
+            if (error) {
+                connectionLog(`Sin conexión a Supabase${label}: ${error.message}`, 'error');
+                return false;
+            }
+
+            connectionLog(`Conexión OK a Supabase${label}. settings=${count ?? 0}`, 'success');
+            return true;
+        } catch (err) {
+            connectionLog(`Error de red Supabase${label}: ${err.message || err}`, 'error');
+            return false;
+        }
+    }
+
     async function loadData() {
+
         try {
             const [settingsRes, categoriesRes, serversRes, goldRes, accountsRes, refsRes] = await Promise.all([
                 supabaseClient.from('settings').select('*').limit(1).maybeSingle(),
@@ -4515,6 +4546,11 @@
                 supabaseClient.from('accounts').select('*').order('created_at', { ascending: true }),
                 supabaseClient.from('customer_references').select('*').order('created_at', { ascending: true })
             ]);
+
+            const errors = [settingsRes.error, categoriesRes.error, serversRes.error, goldRes.error, accountsRes.error, refsRes.error].filter(Boolean);
+            if (errors.length) {
+                throw new Error(errors.map(e => e.message).join(' | '));
+            }
 
             if (settingsRes.data) {
                 settings = {
@@ -4555,6 +4591,8 @@
             }
 
             updateContactLinks();
+
+            connectionLog(`Datos cargados desde DB: gold=${gold.length}, cuentas=${accounts.length}, refs=${references.length}, categorías=${goldCategories.length}`, 'success');
         } catch (error) {
             console.error('Error cargando Supabase:', error);
             showMessage('⚠️ No se pudo cargar la base de datos. Revisa conexión/credenciales.', 'error');
@@ -4570,67 +4608,84 @@
         let parsed;
         try { parsed = JSON.parse(rawValue); } catch { return; }
 
-        if (key === 'epicgoldshop_settings') {
-            await supabaseClient.from('settings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-            await supabaseClient.from('settings').insert({
-                discord: parsed.discord || null,
-                whatsapp: parsed.whatsapp || null,
-                tiktok: parsed.tiktok || null,
-                email: parsed.email || null,
-                site: parsed.site || null
-            });
-            return;
-        }
-
-        const tableMap = {
-            epicgoldshop_gold_categories: 'gold_categories',
-            epicgoldshop_game_servers: 'game_servers',
-            epicgoldshop_gold: 'gold',
-            epicgoldshop_accounts: 'accounts',
-            epicgoldshop_references: 'customer_references'
-        };
-
-        const table = tableMap[key];
-        if (!table || !Array.isArray(parsed)) return;
-
-        await supabaseClient.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
-
-        if (table === 'customer_references') {
-            const rows = parsed.map((r) => ({
-                name: r.name || r.userName || 'Cliente',
-                comment: r.comment || r.text || '',
-                rating: Number.isFinite(Number(r.rating)) ? Number(r.rating) : null,
-                image: r.image || null
-            }));
-            if (rows.length) await supabaseClient.from(table).insert(rows);
-            return;
-        }
-
-        const rows = parsed.map((r) => {
-            if (table === 'gold') {
-                const rawPrice = String(r.price ?? '').replace(/[^0-9.]/g, '');
-                return {
-                    game: r.game || null,
-                    server: r.server || null,
-                    amount: Number.isFinite(Number(r.amount)) ? Number(r.amount) : 0,
-                    price: Number.isFinite(Number(r.price)) ? Number(r.price) : parseFloat(rawPrice || '0'),
-                    delivery: r.delivery || null,
-                    stock: r.stock != null ? String(r.stock) : null,
-                    status: r.status || null
-                };
+        try {
+            if (key === 'epicgoldshop_settings') {
+                const delRes = await supabaseClient.from('settings').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                if (delRes.error) throw delRes.error;
+                const insRes = await supabaseClient.from('settings').insert({
+                    discord: parsed.discord || null,
+                    whatsapp: parsed.whatsapp || null,
+                    tiktok: parsed.tiktok || null,
+                    email: parsed.email || null,
+                    site: parsed.site || null
+                });
+                if (insRes.error) throw insRes.error;
+                connectionLog('settings sincronizado a DB', 'success');
+                return;
             }
-            if (table === 'game_servers') {
-                return { game: r.game || null, name: r.name || r.server || null };
-            }
-            return {
-                ...r,
-                id: undefined,
-                created_at: undefined,
-                updated_at: undefined
+
+            const tableMap = {
+                epicgoldshop_gold_categories: 'gold_categories',
+                epicgoldshop_game_servers: 'game_servers',
+                epicgoldshop_gold: 'gold',
+                epicgoldshop_accounts: 'accounts',
+                epicgoldshop_references: 'customer_references'
             };
-        });
 
-        if (rows.length) await supabaseClient.from(table).insert(rows);
+            const table = tableMap[key];
+            if (!table || !Array.isArray(parsed)) return;
+
+            const delRes = await supabaseClient.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            if (delRes.error) throw delRes.error;
+
+            if (table === 'customer_references') {
+                const rows = parsed.map((r) => ({
+                    name: r.name || r.userName || 'Cliente',
+                    comment: r.comment || r.text || '',
+                    rating: Number.isFinite(Number(r.rating)) ? Number(r.rating) : null,
+                    image: r.image || null
+                }));
+                if (rows.length) {
+                    const insRes = await supabaseClient.from(table).insert(rows);
+                    if (insRes.error) throw insRes.error;
+                }
+                connectionLog(`${table} sincronizado (${rows.length} filas)`, 'success');
+                return;
+            }
+
+            const rows = parsed.map((r) => {
+                if (table === 'gold') {
+                    const rawPrice = String(r.price ?? '').replace(/[^0-9.]/g, '');
+                    return {
+                        game: r.game || null,
+                        server: r.server || null,
+                        amount: Number.isFinite(Number(r.amount)) ? Number(r.amount) : 0,
+                        price: Number.isFinite(Number(r.price)) ? Number(r.price) : parseFloat(rawPrice || '0'),
+                        delivery: r.delivery || null,
+                        stock: r.stock != null ? String(r.stock) : null,
+                        status: r.status || null
+                    };
+                }
+                if (table === 'game_servers') {
+                    return { game: r.game || null, name: r.name || r.server || null };
+                }
+                return {
+                    ...r,
+                    id: undefined,
+                    created_at: undefined,
+                    updated_at: undefined
+                };
+            });
+
+            if (rows.length) {
+                const insRes = await supabaseClient.from(table).insert(rows);
+                if (insRes.error) throw insRes.error;
+            }
+            connectionLog(`${table} sincronizado (${rows.length} filas)`, 'success');
+        } catch (err) {
+            connectionLog(`Error sincronizando ${key}: ${err.message || err}`, 'error');
+            throw err;
+        }
     }
 
     if (!ENABLE_LOCALSTORAGE) {
@@ -5708,7 +5763,7 @@
             message.style.display = 'block';
 
             message.style.animation = 'none';
-            setTimeout(() => {
+            setTimeout(async () => {
                 message.style.animation = 'messageAppear 0.3s ease-out';
             }, 10);
 
@@ -5774,7 +5829,7 @@
         document.getElementById('admin-username').focus();
     }
 
-    function loginAdmin() {
+    async function loginAdmin() {
         const username = document.getElementById('admin-username').value.trim();
         const password = document.getElementById('admin-password').value.trim();
         const message = document.getElementById('login-message');
@@ -5801,10 +5856,11 @@
             loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> INGRESANDO...';
             loginBtn.disabled = true;
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 closeModal();
                 showAdmin();
-                showMessage('✅ Sesión de administrador iniciada', 'success');
+                const ok = await checkSupabaseConnection('login admin');
+                showMessage(ok ? '✅ Sesión admin iniciada + DB conectada' : '⚠️ Sesión admin iniciada pero DB sin conexión', ok ? 'success' : 'error');
 
                 loginBtn.innerHTML = originalText;
                 loginBtn.disabled = false;
