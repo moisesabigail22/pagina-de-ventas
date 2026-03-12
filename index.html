@@ -2953,6 +2953,9 @@
         <a href="#sell" class="nav-btn">
             <i class="fas fa-dollar-sign"></i> VENDER
         </a>
+        <a href="#services" class="nav-btn">
+            <i class="fas fa-hammer"></i> SERVICIOS
+        </a>
         <a href="#references" class="nav-btn">
             <i class="fas fa-star"></i> REFERENCIAS
         </a>
@@ -3019,6 +3022,10 @@
             <a href="#sell" class="quick-action-btn">
                 <i class="fas fa-dollar-sign" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
                 <span>Vender Oro</span>
+            </a>
+            <a href="#services" class="quick-action-btn">
+                <i class="fas fa-hammer" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
+                <span>Servicios</span>
             </a>
         </div>
     </div>
@@ -3177,6 +3184,70 @@
                         <li><i class="fas fa-check" style="color: var(--wow-gold); margin-right: 10px;"></i> Soporte y asistencia continua</li>
                     </ul>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Services Section -->
+<div class="container" id="services">
+    <div class="section">
+        <div class="section-header">
+            <h2 class="section-title">Servicios y Boosting</h2>
+            <div class="stats-badge">
+                <i class="fas fa-bolt"></i> Disponibilidad 24/7
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <div class="sell-info" style="padding: 25px;">
+                <h3 style="color: var(--wow-gold); margin-bottom: 15px;"><i class="fas fa-coins"></i> WoW Turtle</h3>
+                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px;">
+                    <li>Ambershire: <strong style="color: var(--text);">$3 cada 100g</strong></li>
+                    <li>Nordanaar: <strong style="color: var(--text);">$2.9 cada 100g</strong></li>
+                    <li>Telabim: <strong style="color: var(--text);">$4.5 cada 100g</strong></li>
+                </ul>
+            </div>
+
+            <div class="sell-info" style="padding: 25px;">
+                <h3 style="color: var(--wow-gold); margin-bottom: 15px;"><i class="fas fa-server"></i> Servidores Privados</h3>
+                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px;">
+                    <li>Bronzebeard: <strong style="color: var(--text);">$3.5 cada 100g</strong></li>
+                    <li>South Sea: <strong style="color: var(--text);">$4.5 cada 100g</strong></li>
+                    <li>Warmane Onyxia: <strong style="color: var(--text);">$2 cada 1k</strong></li>
+                    <li>Project Epoch (Kezan): <strong style="color: var(--text);">$4 cada 100g</strong></li>
+                    <li>Project Epoch (Gurubashi): <strong style="color: var(--text);">$3 cada 100g</strong></li>
+                </ul>
+            </div>
+
+            <div class="sell-info" style="padding: 25px;">
+                <h3 style="color: var(--wow-gold); margin-bottom: 15px;"><i class="fas fa-globe"></i> WoW Oficial</h3>
+                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px;">
+                    <li>Nightslayer A/H: <strong style="color: var(--text);">$58</strong></li>
+                </ul>
+
+                <h3 style="color: var(--wow-gold); margin: 20px 0 15px;"><i class="fas fa-trophy"></i> Boosteo WoW Privado</h3>
+                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px;">
+                    <li>Boosteo cualquier clase: <strong style="color: var(--text);">$280</strong></li>
+                    <li>PVP Rank Boosting por rango: <strong style="color: var(--text);">$15</strong></li>
+                </ul>
+            </div>
+
+            <div class="sell-info" style="padding: 25px;">
+                <h3 style="color: var(--wow-gold); margin-bottom: 15px;"><i class="fas fa-tools"></i> Profesiones</h3>
+                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px; columns: 2;">
+                    <li>Herboristería / Minería: <strong style="color: var(--text);">$30</strong></li>
+                    <li>Sastrería: <strong style="color: var(--text);">$40</strong></li>
+                    <li>Cocina: <strong style="color: var(--text);">$30</strong></li>
+                    <li>Pesca: <strong style="color: var(--text);">$40</strong></li>
+                    <li>Peletería: <strong style="color: var(--text);">$40</strong></li>
+                    <li>Encantamiento: <strong style="color: var(--text);">$40</strong></li>
+                    <li>Herrería: <strong style="color: var(--text);">$50</strong></li>
+                    <li>Ingeniería: <strong style="color: var(--text);">$55</strong></li>
+                    <li>Alquimia: <strong style="color: var(--text);">$40</strong></li>
+                    <li>Inscription / Crasting: <strong style="color: var(--text);">$50</strong></li>
+                    <li>Desuello: <strong style="color: var(--text);">$30</strong></li>
+                </ul>
             </div>
         </div>
     </div>
@@ -7018,7 +7089,7 @@
             };
             goldCategories.push(newCategory);
 
-            showMessage('✅ Categoría de oro agregada exitosamente', 'success');
+            showMessage('✅ Agregado con éxito', 'success');
         }
 
         if (!categories.includes(game)) {
