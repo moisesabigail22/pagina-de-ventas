@@ -4657,8 +4657,8 @@
                 if (table === 'gold') {
                     const rawPrice = String(r.price ?? '').replace(/[^0-9.]/g, '');
                     return {
-                        game: r.game || null,
-                        server: r.server || null,
+                        game: (r.game || '').trim(),
+                        server: (r.server || '').trim(),
                         amount: Number.isFinite(Number(r.amount)) ? Number(r.amount) : 0,
                         price: Number.isFinite(Number(r.price)) ? Number(r.price) : parseFloat(rawPrice || '0'),
                         delivery: r.delivery || null,
@@ -4666,22 +4666,50 @@
                         status: r.status || null
                     };
                 }
+
                 if (table === 'game_servers') {
-                    return { game: r.game || null, name: r.name || r.server || null };
+                    return {
+                        game: (r.game || '').trim(),
+                        name: (r.name || r.server || '').trim()
+                    };
                 }
-                return {
-                    ...r,
-                    id: undefined,
-                    created_at: undefined,
-                    updated_at: undefined
-                };
+
+                if (table === 'gold_categories') {
+                    return {
+                        game: (r.game || '').trim(),
+                        server: (r.server || '').trim(),
+                        description: r.description || null,
+                        image: r.image || null
+                    };
+                }
+
+                if (table === 'accounts') {
+                    return {
+                        type: r.type || 'account',
+                        category: r.category || null,
+                        server: r.server || null,
+                        name: (r.name || '').trim(),
+                        description: r.description || null,
+                        price: r.price || null,
+                        image: r.image || null,
+                        tags: Array.isArray(r.tags) ? r.tags : []
+                    };
+                }
+
+                return r;
+            }).filter((r) => {
+                if (table === 'gold') return Boolean(r.game && r.server);
+                if (table === 'game_servers') return Boolean(r.game && r.name);
+                if (table === 'gold_categories') return Boolean(r.game);
+                if (table === 'accounts') return Boolean(r.name);
+                return true;
             });
 
             if (rows.length) {
                 const insRes = await supabaseClient.from(table).insert(rows);
                 if (insRes.error) throw insRes.error;
             }
-            connectionLog(`${table} sincronizado (${rows.length} filas)`, 'success');
+            connectionLog(`${table} sincronizado (${rows.length} filas válidas)`, 'success');
         } catch (err) {
             connectionLog(`Error sincronizando ${key}: ${err.message || err}`, 'error');
             throw err;
