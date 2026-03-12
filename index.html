@@ -3803,8 +3803,8 @@
     const SUPABASE_URL = 'https://meeloixabjkrniwocrzp.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZWxvaXhhYmprcm5pd29jcnpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0OTczNzMsImV4cCI6MjA4ODA3MzM3M30.aKCFB4AK1C8A-RC0DhRph9FvyWcwwqaI0mB6s7BPz00';
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const ENABLE_LOCALSTORAGE = false;
-    const SHOW_CONNECTION_MESSAGES = true;
+    const SHOW_CONNECTION_MESSAGES = false;
+    let supabaseReady = false;
 
 
     // URLs de Imgur reales para ejemplos
@@ -4413,7 +4413,7 @@
     // ============================================
 
     async function init() {
-        await checkSupabaseConnection('inicio');
+        supabaseReady = await checkSupabaseConnection('inicio');
         await loadData();
 
         // Renderizar contenido inicial
@@ -4510,8 +4510,8 @@
     function connectionLog(message, type = 'info') {
         const text = `🔌 ${message}`;
         console.log(text);
-        if (SHOW_CONNECTION_MESSAGES) {
-            showMessage(text, type);
+        if (SHOW_CONNECTION_MESSAGES && isAdmin) {
+            showMessage(text, type, { adminOnly: true });
         }
     }
 
@@ -4536,43 +4536,66 @@
     }
 
     async function loadData() {
+        const [settingsRes, categoriesRes, serversRes, goldRes, accountsRes, refsRes] = await Promise.all([
+            supabaseClient.from('settings').select('*').limit(1).maybeSingle(),
+            supabaseClient.from('gold_categories').select('*').order('created_at', { ascending: true }),
+            supabaseClient.from('game_servers').select('*').order('created_at', { ascending: true }),
+            supabaseClient.from('gold').select('*').order('created_at', { ascending: true }),
+            supabaseClient.from('accounts').select('*').order('created_at', { ascending: true }),
+            supabaseClient.from('customer_references').select('*').order('created_at', { ascending: true })
+        ]);
 
-        try {
-            const [settingsRes, categoriesRes, serversRes, goldRes, accountsRes, refsRes] = await Promise.all([
-                supabaseClient.from('settings').select('*').limit(1).maybeSingle(),
-                supabaseClient.from('gold_categories').select('*').order('created_at', { ascending: true }),
-                supabaseClient.from('game_servers').select('*').order('created_at', { ascending: true }),
-                supabaseClient.from('gold').select('*').order('created_at', { ascending: true }),
-                supabaseClient.from('accounts').select('*').order('created_at', { ascending: true }),
-                supabaseClient.from('customer_references').select('*').order('created_at', { ascending: true })
-            ]);
+        if (settingsRes.error) {
+            connectionLog(`Error settings: ${settingsRes.error.message}`, 'error');
+        } else if (settingsRes.data) {
+            settings = {
+                ...settings,
+                discord: settingsRes.data.discord || settings.discord,
+                whatsapp: settingsRes.data.whatsapp || settings.whatsapp,
+                tiktok: settingsRes.data.tiktok || settings.tiktok,
+                email: settingsRes.data.email || settings.email,
+                site: settingsRes.data.site || settings.site
+            };
+        }
 
-            const errors = [settingsRes.error, categoriesRes.error, serversRes.error, goldRes.error, accountsRes.error, refsRes.error].filter(Boolean);
-            if (errors.length) {
-                throw new Error(errors.map(e => e.message).join(' | '));
-            }
-
-            if (settingsRes.data) {
-                settings = {
-                    ...settings,
-                    discord: settingsRes.data.discord || settings.discord,
-                    whatsapp: settingsRes.data.whatsapp || settings.whatsapp,
-                    tiktok: settingsRes.data.tiktok || settings.tiktok,
-                    email: settingsRes.data.email || settings.email,
-                    site: settingsRes.data.site || settings.site
-                };
-            }
-
+        if (categoriesRes.error) {
+            connectionLog(`Error gold_categories: ${categoriesRes.error.message}`, 'error');
+            goldCategories = [];
+        } else {
             goldCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data : [];
-            sanitizeGoldCategoryImages();
+        }
+        sanitizeGoldCategoryImages();
+
+        if (serversRes.error) {
+            connectionLog(`Error game_servers: ${serversRes.error.message}`, 'error');
+            gameServers = [];
+        } else {
             gameServers = Array.isArray(serversRes.data) ? normalizeGameServers(serversRes.data) : [];
+        }
+
+        if (goldRes.error) {
+            connectionLog(`Error gold: ${goldRes.error.message}`, 'error');
+            gold = [];
+        } else {
             gold = Array.isArray(goldRes.data) ? goldRes.data.map(item => ({
                 ...item,
                 amount: item.amount != null ? String(item.amount) : '',
                 price: item.price != null ? String(item.price) : '',
                 status: item.status || 'available'
             })) : [];
+        }
+
+        if (accountsRes.error) {
+            connectionLog(`Error accounts: ${accountsRes.error.message}`, 'error');
+            accounts = [];
+        } else {
             accounts = Array.isArray(accountsRes.data) ? accountsRes.data : [];
+        }
+
+        if (refsRes.error) {
+            connectionLog(`Error customer_references: ${refsRes.error.message}`, 'error');
+            references = [];
+        } else {
             references = Array.isArray(refsRes.data)
                 ? refsRes.data.map(r => ({
                     id: r.id,
@@ -4583,25 +4606,17 @@
                     date: r.created_at ? new Date(r.created_at).toLocaleDateString('es-ES') : ''
                 }))
                 : [];
+        }
 
-            categories = Array.from(new Set([...(goldCategories.map(c => c.game).filter(Boolean)), ...defaultCategories]));
+        categories = Array.from(new Set([...(goldCategories.map(c => c.game).filter(Boolean)), ...defaultCategories]));
 
-            if (!Array.isArray(gameServers) || gameServers.length === 0) {
-                gameServers = buildGameServersFromData();
-            }
-
-            updateContactLinks();
-
-            connectionLog(`Datos cargados desde DB: gold=${gold.length}, cuentas=${accounts.length}, refs=${references.length}, categorías=${goldCategories.length}`, 'success');
-        } catch (error) {
-            console.error('Error cargando Supabase:', error);
-            showMessage('⚠️ No se pudo cargar la base de datos. Revisa conexión/credenciales.', 'error');
-            accounts = [...sampleAccounts];
-            gold = [...sampleGold];
-            goldCategories = [...sampleGoldCategories];
-            references = [...sampleReferences];
+        if (!Array.isArray(gameServers) || gameServers.length === 0) {
             gameServers = buildGameServersFromData();
         }
+
+        updateContactLinks();
+
+        connectionLog(`Datos cargados desde DB: gold=${gold.length}, cuentas=${accounts.length}, refs=${references.length}, categorías=${goldCategories.length}`, 'success');
     }
 
     async function syncToSupabaseByKey(key, rawValue) {
@@ -4716,12 +4731,18 @@
         }
     }
 
-    if (!ENABLE_LOCALSTORAGE) {
-        const originalSetItem = localStorage.setItem.bind(localStorage);
-        localStorage.setItem = function(key, value) {
-            syncToSupabaseByKey(key, value).catch((err) => console.error('sync supabase error', err));
-            return originalSetItem(key, value);
-        };
+
+    async function persistToDatabase(key, payload) {
+        try {
+            await syncToSupabaseByKey(key, JSON.stringify(payload));
+            return true;
+        } catch (err) {
+            console.error('Error guardando en DB:', err);
+            if (isAdmin) {
+                showMessage(`No se pudo guardar en base de datos: ${err.message || err}`, 'error', { adminOnly: true });
+            }
+            return false;
+        }
     }
 
     function updateAverageRating() {
@@ -5259,8 +5280,7 @@
         item.price = newPrice.startsWith('$') ? newPrice : `$${newPrice}`;
         item.stock = parseInt(stockInput?.value, 10) || 0;
         item.status = statusSelect?.value || 'available';
-
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        persistToDatabase('epicgoldshop_gold', gold);
         updateGoldOrderForm();
         showMessage('✅ Precio actualizado correctamente', 'success');
         setupAdminGoldEditForm();
@@ -5279,7 +5299,7 @@
         if (!confirm('¿Eliminar este paquete de oro?')) return;
 
         gold.splice(index, 1);
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        persistToDatabase('epicgoldshop_gold', gold);
         updateGoldOrderForm();
         showMessage('✅ Paquete eliminado', 'success');
         setupAdminGoldEditForm();
@@ -5331,8 +5351,7 @@
             stock,
             status
         });
-
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        persistToDatabase('epicgoldshop_gold', gold);
         updateGoldOrderForm();
         switchAdminTab('gold');
         showMessage('✅ Precio de oro agregado exitosamente', 'success');
@@ -5821,7 +5840,7 @@
         };
 
         references.unshift(newReference);
-        localStorage.setItem('epicgoldshop_references', JSON.stringify(references));
+        persistToDatabase('epicgoldshop_references', references);
 
         renderReferences();
         updateAverageRating();
@@ -5872,6 +5891,16 @@
         }
 
         if (username === 'admin' && password === 'admin123') {
+            const dbOnline = await checkSupabaseConnection('login admin');
+            supabaseReady = dbOnline;
+
+            if (!dbOnline) {
+                message.textContent = 'No hay conexión con la base de datos. No se puede iniciar sesión.';
+                message.className = 'message error';
+                message.style.display = 'block';
+                return;
+            }
+
             isAdmin = true;
             sessionStorage.setItem('isAdmin', 'true');
 
@@ -5887,8 +5916,7 @@
             setTimeout(async () => {
                 closeModal();
                 showAdmin();
-                const ok = await checkSupabaseConnection('login admin');
-                showMessage(ok ? '✅ Sesión admin iniciada + DB conectada' : '⚠️ Sesión admin iniciada pero DB sin conexión', ok ? 'success' : 'error');
+                showMessage('✅ Sesión admin iniciada', 'success', { adminOnly: true });
 
                 loginBtn.innerHTML = originalText;
                 loginBtn.disabled = false;
@@ -6387,8 +6415,7 @@
             game,
             name
         });
-
-        localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+        persistToDatabase('epicgoldshop_game_servers', gameServers);
         nameInput.value = '';
         if (message) message.style.display = 'none';
 
@@ -6405,7 +6432,7 @@
         if (!confirm('¿Eliminar este servidor?')) return;
 
         gameServers.splice(serverIndex, 1);
-        localStorage.setItem('epicgoldshop_game_servers', JSON.stringify(gameServers));
+        persistToDatabase('epicgoldshop_game_servers', gameServers);
         updateGoldServerOptions();
         updateGoldCategoryServerOptions();
         switchAdminTab('servers');
@@ -6610,7 +6637,7 @@
         }
 
         categories.push(categoryName);
-        localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
+        persistToDatabase('epicgoldshop_categories', categories);
 
         updateCategorySelects();
         renderCategoryDropdown(); // Actualizar el dropdown de categorías
@@ -6631,7 +6658,7 @@
         const index = categories.indexOf(category);
         if (index !== -1) {
             categories.splice(index, 1);
-            localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
+        persistToDatabase('epicgoldshop_categories', categories);
 
             updateCategorySelects();
             renderCategoryDropdown(); // Actualizar el dropdown de categorías
@@ -6664,8 +6691,7 @@
         settings.tiktok = tiktok || TIKTOK_LINK;
         settings.email = email || 'soporte@epicgoldshop.com';
         settings.site = site || SITE_URL;
-
-        localStorage.setItem('epicgoldshop_settings', JSON.stringify(settings));
+        persistToDatabase('epicgoldshop_settings', settings);
         updateContactLinks();
         updateSocialLinks();
 
@@ -6744,8 +6770,7 @@
             return category;
         });
 
-        if (changed) {
-            localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
+        if (changed) {        persistToDatabase('epicgoldshop_gold_categories', goldCategories);
         }
         syncGameImagesFromCategories();
     }
@@ -6890,10 +6915,9 @@
         if (!categories.includes(game)) {
             categories.push(game);
             categories.sort();
-            localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
+        persistToDatabase('epicgoldshop_categories', categories);
         }
-
-        localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
+        persistToDatabase('epicgoldshop_gold_categories', goldCategories);
         syncGameImagesFromCategories();
         closeModal();
 
@@ -6912,7 +6936,7 @@
         const index = goldCategories.findIndex(c => c.id === id);
         if (index !== -1) {
             goldCategories.splice(index, 1);
-            localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
+        persistToDatabase('epicgoldshop_gold_categories', goldCategories);
             if (isAdmin) switchAdminTab('gold-categories');
             showMessage('✅ Categoría de oro eliminada exitosamente', 'success');
         }
@@ -7089,8 +7113,7 @@
 
             showMessage('✅ Cuenta agregada exitosamente', 'success');
         }
-
-        localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+        persistToDatabase('epicgoldshop_accounts', accounts);
         renderAccounts(currentFilter);
         renderCategoryDropdown(); // Actualizar dropdown de categorías
         closeModal();
@@ -7136,7 +7159,7 @@
         const index = accounts.findIndex(a => a.id === id);
         if (index !== -1) {
             accounts.splice(index, 1);
-            localStorage.setItem('epicgoldshop_accounts', JSON.stringify(accounts));
+        persistToDatabase('epicgoldshop_accounts', accounts);
             renderAccounts(currentFilter);
             renderCategoryDropdown(); // Actualizar dropdown de categorías
             if (isAdmin) switchAdminTab('accounts');
@@ -7150,7 +7173,7 @@
         const index = references.findIndex(ref => ref.id === id);
         if (index !== -1) {
             references.splice(index, 1);
-            localStorage.setItem('epicgoldshop_references', JSON.stringify(references));
+        persistToDatabase('epicgoldshop_references', references);
             renderReferences();
             updateAverageRating();
             if (isAdmin) switchAdminTab('references');
@@ -7286,8 +7309,7 @@
 
             showMessage('✅ Oro agregado exitosamente', 'success');
         }
-
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        persistToDatabase('epicgoldshop_gold', gold);
         updateGoldOrderForm();
         closeModal();
 
@@ -7318,8 +7340,7 @@
         item.price = formattedPrice;
         item.stock = isNaN(newStock) ? 0 : newStock;
         item.status = newStatus;
-
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        persistToDatabase('epicgoldshop_gold', gold);
         updateGoldOrderForm();
         showMessage('✅ Oro actualizado exitosamente', 'success');
     }
@@ -7330,7 +7351,7 @@
         const index = gold.findIndex(g => g.id === id);
         if (index !== -1) {
             gold.splice(index, 1);
-            localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
+        persistToDatabase('epicgoldshop_gold', gold);
             updateGoldOrderForm();
             if (isAdmin) switchAdminTab('gold');
             showMessage('✅ Oro eliminado exitosamente', 'success');
@@ -7372,7 +7393,15 @@
         });
     }
 
-    function showMessage(text, type) {
+    function showMessage(text, type, options = {}) {
+        const adminVisible = document.getElementById('admin-section').style.display === 'flex';
+        const isWelcomeMessage = text.includes('¡Bienvenido a EPIC GOLD SHOP!');
+        const shouldShowOutsideAdmin = options.force === true || isWelcomeMessage;
+
+        if (!adminVisible && !shouldShowOutsideAdmin) {
+            return;
+        }
+
         const message = document.createElement('div');
         message.className = `message ${type}`;
         message.textContent = text;
