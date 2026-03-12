@@ -1,73 +1,164 @@
--- Esquema/seed para catálogo de oro y servicios solicitado.
--- Compatible con tablas existentes: gold_categories, game_servers, gold, services.
+-- Seed robusto para catálogo de ORO + SERVICIOS.
+-- No requiere índices UNIQUE para funcionar (evita ON CONFLICT).
 
 begin;
 
--- 1) Categorías de juegos para oro
+-- ==========================================
+-- 1) GOLD CATEGORIES (solo oro)
+-- ==========================================
+with src(game, server, description, image) as (
+  values
+    ('WoW Turtle'::text, null::text, 'Oro para Turtle WoW'::text, 'https://i.imgur.com/ynvAS9B.png'::text),
+    ('Servidores Privados', null::text, 'Oro para servidores privados de WoW', 'https://i.imgur.com/ynvAS9B.png'),
+    ('WoW Oficial', null::text, 'Oro para servidores oficiales de WoW', 'https://i.imgur.com/ynvAS9B.png')
+)
+update public.gold_categories gc
+set description = src.description,
+    image = src.image,
+    updated_at = now()
+from src
+where gc.game = src.game
+  and coalesce(gc.server, '') = coalesce(src.server, '');
+
 insert into public.gold_categories (game, server, description, image)
-values
-  ('WoW Turtle', null, 'Oro para Turtle WoW', 'https://i.imgur.com/ynvAS9B.png'),
-  ('Servidores Privados', null, 'Oro para servidores privados de WoW', 'https://i.imgur.com/ynvAS9B.png'),
-  ('WoW Oficial', null, 'Oro para servidores oficiales de WoW', 'https://i.imgur.com/ynvAS9B.png')
-on conflict (game, server) do update
-set description = excluded.description,
-    image = excluded.image,
-    updated_at = now();
+select src.game, src.server, src.description, src.image
+from (
+  values
+    ('WoW Turtle'::text, null::text, 'Oro para Turtle WoW'::text, 'https://i.imgur.com/ynvAS9B.png'::text),
+    ('Servidores Privados', null::text, 'Oro para servidores privados de WoW', 'https://i.imgur.com/ynvAS9B.png'),
+    ('WoW Oficial', null::text, 'Oro para servidores oficiales de WoW', 'https://i.imgur.com/ynvAS9B.png')
+) as src(game, server, description, image)
+where not exists (
+  select 1
+  from public.gold_categories gc
+  where gc.game = src.game
+    and coalesce(gc.server, '') = coalesce(src.server, '')
+);
 
--- 2) Servidores por juego
+-- ==========================================
+-- 2) GAME SERVERS (solo oro)
+-- ==========================================
+with src(game, name) as (
+  values
+    ('WoW Turtle'::text, 'Ambershire'::text),
+    ('WoW Turtle', 'Nordanaar'),
+    ('WoW Turtle', 'Telabim'),
+    ('Servidores Privados', 'Bronzebeard'),
+    ('Servidores Privados', 'South Sea'),
+    ('Servidores Privados', 'Warmane Onyxia'),
+    ('Servidores Privados', 'Project Epoch - Kezan'),
+    ('Servidores Privados', 'Project Epoch - Gurubashi'),
+    ('WoW Oficial', 'Nightslayer A/H')
+)
 insert into public.game_servers (game, name)
-values
-  ('WoW Turtle', 'Ambershire'),
-  ('WoW Turtle', 'Nordanaar'),
-  ('WoW Turtle', 'Telabim'),
-  ('Servidores Privados', 'Bronzebeard'),
-  ('Servidores Privados', 'South Sea'),
-  ('Servidores Privados', 'Warmane Onyxia'),
-  ('Servidores Privados', 'Project Epoch - Kezan'),
-  ('Servidores Privados', 'Project Epoch - Gurubashi'),
-  ('WoW Oficial', 'Nightslayer A/H')
-on conflict (game, name) do nothing;
+select src.game, src.name
+from src
+where not exists (
+  select 1
+  from public.game_servers gs
+  where gs.game = src.game
+    and gs.name = src.name
+);
 
--- 3) Paquetes de oro
+-- ==========================================
+-- 3) GOLD PACKAGES (solo oro)
+-- ==========================================
+with src(game, server, amount, price, delivery, stock) as (
+  values
+    ('WoW Turtle'::text, 'Ambershire'::text, 100::integer, 3.00::numeric, '5-30 minutos'::text, 'available'::text),
+    ('WoW Turtle', 'Nordanaar', 100, 2.90, '5-30 minutos', 'available'),
+    ('WoW Turtle', 'Telabim', 100, 4.50, '5-30 minutos', 'available'),
+
+    ('Servidores Privados', 'Bronzebeard', 100, 3.50, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'South Sea', 100, 4.50, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Warmane Onyxia', 1000, 2.00, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Project Epoch - Kezan', 100, 4.00, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Project Epoch - Gurubashi', 100, 3.00, '5-30 minutos', 'available')
+)
+update public.gold g
+set price = src.price,
+    delivery = src.delivery,
+    stock = src.stock,
+    updated_at = now()
+from src
+where g.game = src.game
+  and g.server = src.server
+  and g.amount = src.amount;
+
 insert into public.gold (game, server, amount, price, delivery, stock)
-values
-  ('WoW Turtle', 'Ambershire', 100, 3.00, '5-30 minutos', 'available'),
-  ('WoW Turtle', 'Nordanaar', 100, 2.90, '5-30 minutos', 'available'),
-  ('WoW Turtle', 'Telabim', 100, 4.50, '5-30 minutos', 'available'),
+select src.game, src.server, src.amount, src.price, src.delivery, src.stock
+from (
+  values
+    ('WoW Turtle'::text, 'Ambershire'::text, 100::integer, 3.00::numeric, '5-30 minutos'::text, 'available'::text),
+    ('WoW Turtle', 'Nordanaar', 100, 2.90, '5-30 minutos', 'available'),
+    ('WoW Turtle', 'Telabim', 100, 4.50, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Bronzebeard', 100, 3.50, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'South Sea', 100, 4.50, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Warmane Onyxia', 1000, 2.00, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Project Epoch - Kezan', 100, 4.00, '5-30 minutos', 'available'),
+    ('Servidores Privados', 'Project Epoch - Gurubashi', 100, 3.00, '5-30 minutos', 'available')
+) as src(game, server, amount, price, delivery, stock)
+where not exists (
+  select 1
+  from public.gold g
+  where g.game = src.game
+    and g.server = src.server
+    and g.amount = src.amount
+);
 
-  ('Servidores Privados', 'Bronzebeard', 100, 3.50, '5-30 minutos', 'available'),
-  ('Servidores Privados', 'South Sea', 100, 4.50, '5-30 minutos', 'available'),
-  ('Servidores Privados', 'Warmane Onyxia', 1000, 2.00, '5-30 minutos', 'available'),
-  ('Servidores Privados', 'Project Epoch - Kezan', 100, 4.00, '5-30 minutos', 'available'),
-  ('Servidores Privados', 'Project Epoch - Gurubashi', 100, 3.00, '5-30 minutos', 'available')
-on conflict (game, server, amount) do update
-set price = excluded.price,
-    delivery = excluded.delivery,
-    stock = excluded.stock,
-    updated_at = now();
+-- ==========================================
+-- 4) SERVICES (solo boosteo + profesiones)
+-- ==========================================
+with src(category, game, name, description, price) as (
+  values
+    ('boosteo'::text, 'WoW Privado'::text, 'Boosteo cualquier clase'::text, 'Boosteo completo en servidor privado'::text, 280.00::numeric),
+    ('boosteo', 'WoW Privado', 'PVP Rank Boosting por rango', 'Boosting por rango PVP', 15.00),
 
--- 4) Servicios adicionales
+    ('profesiones', 'WoW', 'Herboristería / Minería', 'Subida de profesión', 30.00),
+    ('profesiones', 'WoW', 'Sastrería', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Cocina', 'Subida de profesión', 30.00),
+    ('profesiones', 'WoW', 'Pesca', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Peletería', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Encantamiento', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Herrería', 'Subida de profesión', 50.00),
+    ('profesiones', 'WoW', 'Ingeniería', 'Subida de profesión', 55.00),
+    ('profesiones', 'WoW', 'Alquimia', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Inscripción / Crafting', 'Subida de profesión', 50.00),
+    ('profesiones', 'WoW', 'Desuello', 'Subida de profesión', 30.00)
+)
+update public.services s
+set description = src.description,
+    price = src.price,
+    updated_at = now()
+from src
+where s.category = src.category
+  and s.game = src.game
+  and s.name = src.name;
+
 insert into public.services (category, game, name, description, price)
-values
-  ('oro', 'WoW Oficial', 'Nightslayer A/H', 'Precio base publicado', 58.00),
-
-  ('boosteo', 'WoW Privado', 'Boosteo cualquier clase', 'Boosteo completo en servidor privado', 280.00),
-  ('boosteo', 'WoW Privado', 'PVP Rank Boosting por rango', 'Boosting por rango PVP', 15.00),
-
-  ('profesiones', 'WoW', 'Herboristería / Minería', 'Subida de profesión', 30.00),
-  ('profesiones', 'WoW', 'Sastrería', 'Subida de profesión', 40.00),
-  ('profesiones', 'WoW', 'Cocina', 'Subida de profesión', 30.00),
-  ('profesiones', 'WoW', 'Pesca', 'Subida de profesión', 40.00),
-  ('profesiones', 'WoW', 'Peletería', 'Subida de profesión', 40.00),
-  ('profesiones', 'WoW', 'Encantamiento', 'Subida de profesión', 40.00),
-  ('profesiones', 'WoW', 'Herrería', 'Subida de profesión', 50.00),
-  ('profesiones', 'WoW', 'Ingeniería', 'Subida de profesión', 55.00),
-  ('profesiones', 'WoW', 'Alquimia', 'Subida de profesión', 40.00),
-  ('profesiones', 'WoW', 'Inscription / Crasting', 'Subida de profesión', 50.00),
-  ('profesiones', 'WoW', 'Desuello', 'Subida de profesión', 30.00)
-on conflict (category, game, name) do update
-set description = excluded.description,
-    price = excluded.price,
-    updated_at = now();
+select src.category, src.game, src.name, src.description, src.price
+from (
+  values
+    ('boosteo'::text, 'WoW Privado'::text, 'Boosteo cualquier clase'::text, 'Boosteo completo en servidor privado'::text, 280.00::numeric),
+    ('boosteo', 'WoW Privado', 'PVP Rank Boosting por rango', 'Boosting por rango PVP', 15.00),
+    ('profesiones', 'WoW', 'Herboristería / Minería', 'Subida de profesión', 30.00),
+    ('profesiones', 'WoW', 'Sastrería', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Cocina', 'Subida de profesión', 30.00),
+    ('profesiones', 'WoW', 'Pesca', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Peletería', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Encantamiento', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Herrería', 'Subida de profesión', 50.00),
+    ('profesiones', 'WoW', 'Ingeniería', 'Subida de profesión', 55.00),
+    ('profesiones', 'WoW', 'Alquimia', 'Subida de profesión', 40.00),
+    ('profesiones', 'WoW', 'Inscripción / Crafting', 'Subida de profesión', 50.00),
+    ('profesiones', 'WoW', 'Desuello', 'Subida de profesión', 30.00)
+) as src(category, game, name, description, price)
+where not exists (
+  select 1
+  from public.services s
+  where s.category = src.category
+    and s.game = src.game
+    and s.name = src.name
+);
 
 commit;
