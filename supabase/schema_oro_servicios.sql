@@ -83,7 +83,7 @@ set price = src.price,
 from src
 where g.game = src.game
   and g.server = src.server
-  and g.amount = src.amount;
+  and g.amount::text = src.amount::text;
 
 insert into public.gold (game, server, amount, price, delivery, stock)
 select src.game, src.server, src.amount, src.price, src.delivery, src.stock
@@ -103,7 +103,7 @@ where not exists (
   from public.gold g
   where g.game = src.game
     and g.server = src.server
-    and g.amount = src.amount
+    and g.amount::text = src.amount::text
 );
 
 -- ==========================================

@@ -2953,9 +2953,6 @@
         <a href="#sell" class="nav-btn">
             <i class="fas fa-dollar-sign"></i> VENDER
         </a>
-        <a href="#services" class="nav-btn">
-            <i class="fas fa-hammer"></i> SERVICIOS
-        </a>
         <a href="#references" class="nav-btn">
             <i class="fas fa-star"></i> REFERENCIAS
         </a>
@@ -3022,10 +3019,6 @@
             <a href="#sell" class="quick-action-btn">
                 <i class="fas fa-dollar-sign" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
                 <span>Vender Oro</span>
-            </a>
-            <a href="#services" class="quick-action-btn">
-                <i class="fas fa-hammer" style="color: var(--wow-gold); font-size: 1.5rem;"></i>
-                <span>Servicios</span>
             </a>
         </div>
     </div>
@@ -3189,46 +3182,6 @@
     </div>
 </div>
 
-<!-- Services Section -->
-<div class="container" id="services">
-    <div class="section">
-        <div class="section-header">
-            <h2 class="section-title">Servicios y Boosting</h2>
-            <div class="stats-badge">
-                <i class="fas fa-bolt"></i> Disponibilidad 24/7
-            </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
-            <div class="sell-info" style="padding: 25px;">
-                <h3 style="color: var(--wow-gold); margin-bottom: 15px;"><i class="fas fa-trophy"></i> Boosteo WoW Privado</h3>
-                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px;">
-                    <li>Boosteo cualquier clase: <strong style="color: var(--text);">$280</strong></li>
-                    <li>PVP Rank Boosting por rango: <strong style="color: var(--text);">$15</strong></li>
-                </ul>
-                <p style="margin-top: 12px; color: var(--text-gray);">Consulta disponibilidad y tiempos por Discord.</p>
-            </div>
-
-            <div class="sell-info" style="padding: 25px;">
-                <h3 style="color: var(--wow-gold); margin-bottom: 15px;"><i class="fas fa-tools"></i> Profesiones</h3>
-                <ul style="line-height: 1.9; color: var(--text-gray); padding-left: 20px; columns: 2;">
-                    <li>Herboristería / Minería: <strong style="color: var(--text);">$30</strong></li>
-                    <li>Sastrería: <strong style="color: var(--text);">$40</strong></li>
-                    <li>Cocina: <strong style="color: var(--text);">$30</strong></li>
-                    <li>Pesca: <strong style="color: var(--text);">$40</strong></li>
-                    <li>Peletería: <strong style="color: var(--text);">$40</strong></li>
-                    <li>Encantamiento: <strong style="color: var(--text);">$40</strong></li>
-                    <li>Herrería: <strong style="color: var(--text);">$50</strong></li>
-                    <li>Ingeniería: <strong style="color: var(--text);">$55</strong></li>
-                    <li>Alquimia: <strong style="color: var(--text);">$40</strong></li>
-                    <li>Inscripción / Crafting: <strong style="color: var(--text);">$50</strong></li>
-                    <li>Desuello: <strong style="color: var(--text);">$30</strong></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- References Section -->
 <div class="container" id="references">
     <div class="section">
@@ -3369,6 +3322,9 @@
                 </button>
                 <button class="admin-tab" onclick="switchAdminTab('gold')">
                     <i class="fas fa-coins"></i> Oro
+                </button>
+                <button class="admin-tab" onclick="switchAdminTab('services')">
+                    <i class="fas fa-hammer"></i> Servicios
                 </button>
                 <button class="admin-tab" onclick="switchAdminTab('references')">
                     <i class="fas fa-star"></i> Referencias
@@ -4185,6 +4141,7 @@
     let settings = { ...contactInfo };
     let categories = [...defaultCategories];
     let gameServers = [];
+    let services = [];
 
     // ============================================
     // SISTEMA DE IMÁGENES MEJORADO
@@ -4586,13 +4543,14 @@
     }
 
     async function loadData() {
-        const [settingsRes, categoriesRes, serversRes, goldRes, accountsRes, refsRes] = await Promise.all([
+        const [settingsRes, categoriesRes, serversRes, goldRes, accountsRes, refsRes, servicesRes] = await Promise.all([
             supabaseClient.from('settings').select('*').limit(1).maybeSingle(),
             supabaseClient.from('gold_categories').select('*').order('created_at', { ascending: true }),
             supabaseClient.from('game_servers').select('*').order('created_at', { ascending: true }),
             supabaseClient.from('gold').select('*').order('created_at', { ascending: true }),
             supabaseClient.from('accounts').select('*').order('created_at', { ascending: true }),
-            supabaseClient.from('customer_references').select('*').order('created_at', { ascending: true })
+            supabaseClient.from('customer_references').select('*').order('created_at', { ascending: true }),
+            supabaseClient.from('services').select('*').order('created_at', { ascending: true })
         ]);
 
         if (settingsRes.error) {
@@ -4658,6 +4616,16 @@
                 : [];
         }
 
+        if (servicesRes.error) {
+            connectionLog(`Error services: ${servicesRes.error.message}`, 'error');
+            services = [];
+        } else {
+            services = Array.isArray(servicesRes.data) ? servicesRes.data.map(item => ({
+                ...item,
+                price: item.price != null ? String(item.price) : '0'
+            })) : [];
+        }
+
         categories = Array.from(new Set([...(goldCategories.map(c => c.game).filter(Boolean)), ...defaultCategories]));
 
         if (!Array.isArray(gameServers) || gameServers.length === 0) {
@@ -4694,7 +4662,8 @@
                 epicgoldshop_game_servers: 'game_servers',
                 epicgoldshop_gold: 'gold',
                 epicgoldshop_accounts: 'accounts',
-                epicgoldshop_references: 'customer_references'
+                epicgoldshop_references: 'customer_references',
+                epicgoldshop_services: 'services'
             };
 
             const table = tableMap[key];
@@ -6149,6 +6118,9 @@
                 setupAdminGoldPriceForm();
                 setupAdminGoldEditForm();
                 break;
+            case 'services':
+                content.innerHTML = renderAdminServices();
+                break;
             case 'gold-categories':
                 content.innerHTML = renderAdminGoldCategories();
                 break;
@@ -6593,6 +6565,83 @@
         updateGoldCategoryServerOptions();
         switchAdminTab('servers');
         showMessage('✅ Servidor eliminado', 'success');
+    }
+
+    function renderAdminServices() {
+        return `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 20px;">
+                <h3 style="color: var(--wow-gold); font-size: 1.8rem;">Servicios (Admin)</h3>
+                <div class="stats-badge"><i class="fas fa-list"></i> ${services.length} servicios</div>
+            </div>
+
+            <div style="background: var(--panel-light); padding: 25px; border-radius: 10px; border: 2px solid var(--wow-gold-dark); margin-bottom: 25px;">
+                <h4 style="color: var(--wow-gold); margin-bottom: 20px; font-size: 1.2rem;"><i class="fas fa-plus"></i> Agregar servicio</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">Categoría</label>
+                        <select id="admin-service-category">
+                            <option value="boosteo">Boosteo</option>
+                            <option value="profesiones">Profesiones</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Juego</label>
+                        <input type="text" id="admin-service-game" placeholder="Ej: WoW Privado" maxlength="60">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" id="admin-service-name" placeholder="Ej: Boosteo cualquier clase" maxlength="100">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Precio (USD)</label>
+                        <input type="text" id="admin-service-price" placeholder="Ej: 280" maxlength="20">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción</label>
+                    <textarea id="admin-service-description" placeholder="Descripción del servicio" maxlength="300"></textarea>
+                </div>
+                <button class="btn-primary" onclick="addAdminService()"><i class="fas fa-save"></i> Guardar servicio</button>
+            </div>
+
+            <div style="max-height: 520px; overflow-y: auto; padding-right: 10px;">
+                ${services.map(service => `
+                    <div style="background: var(--panel); padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid var(--wow-gold); display:flex; justify-content:space-between; gap:16px; align-items:flex-start;">
+                        <div>
+                            <div style="color: var(--wow-gold); font-weight:700; margin-bottom:8px;">${service.name} • $${service.price}</div>
+                            <div style="color: var(--text); margin-bottom:6px;">${service.game || 'Sin juego'} · ${(service.category || '').toUpperCase()}</div>
+                            <div style="color: var(--text-gray);">${service.description || 'Sin descripción'}</div>
+                        </div>
+                        <button class="btn-danger" onclick="deleteAdminService('${service.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                `).join('')}
+                ${services.length === 0 ? `<div style="text-align:center;color:var(--text-gray);padding:30px;">No hay servicios cargados.</div>` : ''}
+            </div>
+        `;
+    }
+
+    function addAdminService() {
+        const category = document.getElementById('admin-service-category')?.value || 'boosteo';
+        const game = document.getElementById('admin-service-game')?.value.trim() || 'WoW';
+        const name = document.getElementById('admin-service-name')?.value.trim();
+        const price = document.getElementById('admin-service-price')?.value.trim();
+        const description = document.getElementById('admin-service-description')?.value.trim() || '';
+
+        if (!name) return showMessage('El nombre del servicio es obligatorio', 'error');
+        if (!price || !price.match(/^\$?\d+(\.\d{1,2})?$/)) return showMessage('Precio inválido. Usa 99 o 99.99', 'error');
+
+        services.push({ id: Date.now(), category, game, name, description, price: price.replace('$','') });
+        persistToDatabase('epicgoldshop_services', services);
+        switchAdminTab('services');
+        showMessage('✅ Servicio agregado con éxito', 'success');
+    }
+
+    function deleteAdminService(id) {
+        if (!confirm('¿Eliminar este servicio?')) return;
+        services = services.filter(service => String(service.id) !== String(id));
+        persistToDatabase('epicgoldshop_services', services);
+        switchAdminTab('services');
+        showMessage('✅ Servicio eliminado', 'success');
     }
 
     function renderAdminReferences() {
