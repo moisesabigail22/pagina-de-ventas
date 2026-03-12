@@ -3658,6 +3658,23 @@
             <input type="text" id="gold-category-name" placeholder="Ej: Turtle WoW, World of Warcraft" maxlength="100">
         </div>
 
+        <div class="form-grid">
+            <div class="form-group">
+                <label class="form-label">Juego</label>
+                <select id="gold-category-game">
+                    <!-- Los juegos se cargan dinámicamente -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Servidor</label>
+                <select id="gold-category-server-select">
+                    <option value="">Selecciona un servidor</option>
+                </select>
+                <input type="text" id="gold-category-server-custom" placeholder="Otro servidor..." maxlength="50" style="display: none; margin-top: 10px;">
+            </div>
+        </div>
+        
         <div class="form-group">
             <label class="form-label">Descripción*</label>
             <textarea id="gold-category-description" placeholder="Describe este juego, características principales..." maxlength="300"></textarea>
@@ -4521,19 +4538,12 @@
             gameServers = normalizeGameServers(JSON.parse(savedGameServers));
         }
 
-        if (!Array.isArray(gameServers) || gameServers.length === 0) {
-            gameServers = buildGameServersFromData();
+        const goldCategoryGames = goldCategories.map(category => category.game);
+        const combinedGames = Array.from(new Set([...categories, ...goldCategoryGames]));
+        if (combinedGames.length !== categories.length) {
+            categories = combinedGames.sort();
         }
-
-        // Mantener las categorías generales separadas de juegos de Oro
-        // (si una categoría coincide con un juego de oro y no la usa ninguna cuenta, se limpia)
-        const accountCategoriesInUse = new Set(accounts.map(account => account.category).filter(Boolean));
-        const goldCategoryGames = new Set(getGoldCategoryGames());
-        categories = Array.from(new Set(categories.filter(Boolean))).filter(category => {
-            if (accountCategoriesInUse.has(category)) return true;
-            return !goldCategoryGames.has(category);
-        }).sort();
-
+        
         // Asegurar que los enlaces estén actualizados
         if (!settings.discord || settings.discord !== DISCORD_LINK) {
             settings.discord = DISCORD_LINK;
@@ -4684,9 +4694,54 @@
         }
     }
 
+    function updateGoldCategoryServerOptions() {
+        const gameSelect = document.getElementById('gold-category-game');
+        const serverSelect = document.getElementById('gold-category-server-select');
+        const customInput = document.getElementById('gold-category-server-custom');
+
+        if (!gameSelect || !serverSelect) return;
+
+        const selectedGame = gameSelect.value;
+        const serversForGame = gameServers
+            .filter(server => server.game === selectedGame)
+            .sort((a, b) => a.name.localeCompare(b.name));
+
+        serverSelect.innerHTML = `
+            <option value="">Selecciona un servidor</option>
+            ${serversForGame.map(server => `
+                <option value="${server.name}">${server.name} (${server.type})</option>
+            `).join('')}
+            <option value="custom">Otro...</option>
+        `;
+
+        if (customInput) {
+            customInput.value = '';
+            customInput.style.display = serversForGame.length === 0 ? 'block' : 'none';
+        }
+
+        if (serversForGame.length === 0) {
+            serverSelect.value = 'custom';
+            if (customInput) customInput.focus();
+        }
+    }
+
     function toggleGoldServerCustom() {
         const serverSelect = document.getElementById('gold-server-select');
         const customInput = document.getElementById('gold-server-custom');
+        if (!serverSelect || !customInput) return;
+
+        if (serverSelect.value === 'custom') {
+            customInput.style.display = 'block';
+            customInput.focus();
+        } else {
+            customInput.style.display = 'none';
+            customInput.value = '';
+        }
+    }
+
+    function toggleGoldCategoryServerCustom() {
+        const serverSelect = document.getElementById('gold-category-server-select');
+        const customInput = document.getElementById('gold-category-server-custom');
         if (!serverSelect || !customInput) return;
 
         if (serverSelect.value === 'custom') {
@@ -4709,466 +4764,17 @@
         return serverSelect.value.trim();
     }
 
-    function readFileAsDataUrl(file) {
-        return new Promise((resolve, reject) => {
-            if (!file) {
-                resolve('');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result);
-            reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
-            reader.readAsDataURL(file);
-        });
+    function getSelectedGoldCategoryServer() {
+        const serverSelect = document.getElementById('gold-category-server-select');
+        const customInput = document.getElementById('gold-category-server-custom');
+
+        if (!serverSelect) return '';
+        if (serverSelect.value === 'custom') {
+            return customInput ? customInput.value.trim() : '';
+        }
+        return serverSelect.value.trim();
     }
-
-    function getGoldOrderGames() {
-        return getGoldCategoryGames();
-    }
-
-    function getGoldOrderServers(game) {
-        if (!game) return [];
-        const servers = gameServers
-            .filter(server => server.game === game)
-            .map(server => server.name);
-        return Array.from(new Set(servers)).sort();
-    }
-
-    function showGoldOrderStep(step) {
-        const steps = ['game', 'server', 'details'];
-        steps.forEach(name => {
-            const container = document.getElementById(`gold-order-step-${name}`);
-            if (container) {
-                container.style.display = name === step ? 'block' : 'none';
-            }
-        });
-    }
-
-    function renderGoldOrderGameList() {
-        const list = document.getElementById('gold-order-game-list');
-        if (!list) return;
-        const games = getGoldOrderGames();
-        if (games.length === 0) {
-            list.innerHTML = '<p style="color: var(--text-gray);">No hay juegos disponibles.</p>';
-            return;
-        }
-
-        list.innerHTML = games.map(game => {
-            const category = goldCategories.find(item => item.game === game) || {};
-            const image = resolveCategoryImage(category) || getGameImage(game);
-            const description = category.description || `Compra oro para ${game} con entrega rápida y segura.`;
-            const serversCount = getGoldOrderServers(game).length;
-
-            return `
-            <button class="gold-order-option" type="button" data-game="${game}">
-                <span class="gold-order-option-badge">Compra rápida</span>
-                <img class="gold-order-option-cover" src="${image}" alt="${game}" loading="lazy" onerror="this.onerror=null;this.src='${getGameImage(game)}';">
-                <div class="gold-order-option-content">
-                    <div class="gold-order-option-title">${game}</div>
-                    <div class="gold-order-option-description">${description}</div>
-                    <div class="gold-order-option-meta">• ${serversCount} ${serversCount === 1 ? 'servidor disponible' : 'servidores disponibles'}</div>
-                </div>
-            </button>`;
-        }).join('');
-
-        list.querySelectorAll('[data-game]').forEach(btn => {
-            btn.addEventListener('click', () => {
-                goldOrderState.game = btn.dataset.game || '';
-                goldOrderState.server = '';
-                renderGoldOrderServerList();
-                document.getElementById('gold-order-modal-title').textContent = 'Selecciona un servidor';
-                showGoldOrderStep('server');
-            });
-        });
-    }
-
-    function renderGoldOrderServerList() {
-        const serverSelect = document.getElementById('gold-order-server-select');
-        if (!serverSelect) return;
-
-        goldOrderState.server = '';
-
-        const servers = getGoldOrderServers(goldOrderState.game);
-        if (servers.length === 0) {
-            serverSelect.disabled = true;
-            serverSelect.innerHTML = '<option value="">No hay servidores disponibles</option>';
-            return;
-        }
-
-        serverSelect.disabled = false;
-        serverSelect.innerHTML = `
-            <option value="">Selecciona un servidor</option>
-            ${servers.map(server => `<option value="${server}">${server}</option>`).join('')}
-        `;
-
-        if (servers.length === 1) {
-            serverSelect.value = servers[0];
-            goldOrderState.server = servers[0];
-            updateGoldOrderAmountOptions();
-            document.getElementById('gold-order-modal-title').textContent = 'Completa tu compra';
-            showGoldOrderStep('details');
-        }
-    }
-    function updateGoldOrderAmountOptions() {
-        const detailContainer = document.getElementById('gold-order-step-details');
-        const amountSelect = document.getElementById('gold-order-amount');
-        if (!amountSelect) return;
-
-        const selectedGame = goldOrderState.game;
-        const selectedServer = goldOrderState.server;
-
-        if (!selectedGame || !selectedServer) {
-            amountSelect.innerHTML = '<option value="">Selecciona una cantidad</option>';
-            amountSelect.value = '';
-            amountSelect.disabled = true;
-            if (detailContainer) {
-                detailContainer.style.display = 'none';
-            }
-            updateGoldOrderSummary();
-            return;
-        }
-
-        const packages = gold.filter(item => item.game === selectedGame && item.server === selectedServer);
-        if (packages.length === 0) {
-            amountSelect.innerHTML = '<option value="">Sin paquetes disponibles</option>';
-            amountSelect.value = '';
-            amountSelect.disabled = true;
-            if (detailContainer) {
-                detailContainer.style.display = 'none';
-            }
-            updateGoldOrderSummary();
-            return;
-        }
-
-        amountSelect.disabled = false;
-        if (detailContainer) {
-            detailContainer.style.display = 'block';
-        }
-        const current = amountSelect.value;
-        amountSelect.innerHTML = `
-            <option value="">Selecciona una cantidad</option>
-            ${packages.map(item => `
-                <option value="${item.id}" ${String(item.id) === current ? 'selected' : ''}>
-                    ${item.amount} • ${item.price}
-                </option>
-            `).join('')}
-        `;
-
-        if (current && packages.some(item => String(item.id) === current)) {
-            amountSelect.value = current;
-        }
-
-        updateGoldOrderSummary();
-    }
-
-    function updateGoldOrderSummary() {
-        const amountSelect = document.getElementById('gold-order-amount');
-        const priceEl = document.getElementById('gold-order-price');
-        const deliveryEl = document.getElementById('gold-order-delivery');
-        const stockEl = document.getElementById('gold-order-stock');
-        const cta = document.getElementById('gold-order-cta');
-
-        if (!amountSelect || !priceEl || !deliveryEl || !stockEl) return;
-
-        const selectedId = parseInt(amountSelect.value, 10);
-        const item = gold.find(entry => entry.id === selectedId);
-
-        if (!item) {
-            priceEl.textContent = '-';
-            deliveryEl.textContent = '-';
-            stockEl.textContent = '-';
-            if (cta) {
-                cta.setAttribute('aria-disabled', 'true');
-                cta.style.pointerEvents = 'none';
-                cta.style.opacity = '0.6';
-                cta.href = settings?.discord || DISCORD_LINK;
-            }
-            return;
-        }
-
-        priceEl.textContent = item.price;
-        deliveryEl.textContent = item.delivery || 'Por confirmar';
-        stockEl.textContent = item.stock ? `${item.stock} disponibles` : 'Consultar stock';
-        if (cta) {
-            cta.setAttribute('aria-disabled', 'false');
-            cta.style.pointerEvents = 'auto';
-            cta.style.opacity = '1';
-            cta.href = settings?.discord || DISCORD_LINK;
-        }
-    }
-
-    function updateGoldOrderForm() {
-        const modal = document.getElementById('gold-order-modal');
-        if (modal && modal.style.display === 'flex') {
-            renderGoldOrderGameList();
-            renderGoldOrderServerList();
-            updateGoldOrderAmountOptions();
-            updateGoldOrderSummary();
-        }
-    }
-
-    function resetGoldOrderFlow() {
-        goldOrderState = {
-            game: '',
-            server: ''
-        };
-
-        const serverSelect = document.getElementById('gold-order-server-select');
-        const amountSelect = document.getElementById('gold-order-amount');
-        if (serverSelect) {
-            serverSelect.value = '';
-            serverSelect.disabled = true;
-            serverSelect.innerHTML = '<option value="">Selecciona un servidor</option>';
-        }
-        if (amountSelect) {
-            amountSelect.value = '';
-            amountSelect.disabled = true;
-        }
-        document.getElementById('gold-order-modal-title').textContent = 'Selecciona un juego';
-        showGoldOrderStep('game');
-        renderGoldOrderGameList();
-        renderGoldOrderServerList();
-        updateGoldOrderSummary();
-    }
-
-    function openGoldOrderModal() {
-        resetGoldOrderFlow();
-        showModal('gold-order-modal');
-    }
-
-    function getAdminGoldGames() {
-        return getGoldCategoryGames();
-    }
-
-    function setupAdminGoldPriceForm() {
-        const gameSelect = document.getElementById('admin-gold-price-game');
-        const serverSelect = document.getElementById('admin-gold-price-server');
-        const deliveryInput = document.getElementById('admin-gold-price-delivery');
-
-        if (!gameSelect || !serverSelect) return;
-
-        const games = getAdminGoldGames();
-        if (games.length === 0) {
-            gameSelect.innerHTML = '<option value="">Sin juegos disponibles</option>';
-            serverSelect.innerHTML = '<option value="">Sin servidores disponibles</option>';
-            serverSelect.disabled = true;
-            return;
-        }
-
-        gameSelect.innerHTML = games.map(game => `<option value="${game}">${game}</option>`).join('');
-
-        const updateServers = () => {
-            const selectedGame = gameSelect.value;
-            const serversFromAdmin = gameServers
-                .filter(server => server.game === selectedGame)
-                .map(server => server.name);
-            const serversFromGold = gold
-                .filter(item => item.game === selectedGame)
-                .map(item => item.server);
-            const servers = Array.from(new Set([...serversFromAdmin, ...serversFromGold])).sort();
-
-            if (servers.length === 0) {
-                serverSelect.innerHTML = '<option value="">Sin servidores disponibles</option>';
-                serverSelect.value = '';
-                serverSelect.disabled = true;
-                return;
-            }
-
-            serverSelect.disabled = false;
-            serverSelect.innerHTML = servers.map(server => `<option value="${server}">${server}</option>`).join('');
-        };
-
-        gameSelect.addEventListener('change', updateServers);
-        updateServers();
-
-        if (deliveryInput && !deliveryInput.value) {
-            deliveryInput.value = '5-15 minutos';
-        }
-    }
-
-    function setupAdminGoldEditForm() {
-        const gameSelect = document.getElementById('admin-gold-edit-game');
-        const serverSelect = document.getElementById('admin-gold-edit-server');
-        const packageSelect = document.getElementById('admin-gold-edit-package');
-        const priceInput = document.getElementById('admin-gold-edit-price');
-        const stockInput = document.getElementById('admin-gold-edit-stock');
-        const statusSelect = document.getElementById('admin-gold-edit-status');
-
-        if (!gameSelect || !serverSelect || !packageSelect) return;
-
-        const games = getAdminGoldGames();
-        if (games.length === 0) {
-            gameSelect.innerHTML = '<option value="">Sin juegos disponibles</option>';
-            serverSelect.innerHTML = '<option value="">Sin servidores</option>';
-            serverSelect.disabled = true;
-            packageSelect.innerHTML = '<option value="">Sin paquetes</option>';
-            packageSelect.disabled = true;
-            if (priceInput) priceInput.value = '';
-            if (stockInput) stockInput.value = 0;
-            if (statusSelect) statusSelect.value = 'available';
-            return;
-        }
-        gameSelect.innerHTML = games.map(game => `<option value="${game}">${game}</option>`).join('');
-
-        const updateServers = () => {
-            const selectedGame = gameSelect.value;
-            const servers = gameServers
-                .filter(server => server.game === selectedGame)
-                .map(server => server.name);
-            const uniqueServers = Array.from(new Set(servers)).sort();
-            if (uniqueServers.length === 0) {
-                serverSelect.innerHTML = '<option value="">Sin servidores</option>';
-                serverSelect.disabled = true;
-                packageSelect.innerHTML = '<option value="">Sin paquetes</option>';
-                packageSelect.disabled = true;
-                if (priceInput) priceInput.value = '';
-                if (stockInput) stockInput.value = 0;
-                if (statusSelect) statusSelect.value = 'available';
-                return;
-            }
-            serverSelect.disabled = false;
-            serverSelect.innerHTML = uniqueServers.map(server => `<option value="${server}">${server}</option>`).join('');
-            updatePackages();
-        };
-
-        const updatePackages = () => {
-            const selectedGame = gameSelect.value;
-            const selectedServer = serverSelect.value;
-            const packages = gold.filter(item => item.game === selectedGame && item.server === selectedServer);
-            if (packages.length === 0) {
-                packageSelect.innerHTML = '<option value="">Sin paquetes</option>';
-                packageSelect.disabled = true;
-                if (priceInput) priceInput.value = '';
-                if (stockInput) stockInput.value = 0;
-                if (statusSelect) statusSelect.value = 'available';
-                return;
-            }
-            packageSelect.disabled = false;
-            packageSelect.innerHTML = packages.map(item => `
-                <option value="${item.id}">${item.amount} • ${item.price}</option>
-            `).join('');
-            updateEditFields();
-        };
-
-        const updateEditFields = () => {
-            const selectedId = parseInt(packageSelect.value, 10);
-            const item = gold.find(entry => entry.id === selectedId);
-            if (!item) return;
-            if (priceInput) priceInput.value = item.price;
-            if (stockInput) stockInput.value = item.stock ?? 0;
-            if (statusSelect) statusSelect.value = item.status;
-        };
-
-        gameSelect.addEventListener('change', updateServers);
-        serverSelect.addEventListener('change', updatePackages);
-        packageSelect.addEventListener('change', updateEditFields);
-
-        updateServers();
-    }
-
-    function saveAdminGoldEdit() {
-        const packageSelect = document.getElementById('admin-gold-edit-package');
-        const priceInput = document.getElementById('admin-gold-edit-price');
-        const stockInput = document.getElementById('admin-gold-edit-stock');
-        const statusSelect = document.getElementById('admin-gold-edit-status');
-
-        if (!packageSelect || !packageSelect.value) {
-            showMessage('Selecciona un paquete válido', 'error');
-            return;
-        }
-
-        const selectedId = parseInt(packageSelect.value, 10);
-        const item = gold.find(entry => entry.id === selectedId);
-        if (!item) return;
-
-        const newPrice = priceInput?.value.trim() || '';
-        if (!newPrice.match(/^\$?\d+(\.\d{2})?$/)) {
-            showMessage('Formato de precio inválido. Usa: $99.99', 'error');
-            return;
-        }
-
-        item.price = newPrice.startsWith('$') ? newPrice : `$${newPrice}`;
-        item.stock = parseInt(stockInput?.value, 10) || 0;
-        item.status = statusSelect?.value || 'available';
-
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
-        updateGoldOrderForm();
-        showMessage('✅ Precio actualizado correctamente', 'success');
-        setupAdminGoldEditForm();
-    }
-
-    function deleteAdminGoldEdit() {
-        const packageSelect = document.getElementById('admin-gold-edit-package');
-        if (!packageSelect || !packageSelect.value) {
-            showMessage('Selecciona un paquete válido', 'error');
-            return;
-        }
-        const selectedId = parseInt(packageSelect.value, 10);
-        const index = gold.findIndex(entry => entry.id === selectedId);
-        if (index === -1) return;
-
-        if (!confirm('¿Eliminar este paquete de oro?')) return;
-
-        gold.splice(index, 1);
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
-        updateGoldOrderForm();
-        showMessage('✅ Paquete eliminado', 'success');
-        setupAdminGoldEditForm();
-    }
-
-    function addGoldPriceFromAdmin() {
-        const game = document.getElementById('admin-gold-price-game')?.value;
-        const server = document.getElementById('admin-gold-price-server')?.value;
-        const amount = document.getElementById('admin-gold-price-amount')?.value.trim();
-        const price = document.getElementById('admin-gold-price-price')?.value.trim();
-        const delivery = document.getElementById('admin-gold-price-delivery')?.value.trim() || 'Por confirmar';
-        const stock = parseInt(document.getElementById('admin-gold-price-stock')?.value, 10) || 0;
-        const status = document.getElementById('admin-gold-price-status')?.value || 'available';
-
-        if (!game) {
-            showMessage('Selecciona un juego válido', 'error');
-            return;
-        }
-
-        if (!server) {
-            showMessage('Selecciona un servidor válido', 'error');
-            return;
-        }
-
-        if (!amount) {
-            showMessage('La cantidad de oro es obligatoria', 'error');
-            return;
-        }
-
-        if (!price) {
-            showMessage('El precio es obligatorio', 'error');
-            return;
-        }
-
-        if (!price.match(/^\$?\d+(\.\d{2})?$/)) {
-            showMessage('Formato de precio inválido. Usa: $99.99', 'error');
-            return;
-        }
-
-        const formattedPrice = price.startsWith('$') ? price : `$${price}`;
-
-        gold.push({
-            id: Date.now(),
-            game,
-            server,
-            amount,
-            price: formattedPrice,
-            delivery,
-            stock,
-            status
-        });
-
-        localStorage.setItem('epicgoldshop_gold', JSON.stringify(gold));
-        updateGoldOrderForm();
-        switchAdminTab('gold');
-        showMessage('✅ Precio de oro agregado exitosamente', 'success');
-    }
-
+    
     function setupSmoothNavigation() {
         // Navegación suave para enlaces internos
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -5264,35 +4870,17 @@
             });
         }
 
-        const goldOrderAmountSelect = document.getElementById('gold-order-amount');
-        if (goldOrderAmountSelect) {
-            goldOrderAmountSelect.addEventListener('change', function() {
-                updateGoldOrderSummary();
+        const goldCategoryGameSelect = document.getElementById('gold-category-game');
+        if (goldCategoryGameSelect) {
+            goldCategoryGameSelect.addEventListener('change', function() {
+                updateGoldCategoryServerOptions();
             });
         }
 
-        const goldOrderBackBtn = document.getElementById('gold-order-back-btn');
-        if (goldOrderBackBtn) {
-            goldOrderBackBtn.addEventListener('click', function() {
-                resetGoldOrderFlow();
-            });
-        }
-
-        const goldOrderServerSelect = document.getElementById('gold-order-server-select');
-        if (goldOrderServerSelect) {
-            goldOrderServerSelect.addEventListener('change', function() {
-                goldOrderState.server = this.value || '';
-                if (!goldOrderState.server) return;
-                updateGoldOrderAmountOptions();
-                document.getElementById('gold-order-modal-title').textContent = 'Completa tu compra';
-                showGoldOrderStep('details');
-            });
-        }
-
-        const goldOrderOpenBtn = document.getElementById('gold-order-open');
-        if (goldOrderOpenBtn) {
-            goldOrderOpenBtn.addEventListener('click', function() {
-                openGoldOrderModal();
+        const goldCategoryServerSelect = document.getElementById('gold-category-server-select');
+        if (goldCategoryServerSelect) {
+            goldCategoryServerSelect.addEventListener('change', function() {
+                toggleGoldCategoryServerCustom();
             });
         }
     }
@@ -6091,7 +5679,11 @@
     }
 
     function renderAdminServers() {
-        const games = getGoldCategoryGames();
+        const games = Array.from(new Set([
+            ...categories,
+            ...goldCategories.map(category => category.game),
+            ...gameServers.map(server => server.game)
+        ])).sort();
         const totalServers = gameServers.length;
         const serversByGame = gameServers.reduce((acc, server) => {
             if (!acc[server.game]) acc[server.game] = [];
@@ -6615,8 +6207,14 @@
     // CAMBIA ESTAS 2 LÍNEAS:
     document.getElementById('gold-category-modal-title').textContent = 'AGREGAR JUEGO';
     document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> AGREGAR JUEGO';
-
+    
     document.getElementById('gold-category-name').value = '';
+    updateCategorySelects();
+    document.getElementById('gold-category-game').value = categories[0] || '';
+    updateGoldCategoryServerOptions();
+    document.getElementById('gold-category-server-select').value = '';
+    document.getElementById('gold-category-server-custom').value = '';
+    document.getElementById('gold-category-server-custom').style.display = 'none';
     document.getElementById('gold-category-description').value = '';
     document.getElementById('gold-category-image').value = '';
     document.getElementById('gold-category-image-file').value = '';
@@ -6637,13 +6235,33 @@
     // CAMBIA ESTAS 2 LÍNEAS:
     document.getElementById('gold-category-modal-title').textContent = 'EDITAR JUEGO';
     document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> ACTUALIZAR JUEGO';
-
+    
     document.getElementById('gold-category-name').value = category.name;
     document.getElementById('gold-category-description').value = category.description;
     document.getElementById('gold-category-image').value = category.image || '';
-    document.getElementById('gold-category-image-file').value = '';
-    updateGoldCategoryImagePreview(resolveCategoryImage(category) || getGameImage(category.game));
 
+    updateCategorySelects();
+    document.getElementById('gold-category-game').value = category.game || '';
+    updateGoldCategoryServerOptions();
+    const serverSelect = document.getElementById('gold-category-server-select');
+    const serverCustom = document.getElementById('gold-category-server-custom');
+    const hasServerOption = Array.from(serverSelect.options).some(
+        option => option.value === category.server
+    );
+    if (hasServerOption) {
+        serverSelect.value = category.server;
+        if (serverCustom) {
+            serverCustom.style.display = 'none';
+            serverCustom.value = '';
+        }
+    } else {
+        serverSelect.value = 'custom';
+        if (serverCustom) {
+            serverCustom.style.display = 'block';
+            serverCustom.value = category.server || '';
+        }
+    }
+    
     document.getElementById('gold-category-message').style.display = 'none';
 
     showModal('gold-category-modal');
@@ -6652,9 +6270,10 @@
 
     async function saveGoldCategory() {
         const name = document.getElementById('gold-category-name').value.trim();
+        const game = document.getElementById('gold-category-game').value.trim();
+        const server = getSelectedGoldCategoryServer();
         const description = document.getElementById('gold-category-description').value.trim();
         const imageUrl = document.getElementById('gold-category-image').value.trim();
-        const imageFile = document.getElementById('gold-category-image-file').files[0];
         const message = document.getElementById('gold-category-message');
 
         if (!name) {
@@ -6664,7 +6283,29 @@
             document.getElementById('gold-category-name').focus();
             return;
         }
-
+        
+        if (!game) {
+            message.textContent = 'El juego es obligatorio';
+            message.className = 'message error';
+            message.style.display = 'block';
+            document.getElementById('gold-category-game').focus();
+            return;
+        }
+        
+        if (!server) {
+            message.textContent = 'El servidor es obligatorio';
+            message.className = 'message error';
+            message.style.display = 'block';
+            const serverSelect = document.getElementById('gold-category-server-select');
+            const serverCustom = document.getElementById('gold-category-server-custom');
+            if (serverSelect && serverSelect.value === 'custom' && serverCustom) {
+                serverCustom.focus();
+            } else if (serverSelect) {
+                serverSelect.focus();
+            }
+            return;
+        }
+        
         if (!description) {
             message.textContent = 'La descripción es obligatoria';
             message.className = 'message error';
@@ -6672,24 +6313,8 @@
             document.getElementById('gold-category-description').focus();
             return;
         }
-
-        let categoryImage = '';
-        if (imageFile) {
-            try {
-                categoryImage = await readFileAsDataUrl(imageFile);
-            } catch (error) {
-                message.textContent = 'No se pudo cargar la imagen del archivo';
-                message.className = 'message error';
-                message.style.display = 'block';
-                return;
-            }
-        } else {
-            categoryImage = resolveCategoryImage({ game: name, image: imageUrl });
-        }
-        const game = name;
-        if (!categoryImage) {
-            categoryImage = getGameImage(game);
-        }
+        
+        const categoryImage = imageUrl || GAME_IMAGES[game] || GAME_IMAGES.default;
 
         if (editingGoldCategoryId) {
             const index = goldCategories.findIndex(c => c.id === editingGoldCategoryId);
@@ -6722,7 +6347,7 @@
             categories.sort();
             localStorage.setItem('epicgoldshop_categories', JSON.stringify(categories));
         }
-
+        
         localStorage.setItem('epicgoldshop_gold_categories', JSON.stringify(goldCategories));
         syncGameImagesFromCategories();
         closeModal();
