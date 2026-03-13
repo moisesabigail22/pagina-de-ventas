@@ -4122,6 +4122,20 @@
     let gameServers = [];
     let services = [];
 
+
+    const defaultServiceCatalog = [
+        { category: 'boosteo', game: 'WoW Privado', name: 'Boosting Epic 1-70', description: 'Boosteo manual, niveles personalizados, soporte por región.', price: '280', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Alchemy Epic 1-375', description: 'Subida manual de Alquimia 1-375.', price: '40', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Blacksmithing Epic 1-375', description: 'Subida manual de Herrería 1-375.', price: '50', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Cooking Epic 1-375', description: 'Subida manual de Cocina 1-375.', price: '30', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Enchanting Epic 1-375', description: 'Subida manual de Encantamiento 1-375.', price: '40', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Fishing Epic 1-375', description: 'Subida manual de Pesca 1-375.', price: '40', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Herbalism Epic 1-375', description: 'Subida manual de Herboristería 1-375.', price: '30', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Jewelcrafting Epic 1-375', description: 'Subida manual de Joyería 1-375.', price: '50', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Mining Epic 1-375', description: 'Subida manual de Minería 1-375.', price: '30', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'profesiones', game: 'WoW', name: 'Skinning Epic 1-375', description: 'Subida manual de Desuello 1-375.', price: '30', image: 'https://i.imgur.com/ynvAS9B.png' }
+    ];
+
     // ============================================
     // SISTEMA DE IMÁGENES MEJORADO
     // ============================================
@@ -4601,12 +4615,15 @@
 
         if (servicesRes.error) {
             connectionLog(`Error services: ${servicesRes.error.message}`, 'error');
-            services = [];
+            services = [...defaultServiceCatalog];
         } else {
             services = Array.isArray(servicesRes.data) ? servicesRes.data.map(item => ({
                 ...item,
                 price: item.price != null ? String(item.price) : '0'
             })) : [];
+            if (services.length === 0) {
+                services = [...defaultServiceCatalog];
+            }
         }
 
         categories = Array.from(new Set(goldCategories.map(c => c.game).filter(Boolean))).sort();

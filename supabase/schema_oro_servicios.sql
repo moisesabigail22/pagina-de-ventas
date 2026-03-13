@@ -155,4 +155,22 @@ where not exists (
     and s.name = src.name
 );
 
+
+-- Asegurar lectura pública de servicios para el frontend (anon)
+alter table if exists public.services enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_policies
+    where schemaname = 'public'
+      and tablename = 'services'
+      and policyname = 'public read services'
+  ) then
+    create policy "public read services" on public.services
+      for select to anon using (true);
+  end if;
+end $$;
+
 commit;
