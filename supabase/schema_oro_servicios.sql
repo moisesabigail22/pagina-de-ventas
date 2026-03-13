@@ -111,7 +111,7 @@ alter table if exists public.services
 
 with src(category, game, name, description, price, image) as (
   values
-    ('boosteo'::text, 'WoW Privado'::text, 'Boosting Epic 1-70'::text, 'Boosteo manual, niveles personalizados, soporte por región.', 280.00::numeric, 'https://i.imgur.com/ynvAS9B.png'::text),
+    ('boosteo'::text, 'WoW Privado'::text, 'Boosting EPIC'::text, 'Boosteo manual, niveles personalizados, soporte por región.', 280.00::numeric, 'https://i.imgur.com/ynvAS9B.png'::text),
     ('profesiones', 'WoW', 'Alchemy Epic 1-375', 'Subida manual de Alquimia 1-375.', 40.00, 'https://i.imgur.com/ynvAS9B.png'),
     ('profesiones', 'WoW', 'Blacksmithing Epic 1-375', 'Subida manual de Herrería 1-375.', 50.00, 'https://i.imgur.com/ynvAS9B.png'),
     ('profesiones', 'WoW', 'Cooking Epic 1-375', 'Subida manual de Cocina 1-375.', 30.00, 'https://i.imgur.com/ynvAS9B.png'),
@@ -136,7 +136,7 @@ insert into public.services (category, game, name, description, price, image)
 select src.category, src.game, src.name, src.description, src.price, src.image
 from (
   values
-    ('boosteo'::text, 'WoW Privado'::text, 'Boosting Epic 1-70'::text, 'Boosteo manual, niveles personalizados, soporte por región.', 280.00::numeric, 'https://i.imgur.com/ynvAS9B.png'::text),
+    ('boosteo'::text, 'WoW Privado'::text, 'Boosting EPIC'::text, 'Boosteo manual, niveles personalizados, soporte por región.', 280.00::numeric, 'https://i.imgur.com/ynvAS9B.png'::text),
     ('profesiones', 'WoW', 'Alchemy Epic 1-375', 'Subida manual de Alquimia 1-375.', 40.00, 'https://i.imgur.com/ynvAS9B.png'),
     ('profesiones', 'WoW', 'Blacksmithing Epic 1-375', 'Subida manual de Herrería 1-375.', 50.00, 'https://i.imgur.com/ynvAS9B.png'),
     ('profesiones', 'WoW', 'Cooking Epic 1-375', 'Subida manual de Cocina 1-375.', 30.00, 'https://i.imgur.com/ynvAS9B.png'),

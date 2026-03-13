@@ -4124,7 +4124,7 @@
 
 
     const defaultServiceCatalog = [
-        { category: 'boosteo', game: 'WoW Privado', name: 'Boosting Epic 1-70', description: 'Boosteo manual, niveles personalizados, soporte por región.', price: '280', image: 'https://i.imgur.com/ynvAS9B.png' },
+        { category: 'boosteo', game: 'WoW Privado', name: 'Boosting EPIC', description: 'Boosteo manual, niveles personalizados, soporte por región.', price: '280', image: 'https://i.imgur.com/ynvAS9B.png' },
         { category: 'profesiones', game: 'WoW', name: 'Alchemy Epic 1-375', description: 'Subida manual de Alquimia 1-375.', price: '40', image: 'https://i.imgur.com/ynvAS9B.png' },
         { category: 'profesiones', game: 'WoW', name: 'Blacksmithing Epic 1-375', description: 'Subida manual de Herrería 1-375.', price: '50', image: 'https://i.imgur.com/ynvAS9B.png' },
         { category: 'profesiones', game: 'WoW', name: 'Cooking Epic 1-375', description: 'Subida manual de Cocina 1-375.', price: '30', image: 'https://i.imgur.com/ynvAS9B.png' },
@@ -6576,6 +6576,10 @@
                         <label class="form-label">Imagen (URL)</label>
                         <input type="text" id="admin-service-image" placeholder="https://...jpg" maxlength="500">
                     </div>
+                    <div class="form-group">
+                        <label class="form-label">Imagen (archivo)</label>
+                        <input type="file" id="admin-service-image-file" accept="image/*">
+                    </div>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Descripción</label>
@@ -6600,16 +6604,27 @@
         `;
     }
 
-    function addAdminService() {
+    async function addAdminService() {
         const category = document.getElementById('admin-service-category')?.value || 'boosteo';
         const game = document.getElementById('admin-service-game')?.value.trim() || 'WoW';
         const name = document.getElementById('admin-service-name')?.value.trim();
         const price = document.getElementById('admin-service-price')?.value.trim();
         const description = document.getElementById('admin-service-description')?.value.trim() || '';
-        const image = document.getElementById('admin-service-image')?.value.trim() || null;
+        const imageUrl = document.getElementById('admin-service-image')?.value.trim() || '';
+        const imageFile = document.getElementById('admin-service-image-file')?.files?.[0] || null;
 
         if (!name) return showMessage('El nombre del servicio es obligatorio', 'error');
         if (!price || !price.match(/^\$?\d+(\.\d{1,2})?$/)) return showMessage('Precio inválido. Usa 99 o 99.99', 'error');
+
+        let image = imageUrl || null;
+        if (imageFile) {
+            try {
+                image = await readFileAsDataUrl(imageFile);
+            } catch (error) {
+                showMessage('No se pudo cargar la imagen del archivo', 'error');
+                return;
+            }
+        }
 
         const serviceId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
         services.push({ id: serviceId, category, game, name, description, image, price: price.replace('$','') });
