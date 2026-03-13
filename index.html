@@ -3308,28 +3308,28 @@
 
         <div class="admin-container">
             <div class="admin-tabs">
-                <button class="admin-tab active" onclick="switchAdminTab('account-categories')">
+                <button class="admin-tab active" onclick="switchAdminTab('account-categories', this)">
                     <i class="fas fa-tags"></i> Categorías de Cuentas
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('accounts')">
+                <button class="admin-tab" onclick="switchAdminTab('accounts', this)">
                     <i class="fas fa-gamepad"></i> Cuentas
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('gold-categories')">
+                <button class="admin-tab" onclick="switchAdminTab('gold-categories', this)">
                     <i class="fas fa-tags"></i> Categorías de Juegos (Oro)
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('servers')">
+                <button class="admin-tab" onclick="switchAdminTab('servers', this)">
                     <i class="fas fa-server"></i> Servidores (Juegos)
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('gold')">
+                <button class="admin-tab" onclick="switchAdminTab('gold', this)">
                     <i class="fas fa-coins"></i> Oro
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('services')">
+                <button class="admin-tab" onclick="switchAdminTab('services', this)">
                     <i class="fas fa-hammer"></i> Servicios
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('references')">
+                <button class="admin-tab" onclick="switchAdminTab('references', this)">
                     <i class="fas fa-star"></i> Referencias
                 </button>
-                <button class="admin-tab" onclick="switchAdminTab('settings')">
+                <button class="admin-tab" onclick="switchAdminTab('settings', this)">
                     <i class="fas fa-cog"></i> Configuración
                 </button>
             </div>
@@ -4074,18 +4074,7 @@
         }
     ];
 
-    // Categorías por defecto
-    const defaultCategories = [
-        'Turtle WoW',
-        'World of Warcraft',
-        'Albion Online',
-        'Runescape',
-        'New World',
-        'Final Fantasy XIV',
-        'Elder Scrolls Online',
-        'Guild Wars 2'
-    ];
-
+    const defaultCategories = [];
 
     // Configuración de contactos
     const contactInfo = {
@@ -4096,7 +4085,7 @@
         site: SITE_URL
     };
 
-    // Cargar datos del localStorage
+    // Normalizadores de datos
     function normalizeGameServers(servers) {
         if (!Array.isArray(servers)) return [];
         return servers.map((server, index) => ({
@@ -4542,7 +4531,11 @@
             connectionLog(`Error gold_categories: ${categoriesRes.error.message}`, 'error');
             goldCategories = [];
         } else {
-            goldCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data : [];
+            goldCategories = Array.isArray(categoriesRes.data) ? categoriesRes.data.map(item => ({
+                ...item,
+                game: (item.game || item.name || 'Juego sin nombre').trim(),
+                name: (item.name || item.game || 'Juego sin nombre').trim()
+            })) : [];
         }
         sanitizeGoldCategoryImages();
 
@@ -4597,7 +4590,7 @@
             })) : [];
         }
 
-        categories = Array.from(new Set([...(goldCategories.map(c => c.game).filter(Boolean)), ...defaultCategories]));
+        categories = Array.from(new Set(goldCategories.map(c => c.game).filter(Boolean))).sort();
 
         if (!Array.isArray(gameServers) || gameServers.length === 0) {
             gameServers = buildGameServersFromData();
@@ -4803,6 +4796,10 @@
         selects.forEach(select => {
             if (select.id === 'gold-category') return;
             const currentValue = select.value;
+            if (categories.length === 0) {
+                select.innerHTML = '<option value="">Sin categorías disponibles</option>';
+                return;
+            }
             select.innerHTML = categories.map(cat =>
                 `<option value="${cat}" ${cat === currentValue ? 'selected' : ''}>${cat}</option>`
             ).join('');
@@ -5967,7 +5964,6 @@
             }
 
             isAdmin = true;
-            sessionStorage.setItem('isAdmin', 'true');
 
             message.textContent = '✓ Acceso concedido. Redirigiendo...';
             message.className = 'message success';
@@ -6005,7 +6001,6 @@
         if (!confirm('¿Estás seguro de cerrar sesión del panel de administración?')) return;
 
         isAdmin = false;
-        sessionStorage.removeItem('isAdmin');
 
         document.getElementById('admin-section').style.display = 'none';
         updateBodyScrollLock();
@@ -6022,25 +6017,19 @@
     }
 
     function checkAdminSession() {
-        const savedAdmin = sessionStorage.getItem('isAdmin');
-        if (savedAdmin === 'true') {
-            isAdmin = true;
-            document.getElementById('acceso-btn').innerHTML = '<i class="fas fa-user-shield"></i> PANEL ADMIN';
-        }
+        // Sesión no persistente: siempre requiere login por seguridad.
+        isAdmin = false;
     }
 
-    function switchAdminTab(tab) {
+    function switchAdminTab(tab, clickedBtn = null) {
         document.querySelectorAll('.admin-tab').forEach(t => {
             t.classList.remove('active');
         });
 
-        if (event && event.target) {
-            event.target.classList.add('active');
+        if (clickedBtn) {
+            clickedBtn.classList.add('active');
         } else {
-            const tabBtn = Array.from(document.querySelectorAll('.admin-tab')).find(btn =>
-                btn.textContent.includes(tab.charAt(0).toUpperCase() + tab.slice(1).toLowerCase()) ||
-                btn.onclick?.toString().includes(`'${tab}'`)
-            );
+            const tabBtn = document.querySelector(`.admin-tab[onclick*=\"switchAdminTab('${tab}'\"]`);
             if (tabBtn) tabBtn.classList.add('active');
         }
 
@@ -6279,7 +6268,7 @@
                                         <img src="${resolveCategoryImage(category)}" alt="${category.game}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.onerror=null;this.src='${getGameImage(category.game)}';">
                                     </div>
                                     <div style="flex: 1;">
-                                        <h4 style="color: var(--text); margin-bottom: 8px; font-size: 1.3rem; word-break: break-word;">${category.name}</h4>
+                                        <h4 style="color: var(--text); margin-bottom: 8px; font-size: 1.3rem; word-break: break-word;">${category.name || category.game || "Juego sin nombre"}</h4>
                                         <div style="color: var(--text-gray); font-size: 0.95rem;">
                                             <i class="fas fa-gamepad"></i> ${category.game} ${category.server ? '• ' + category.server : ''}
                                         </div>
@@ -6950,7 +6939,7 @@
     document.getElementById('gold-category-modal-title').textContent = 'EDITAR JUEGO';
     document.getElementById('save-gold-category-btn').innerHTML = '<i class="fas fa-save"></i> ACTUALIZAR JUEGO';
 
-    document.getElementById('gold-category-name').value = category.name;
+    document.getElementById('gold-category-name').value = category.name || category.game || '';
     document.getElementById('gold-category-description').value = category.description;
     document.getElementById('gold-category-image').value = category.image || '';
     document.getElementById('gold-category-image-file').value = '';
