@@ -378,24 +378,31 @@ async function createBotTicket(payload: Required<GoldTicketPayload>) {
     throw new Error(`No se pudo crear el canal en Discord: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  const proofAttachment = parseDataUrlAttachment(payload.transaction_proof_name, payload.transaction_proof_data_url);
-  const embed = buildDiscordEmbed(payload, proofAttachment.fileName);
+  const hasProofAttachment = Boolean(String(payload.transaction_proof_data_url || '').trim());
+  const proofAttachment = hasProofAttachment
+    ? parseDataUrlAttachment(payload.transaction_proof_name, payload.transaction_proof_data_url)
+    : null;
+  const embed = buildDiscordEmbed(payload, proofAttachment?.fileName || '');
   const adminRoleMentions = adminRoleIds.map((adminRoleId) => `<@&${adminRoleId}>`).join(' ');
   const adminUserMentions = adminUserIds.map((adminUserId) => `<@${adminUserId}>`).join(' ');
   const openingHeader = [adminRoleMentions, adminUserMentions].filter(Boolean).join(' ').trim() || 'Nuevo pedido desde la web.';
   const openingSummary = [
     openingHeader,
     `Contacto: ${payload.customer_contact}`,
-    `Comprobante: ${proofAttachment.fileName}`,
+    proofAttachment ? `Comprobante: ${proofAttachment.fileName}` : 'Comprobante: no adjuntado',
     `Pago: ${payload.payment_method_name} (${payload.payment_method_label}: ${payload.payment_method_value})`
   ].filter(Boolean).join('\n');
 
   let ticketMessageId = '';
   try {
-    const ticketMessage = await postChannelMessageWithAttachment(botToken, channel.id, {
+    const messageBody = {
       content: openingSummary,
       embeds: [embed]
-    }, proofAttachment);
+    };
+
+    const ticketMessage = proofAttachment
+      ? await postChannelMessageWithAttachment(botToken, channel.id, messageBody, proofAttachment)
+      : await postChannelMessage(botToken, channel.id, messageBody);
     if (ticketMessage?.id) {
       ticketMessageId = ticketMessage.id;
     }
@@ -447,7 +454,7 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: 'El body JSON no es válido' }, 400);
   }
 
-  const requiredFields = ['game', 'server', 'amount', 'price', 'faction', 'character', 'trade', 'customer_contact', 'payment_method_name', 'payment_method_label', 'payment_method_value', 'transaction_proof_name', 'transaction_proof_data_url'] as const;
+  const requiredFields = ['game', 'server', 'amount', 'price', 'faction', 'character', 'trade', 'customer_contact', 'payment_method_name', 'payment_method_label', 'payment_method_value'] as const;
   for (const field of requiredFields) {
     if (!payload[field] || !String(payload[field]).trim()) {
       return jsonResponse({ error: `Falta el campo requerido: ${field}` }, 400);
@@ -466,8 +473,8 @@ Deno.serve(async (request) => {
     payment_method_name: String(payload.payment_method_name).trim(),
     payment_method_label: String(payload.payment_method_label).trim(),
     payment_method_value: String(payload.payment_method_value).trim(),
-    transaction_proof_name: String(payload.transaction_proof_name).trim(),
-    transaction_proof_data_url: String(payload.transaction_proof_data_url).trim(),
+    transaction_proof_name: String(payload.transaction_proof_name || '').trim(),
+    transaction_proof_data_url: String(payload.transaction_proof_data_url || '').trim(),
     custom_amount: Boolean(payload.custom_amount),
     source: String(payload.source || 'web_gold_order').trim(),
     created_at: String(payload.created_at || new Date().toISOString())
