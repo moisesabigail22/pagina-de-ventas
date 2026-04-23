@@ -2756,6 +2756,47 @@
 
         /* ========== SISTEMA RESPONSIVO DE IMÁGENES MEJORADO ========== */
         @media (max-width: 768px) {
+            header {
+                padding: 10px 12px;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .logo {
+                gap: 10px;
+                min-width: 0;
+            }
+
+            .logo-subtitle {
+                display: none;
+            }
+
+            .nav-container {
+                width: 100%;
+                margin-top: 6px;
+                gap: 8px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                padding-bottom: 2px;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .nav-btn {
+                flex: 0 0 auto;
+                padding: 8px 12px;
+                font-size: .82rem;
+            }
+
+            .social-links {
+                margin-left: 0;
+                gap: 10px;
+            }
+
+            .container {
+                margin: 18px auto;
+                padding: 22px 14px;
+            }
+
             .product-image-container {
                 height: 200px;
             }
@@ -2823,6 +2864,24 @@
         }
 
         @media (max-width: 480px) {
+            header {
+                padding: 8px 10px;
+            }
+
+            .logo-text {
+                font-size: 1.35rem;
+                letter-spacing: 1.5px;
+            }
+
+            .nav-container {
+                gap: 6px;
+            }
+
+            .nav-btn {
+                padding: 7px 10px;
+                font-size: .76rem;
+            }
+
             .product-image-container {
                 height: 180px;
             }
