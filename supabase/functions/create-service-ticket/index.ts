@@ -11,6 +11,9 @@ type ServiceTicketPayload = {
   price?: string;
   description?: string;
   image?: string;
+  customer_name?: string;
+  customer_email?: string;
+  customer_discord?: string;
   source?: string;
   created_at?: string;
 };
@@ -26,6 +29,10 @@ type DiscordChannelResponse = {
 type DiscordBotUserResponse = {
   id: DiscordSnowflake;
   username?: string;
+};
+
+type DiscordMessageResponse = {
+  id: DiscordSnowflake;
 };
 
 type DiscordPermissionOverwrite = {
@@ -92,6 +99,12 @@ function buildTicketName(ticketPrefix: string, serviceName: string) {
 }
 
 function buildDiscordEmbed(payload: Required<ServiceTicketPayload>) {
+  const contactLines = [
+    payload.customer_name ? `Nombre: ${payload.customer_name}` : '',
+    payload.customer_email ? `Gmail: ${payload.customer_email}` : '',
+    payload.customer_discord ? `Discord: ${payload.customer_discord}` : ''
+  ].filter(Boolean).join('\n');
+
   return {
     title: 'Nuevo ticket de servicio',
     color: 0xa86dff,
@@ -100,6 +113,8 @@ function buildDiscordEmbed(payload: Required<ServiceTicketPayload>) {
       { name: 'Juego', value: payload.game, inline: true },
       { name: 'Servicio', value: payload.name, inline: true },
       { name: 'Precio', value: `$${payload.price}`.replace('$$', '$'), inline: true },
+      { name: 'Comprador', value: payload.customer_name || 'No indicado', inline: true },
+      { name: 'Contacto', value: contactLines || 'No indicado', inline: false },
       { name: 'Origen', value: payload.source, inline: true },
       { name: 'Descripción', value: payload.description || 'Sin descripción', inline: false }
     ],
@@ -158,6 +173,7 @@ async function createGuildChannel(
   channelName: string,
   payload: Required<ServiceTicketPayload>
 ) {
+  const hasAdminVisibility = visibilityConfig.adminRoleIds.length > 0 || visibilityConfig.adminUserIds.length > 0;
   const everyoneAllow = '0';
   const everyoneDeny = DISCORD_PERMISSION_VIEW_CHANNEL.toString();
   const adminAllow = (
@@ -167,20 +183,24 @@ async function createGuildChannel(
     DISCORD_PERMISSION_MANAGE_CHANNELS
   ).toString();
 
-  const permissionOverwrites: DiscordPermissionOverwrite[] = [
-    {
-      id: guildId,
-      type: 0,
-      allow: everyoneAllow,
-      deny: everyoneDeny
-    },
-    {
-      id: botUserId,
-      type: 1,
-      allow: adminAllow,
-      deny: '0'
-    }
-  ];
+  const permissionOverwrites: DiscordPermissionOverwrite[] = [];
+
+  if (hasAdminVisibility) {
+    permissionOverwrites.push(
+      {
+        id: guildId,
+        type: 0,
+        allow: everyoneAllow,
+        deny: everyoneDeny
+      },
+      {
+        id: botUserId,
+        type: 1,
+        allow: adminAllow,
+        deny: '0'
+      }
+    );
+  }
 
   visibilityConfig.adminRoleIds.forEach((adminRoleId) => {
     permissionOverwrites.push({
@@ -200,20 +220,25 @@ async function createGuildChannel(
     });
   });
 
+  const body: Record<string, unknown> = {
+    name: channelName,
+    type: 0,
+    parent_id: parentId,
+    topic: `Servicio web · ${payload.name} · ${payload.game}`.slice(0, 1024)
+  };
+
+  if (permissionOverwrites.length > 0) {
+    body.permission_overwrites = permissionOverwrites;
+  }
+
   return await discordApi<DiscordChannelResponse>(`/guilds/${guildId}/channels`, token, {
     method: 'POST',
-    body: JSON.stringify({
-      name: channelName,
-      type: 0,
-      parent_id: parentId,
-      topic: `Servicio web · ${payload.name} · ${payload.game}`.slice(0, 1024),
-      permission_overwrites: permissionOverwrites
-    })
+    body: JSON.stringify(body)
   });
 }
 
 async function postChannelMessage(token: string, channelId: string, body: Record<string, unknown>) {
-  return await discordApi(`/channels/${channelId}/messages`, token, {
+  return await discordApi<DiscordMessageResponse>(`/channels/${channelId}/messages`, token, {
     method: 'POST',
     body: JSON.stringify(body)
   });
@@ -238,10 +263,6 @@ async function createBotTicket(payload: Required<ServiceTicketPayload>) {
     throw new Error(`Faltan secretos del bot de Discord para servicios: ${missingSecrets.join(', ')}`);
   }
 
-  if (adminRoleIds.length === 0 && adminUserIds.length === 0) {
-    throw new Error('Falta la configuración de visibilidad para admins en servicios: define DISCORD_SERVICES_ADMIN_ROLE_IDS y/o DISCORD_SERVICES_ADMIN_IDS.');
-  }
-
   const visibilityConfig: DiscordVisibilityConfig = {
     adminRoleIds,
     adminUserIds
@@ -255,7 +276,7 @@ async function createBotTicket(payload: Required<ServiceTicketPayload>) {
   const adminUserMentions = adminUserIds.map((adminUserId) => `<@${adminUserId}>`).join(' ');
   const openingMessage = [adminRoleMentions, adminUserMentions].filter(Boolean).join(' ').trim() || 'Nueva consulta de servicio desde la web.';
 
-  await postChannelMessage(botToken, channel.id, {
+  const ticketMessage = await postChannelMessage(botToken, channel.id, {
     content: openingMessage,
     embeds: [embed]
   });
@@ -277,6 +298,7 @@ async function createBotTicket(payload: Required<ServiceTicketPayload>) {
     channel_id: channel.id,
     channel_name: channel.name || channelName,
     discord_url: `https://discord.com/channels/${guildId}/${channel.id}`,
+    discord_message_url: `https://discord.com/channels/${guildId}/${channel.id}/${ticketMessage.id}`,
     visibility_scope: {
       roles: adminRoleIds.length,
       users: adminUserIds.length
@@ -314,6 +336,9 @@ Deno.serve(async (request) => {
     price: String(payload.price).trim(),
     description: String(payload.description || 'Sin descripción').trim().slice(0, 1000),
     image: String(payload.image || '').trim(),
+    customer_name: String(payload.customer_name || '').trim().slice(0, 120),
+    customer_email: String(payload.customer_email || '').trim().slice(0, 160),
+    customer_discord: String(payload.customer_discord || '').trim().slice(0, 120),
     source: String(payload.source || 'web_service_order').trim(),
     created_at: String(payload.created_at || new Date().toISOString())
   };

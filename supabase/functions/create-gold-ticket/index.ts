@@ -36,6 +36,10 @@ type DiscordBotUserResponse = {
   username?: string;
 };
 
+type DiscordMessageResponse = {
+  id: DiscordSnowflake;
+};
+
 type DiscordPermissionOverwrite = {
   id: DiscordSnowflake;
   type: 0 | 1;
@@ -184,6 +188,7 @@ async function createGuildChannel(
   channelName: string,
   payload: Required<GoldTicketPayload>
 ) {
+  const hasAdminVisibility = visibilityConfig.adminRoleIds.length > 0 || visibilityConfig.adminUserIds.length > 0;
   const everyoneAllow = '0';
   const everyoneDeny = DISCORD_PERMISSION_VIEW_CHANNEL.toString();
   const adminAllow = (
@@ -193,20 +198,24 @@ async function createGuildChannel(
     DISCORD_PERMISSION_MANAGE_CHANNELS
   ).toString();
 
-  const permissionOverwrites: DiscordPermissionOverwrite[] = [
-    {
-      id: guildId,
-      type: 0,
-      allow: everyoneAllow,
-      deny: everyoneDeny
-    },
-    {
-      id: botUserId,
-      type: 1,
-      allow: adminAllow,
-      deny: '0'
-    }
-  ];
+  const permissionOverwrites: DiscordPermissionOverwrite[] = [];
+
+  if (hasAdminVisibility) {
+    permissionOverwrites.push(
+      {
+        id: guildId,
+        type: 0,
+        allow: everyoneAllow,
+        deny: everyoneDeny
+      },
+      {
+        id: botUserId,
+        type: 1,
+        allow: adminAllow,
+        deny: '0'
+      }
+    );
+  }
 
   visibilityConfig.adminRoleIds.forEach((adminRoleId) => {
     permissionOverwrites.push({
@@ -226,20 +235,25 @@ async function createGuildChannel(
     });
   });
 
+  const body: Record<string, unknown> = {
+    name: channelName,
+    type: 0,
+    parent_id: parentId,
+    topic: `Pedido web · ${payload.character} · ${payload.game} · ${payload.server}`.slice(0, 1024)
+  };
+
+  if (permissionOverwrites.length > 0) {
+    body.permission_overwrites = permissionOverwrites;
+  }
+
   return await discordApi<DiscordChannelResponse>(`/guilds/${guildId}/channels`, token, {
     method: 'POST',
-    body: JSON.stringify({
-      name: channelName,
-      type: 0,
-      parent_id: parentId,
-      topic: `Pedido web · ${payload.character} · ${payload.game} · ${payload.server}`.slice(0, 1024),
-      permission_overwrites: permissionOverwrites
-    })
+    body: JSON.stringify(body)
   });
 }
 
 async function postChannelMessage(token: string, channelId: string, body: Record<string, unknown>) {
-  return await discordApi(`/channels/${channelId}/messages`, token, {
+  return await discordApi<DiscordMessageResponse>(`/channels/${channelId}/messages`, token, {
     method: 'POST',
     body: JSON.stringify(body)
   });
@@ -325,10 +339,10 @@ async function postChannelMessageWithAttachment(
   }
 
   if (response.status === 204) {
-    return;
+    return { id: '' };
   }
 
-  await response.json();
+  return await response.json() as DiscordMessageResponse;
 }
 
 async function createBotTicket(payload: Required<GoldTicketPayload>) {
@@ -348,10 +362,6 @@ async function createBotTicket(payload: Required<GoldTicketPayload>) {
 
   if (missingSecrets.length > 0) {
     throw new Error(`Faltan secretos del bot de Discord: ${missingSecrets.join(', ')}`);
-  }
-
-  if (adminRoleIds.length === 0 && adminUserIds.length === 0) {
-    throw new Error('Falta la configuración de visibilidad para admins: define DISCORD_WEB_ADMIN_ROLE_IDS y/o DISCORD_WEB_ADMIN_IDS con uno o más IDs de Discord.');
   }
 
   const visibilityConfig: DiscordVisibilityConfig = {
@@ -374,23 +384,34 @@ async function createBotTicket(payload: Required<GoldTicketPayload>) {
     throw new Error(`No se pudo crear el canal en Discord: ${error instanceof Error ? error.message : String(error)}`);
   }
 
-  const proofAttachment = parseDataUrlAttachment(payload.transaction_proof_name, payload.transaction_proof_data_url);
-  const embed = buildDiscordEmbed(payload, proofAttachment.fileName);
+  const hasProofAttachment = Boolean(String(payload.transaction_proof_data_url || '').trim());
+  const proofAttachment = hasProofAttachment
+    ? parseDataUrlAttachment(payload.transaction_proof_name, payload.transaction_proof_data_url)
+    : null;
+  const embed = buildDiscordEmbed(payload, proofAttachment?.fileName || '');
   const adminRoleMentions = adminRoleIds.map((adminRoleId) => `<@&${adminRoleId}>`).join(' ');
   const adminUserMentions = adminUserIds.map((adminUserId) => `<@${adminUserId}>`).join(' ');
   const openingHeader = [adminRoleMentions, adminUserMentions].filter(Boolean).join(' ').trim() || 'Nuevo pedido desde la web.';
   const openingSummary = [
     openingHeader,
     `Contacto: ${payload.customer_contact}`,
-    `Comprobante: ${proofAttachment.fileName}`,
+    proofAttachment ? `Comprobante: ${proofAttachment.fileName}` : 'Comprobante: no adjuntado',
     `Pago: ${payload.payment_method_name} (${payload.payment_method_label}: ${payload.payment_method_value})`
   ].filter(Boolean).join('\n');
 
+  let ticketMessageId = '';
   try {
-    await postChannelMessageWithAttachment(botToken, channel.id, {
+    const messageBody = {
       content: openingSummary,
       embeds: [embed]
-    }, proofAttachment);
+    };
+
+    const ticketMessage = proofAttachment
+      ? await postChannelMessageWithAttachment(botToken, channel.id, messageBody, proofAttachment)
+      : await postChannelMessage(botToken, channel.id, messageBody);
+    if (ticketMessage?.id) {
+      ticketMessageId = ticketMessage.id;
+    }
   } catch (error) {
     throw new Error(`No se pudo publicar el mensaje inicial del ticket en Discord: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -412,6 +433,9 @@ async function createBotTicket(payload: Required<GoldTicketPayload>) {
     channel_id: channel.id,
     channel_name: channel.name || channelName,
     discord_url: `https://discord.com/channels/${guildId}/${channel.id}`,
+    discord_message_url: ticketMessageId
+      ? `https://discord.com/channels/${guildId}/${channel.id}/${ticketMessageId}`
+      : '',
     customer_visibility: 'admins_only',
     visibility_scope: {
       roles: adminRoleIds.length,
@@ -436,7 +460,7 @@ Deno.serve(async (request) => {
     return jsonResponse({ error: 'El body JSON no es válido' }, 400);
   }
 
-  const requiredFields = ['game', 'server', 'amount', 'price', 'faction', 'character', 'trade', 'customer_contact', 'payment_method_name', 'payment_method_label', 'payment_method_value', 'transaction_proof_name', 'transaction_proof_data_url'] as const;
+  const requiredFields = ['game', 'server', 'amount', 'price', 'faction', 'character', 'trade', 'customer_contact', 'payment_method_name', 'payment_method_label', 'payment_method_value'] as const;
   for (const field of requiredFields) {
     if (!payload[field] || !String(payload[field]).trim()) {
       return jsonResponse({ error: `Falta el campo requerido: ${field}` }, 400);
@@ -455,8 +479,8 @@ Deno.serve(async (request) => {
     payment_method_name: String(payload.payment_method_name).trim(),
     payment_method_label: String(payload.payment_method_label).trim(),
     payment_method_value: String(payload.payment_method_value).trim(),
-    transaction_proof_name: String(payload.transaction_proof_name).trim(),
-    transaction_proof_data_url: String(payload.transaction_proof_data_url).trim(),
+    transaction_proof_name: String(payload.transaction_proof_name || '').trim(),
+    transaction_proof_data_url: String(payload.transaction_proof_data_url || '').trim(),
     custom_amount: Boolean(payload.custom_amount),
     source: String(payload.source || 'web_gold_order').trim(),
     created_at: String(payload.created_at || new Date().toISOString())
