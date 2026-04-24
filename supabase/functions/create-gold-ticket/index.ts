@@ -188,6 +188,7 @@ async function createGuildChannel(
   channelName: string,
   payload: Required<GoldTicketPayload>
 ) {
+  const hasAdminVisibility = visibilityConfig.adminRoleIds.length > 0 || visibilityConfig.adminUserIds.length > 0;
   const everyoneAllow = '0';
   const everyoneDeny = DISCORD_PERMISSION_VIEW_CHANNEL.toString();
   const adminAllow = (
@@ -197,20 +198,24 @@ async function createGuildChannel(
     DISCORD_PERMISSION_MANAGE_CHANNELS
   ).toString();
 
-  const permissionOverwrites: DiscordPermissionOverwrite[] = [
-    {
-      id: guildId,
-      type: 0,
-      allow: everyoneAllow,
-      deny: everyoneDeny
-    },
-    {
-      id: botUserId,
-      type: 1,
-      allow: adminAllow,
-      deny: '0'
-    }
-  ];
+  const permissionOverwrites: DiscordPermissionOverwrite[] = [];
+
+  if (hasAdminVisibility) {
+    permissionOverwrites.push(
+      {
+        id: guildId,
+        type: 0,
+        allow: everyoneAllow,
+        deny: everyoneDeny
+      },
+      {
+        id: botUserId,
+        type: 1,
+        allow: adminAllow,
+        deny: '0'
+      }
+    );
+  }
 
   visibilityConfig.adminRoleIds.forEach((adminRoleId) => {
     permissionOverwrites.push({
@@ -230,15 +235,20 @@ async function createGuildChannel(
     });
   });
 
+  const body: Record<string, unknown> = {
+    name: channelName,
+    type: 0,
+    parent_id: parentId,
+    topic: `Pedido web · ${payload.character} · ${payload.game} · ${payload.server}`.slice(0, 1024)
+  };
+
+  if (permissionOverwrites.length > 0) {
+    body.permission_overwrites = permissionOverwrites;
+  }
+
   return await discordApi<DiscordChannelResponse>(`/guilds/${guildId}/channels`, token, {
     method: 'POST',
-    body: JSON.stringify({
-      name: channelName,
-      type: 0,
-      parent_id: parentId,
-      topic: `Pedido web · ${payload.character} · ${payload.game} · ${payload.server}`.slice(0, 1024),
-      permission_overwrites: permissionOverwrites
-    })
+    body: JSON.stringify(body)
   });
 }
 
@@ -352,10 +362,6 @@ async function createBotTicket(payload: Required<GoldTicketPayload>) {
 
   if (missingSecrets.length > 0) {
     throw new Error(`Faltan secretos del bot de Discord: ${missingSecrets.join(', ')}`);
-  }
-
-  if (adminRoleIds.length === 0 && adminUserIds.length === 0) {
-    throw new Error('Falta la configuración de visibilidad para admins: define DISCORD_WEB_ADMIN_ROLE_IDS y/o DISCORD_WEB_ADMIN_IDS con uno o más IDs de Discord.');
   }
 
   const visibilityConfig: DiscordVisibilityConfig = {
